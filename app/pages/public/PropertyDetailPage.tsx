@@ -90,7 +90,7 @@ export const PropertyDetailPage: React.FC = () => {
 
       {/* Gallery */}
       <div className="mt-4 grid gap-3 lg:grid-cols-[2fr_1fr]">
-        <motion.div 
+        <motion.div
           layoutId={`gallery-main-${property.id}`}
           className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--card)] shadow-sm relative"
         >
@@ -103,39 +103,41 @@ export const PropertyDetailPage: React.FC = () => {
               transition={{ duration: 0.4 }}
               src={property.images?.[active] || 'https://via.placeholder.com/1200x800'}
               alt={title}
-              className="h-[320px] w-full object-cover md:h-[480px] absolute inset-0"
+              className="h-[240px] sm:h-[320px] md:h-[400px] lg:h-[480px] w-full object-cover absolute inset-0"
             />
           </AnimatePresence>
           {/* placeholder for height */}
-          <div className="h-[320px] w-full md:h-[480px]"></div>
+          <div className="h-[240px] sm:h-[320px] md:h-[400px] lg:h-[480px] w-full" />
         </motion.div>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-1 h-[320px] md:h-[480px] overflow-y-auto pr-2 pb-2 custom-scrollbar">
+
+        {/* Thumbnails: horizontal scroll on mobile, vertical grid on desktop */}
+        <div className="flex flex-row lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto lg:overflow-x-hidden lg:h-[480px] pb-1 lg:pb-2 lg:pr-2 custom-scrollbar">
           {property.images?.map((g: string, i: number) => (
             <button
               key={i}
               onClick={() => setActive(i)}
-              className={`overflow-hidden rounded-[12px] border transition-all ${
+              className={`flex-shrink-0 overflow-hidden rounded-[12px] border transition-all ${
                 active === i ? "border-[var(--primary)] ring-2 ring-[var(--primary)]/30 opacity-100" : "border-[var(--border)] opacity-70 hover:opacity-100"
               }`}
             >
-              <img src={g} alt="" className="h-28 w-full object-cover md:h-[148px]" />
+              <img src={g} alt="" className="h-20 w-28 sm:h-24 sm:w-36 lg:h-[148px] lg:w-full object-cover" />
             </button>
           ))}
         </div>
       </div>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
+      <div className="mt-6 sm:mt-8 grid gap-6 sm:gap-8 lg:grid-cols-[1fr_360px]">
         {/* Main */}
         <div>
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight md:text-4xl text-[var(--foreground)]">{title}</h1>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight md:text-4xl text-[var(--foreground)] break-words">{title}</h1>
               <p className="mt-2 flex items-center gap-1.5 text-sm text-[var(--text-secondary)] font-medium">
-                <MapPin className="h-4 w-4 text-[var(--primary)]" /> {location}
+                <MapPin className="h-4 w-4 text-[var(--primary)] shrink-0" /> {location}
               </p>
             </div>
-            <div className="rounded-2xl border border-[var(--primary)]/20 bg-[var(--primary)]/10 px-5 py-3 shadow-sm">
-              <p className="text-2xl font-bold text-[var(--primary)]">{formatEGPShort(property.price)}</p>
+            <div className="rounded-2xl border border-[var(--primary)]/20 bg-[var(--primary)]/10 px-4 sm:px-5 py-3 shadow-sm shrink-0 self-start">
+              <p className="text-xl sm:text-2xl font-bold text-[var(--primary)]">{formatEGPShort(property.price)}</p>
               {property.status === 'rented' && <p className="text-xs text-[var(--primary)]/80 font-medium text-center">{language === 'en' ? 'per month' : 'شهرياً'}</p>}
             </div>
           </div>

@@ -193,8 +193,8 @@ export const PublicLayout: React.FC = () => {
 
       {/* Footer */}
       <footer className="bg-[var(--card)] border-t border-[var(--border)] mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
             <div className="md:col-span-2">
               <Link to="/" className="inline-block mb-4">
                 <MRLogo size="md" showText={true} animated={false} />
@@ -239,7 +239,7 @@ export const PublicLayout: React.FC = () => {
                 </li>
                 <li className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
                   <Mail className="w-4 h-4 text-[var(--accent)] shrink-0" />
-                  <span>minarent23@gmail.com</span>
+                  <span className="break-all">minarent23@gmail.com</span>
                 </li>
               </ul>
             </div>

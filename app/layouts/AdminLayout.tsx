@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router';
 import {
-  LayoutDashboard, Building, Users, Calendar,
+  LayoutDashboard, Building, Users, CalendarDays, CalendarRange,
   DollarSign, PieChart, Settings, LogOut, Menu,
   Sun, Moon, Languages, Bell, MessageSquare, Globe,
   ChevronDown, X, CheckCheck, Mail
@@ -66,10 +66,10 @@ export const AdminLayout: React.FC = () => {
   const navLinks = [
     { name: t('admin.dashboard'), path: '/admin', icon: LayoutDashboard },
     { name: t('admin.properties'), path: '/admin/properties', icon: Building },
-    { name: t('admin.bookings'), path: '/admin/bookings', icon: Calendar },
+    { name: t('admin.bookings'), path: '/admin/bookings', icon: CalendarDays },
     { name: t('admin.messages'), path: '/admin/messages', icon: Mail },
     { name: language === 'en' ? 'Testimonials' : 'التعليقات', path: '/admin/testimonials', icon: MessageSquare },
-    { name: t('admin.calendar'), path: '/admin/calendar', icon: Calendar },
+    { name: t('admin.calendar'), path: '/admin/calendar', icon: CalendarRange },
     { name: t('admin.financial'), path: '/admin/financial', icon: DollarSign },
     { name: t('admin.analytics'), path: '/admin/analytics', icon: PieChart },
     { name: t('admin.settings'), path: '/admin/settings', icon: Settings },
@@ -102,8 +102,14 @@ export const AdminLayout: React.FC = () => {
 
       {/* Sidebar — Navy Dark */}
       <aside
-        className={`fixed lg:static inset-y-0 ${isRtl ? 'right-0' : 'left-0'} z-50 w-72 transition-all duration-300 ease-in-out lg:transform-none ${
-          isMobileOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full lg:translate-x-0' : '-translate-x-full lg:translate-x-0')
+        className={`fixed lg:static inset-y-0 z-50 w-72 transition-all duration-300 ease-in-out lg:transform-none ${
+          isRtl ? 'right-0' : 'left-0'
+        } ${
+          isMobileOpen
+            ? 'translate-x-0'
+            : isRtl
+              ? 'translate-x-full lg:translate-x-0'
+              : '-translate-x-full lg:translate-x-0'
         } ${!isSidebarOpen && 'lg:w-20'}`}
         style={{ background: 'var(--sidebar)' }}
       >

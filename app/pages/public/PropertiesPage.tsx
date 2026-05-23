@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router";
-import { Heart, Bed, Bath, Maximize, MapPin, Search as SearchIcon, SlidersHorizontal, Eye, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Heart, Bed, Bath, Maximize, MapPin, Search as SearchIcon, SlidersHorizontal, Eye, ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { useApp } from "../../contexts/AppContext";
 import { getProperties, Property, formatEGPShort, PropertiesResponse } from "../../../services/api";
@@ -30,6 +30,7 @@ export const PropertiesPage: React.FC = () => {
   const [location, setLocation] = useState("");
   const [query, setQuery] = useState("");
   const [savedProperties, setSavedProperties] = useState<string[]>([]);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("savedProperties") || "[]");
@@ -96,17 +97,41 @@ export const PropertiesPage: React.FC = () => {
           <h1 className="text-3xl font-bold tracking-tight md:text-4xl text-[var(--foreground)]">{language === 'en' ? 'Find your next home' : 'ابحث عن منزلك القادم'}</h1>
           <p className="mt-1.5 text-sm text-[var(--text-secondary)]">{language === 'en' ? 'Browse curated listings across the city' : 'تصفح القوائم المنسقة عبر المدينة'}</p>
         </div>
-        <div className="flex w-full max-w-md items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-[var(--primary)] transition-all">
-          <SearchIcon className="h-4 w-4 text-[var(--text-secondary)]" />
-          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={language === 'en' ? "Search location, city or area..." : "البحث عن موقع، مدينة أو منطقة..."} className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--text-secondary)] text-[var(--foreground)]" />
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <button
+            onClick={() => setShowMobileFilters(!showMobileFilters)}
+            className="flex lg:hidden items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--card)] text-sm font-semibold text-[var(--foreground)] shadow-sm shrink-0"
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            {language === 'en' ? 'Filters' : 'تصفية'}
+          </button>
+          <div className="flex flex-1 items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-[var(--primary)] transition-all">
+            <SearchIcon className="h-4 w-4 text-[var(--text-secondary)] shrink-0" />
+            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={language === 'en' ? "Search location, city or area..." : "البحث عن موقع، مدينة أو منطقة..."} className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--text-secondary)] text-[var(--foreground)]" />
+          </div>
         </div>
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[280px_1fr]">
-        {/* Filters */}
-        <motion.aside initial={{ x: isRtl ? 30 : -30, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.5, delay: 0.2 }} className="h-fit rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-sm">
-          <div className="flex items-center gap-2 text-sm font-bold text-[var(--foreground)]">
-            <SlidersHorizontal className="h-4 w-4" /> {language === 'en' ? 'Filters' : 'عوامل التصفية'}
+        {/* Filters — always visible on lg+, toggleable on mobile */}
+        <motion.aside
+          initial={{ x: isRtl ? 30 : -30, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className={`${
+            showMobileFilters ? 'block' : 'hidden'
+          } lg:block h-fit rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-sm`}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm font-bold text-[var(--foreground)]">
+              <SlidersHorizontal className="h-4 w-4" /> {language === 'en' ? 'Filters' : 'عوامل التصفية'}
+            </div>
+            <button
+              onClick={() => setShowMobileFilters(false)}
+              className="lg:hidden p-1.5 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--secondary)]"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
           <div className="mt-5 space-y-5">
             <div>
