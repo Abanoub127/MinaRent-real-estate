@@ -291,6 +291,22 @@ export const AdminLayout: React.FC = () => {
           </div>
         </main>
       </div>
+
+      {/* Floating Premium Back to Site Button */}
+      <motion.button
+        initial={{ scale: 0, rotate: -180 }}
+        animate={{ scale: 1, rotate: 0 }}
+        whileHover={{ scale: 1.15, rotate: 12 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={() => navigate('/')}
+        className={`fixed bottom-6 ${isRtl ? 'left-6' : 'right-6'} z-50 w-14 h-14 rounded-full bg-gradient-to-tr from-[var(--primary)] to-[var(--primary-light)] text-white flex items-center justify-center shadow-lg border border-white/10 cursor-pointer focus:outline-none focus:ring-4 focus:ring-[var(--primary)]/30`}
+        style={{
+          boxShadow: '0 8px 30px rgba(45,74,140,0.35)',
+        }}
+        title={language === 'en' ? 'Return to Website' : 'الرجوع للموقع'}
+      >
+        <Globe className="w-6 h-6 animate-pulse" />
+      </motion.button>
     </div>
   );
 };

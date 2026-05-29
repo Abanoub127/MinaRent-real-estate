@@ -8,6 +8,7 @@ import { Input,  TextArea } from '../../components/ui/input';
 import { Modal } from '../../components/ui/Modal';
 import { Select, SelectContent,SelectItem, SelectTrigger, SelectValue,} from "../../components/ui/Select";
 import { getProperties, createProperty, updateProperty, deleteProperty, Property, PropertyStatus, PropertyType, PropertiesResponse, formatEGPShort} from "../../../services/api";
+import { ProtectedImage } from "../../components/ProtectedImage";
 export const AdminPropertiesPage: React.FC = () => {
   const { t, language } = useApp();
 const [properties, setProperties] =
@@ -41,7 +42,8 @@ const itemsPerPage = 6;
     bedrooms: '',
     bathrooms: '',
     size: '',
-  images: [] as File[],
+    images: [] as File[],
+    color: '#C9A84C',
   });
 let modalTitle = t('propertiesMgmt.add');
 
@@ -125,7 +127,8 @@ const locations = [
         bedrooms: property.bedrooms.toString(),
         bathrooms: property.bathrooms.toString(),
         size: property.size.toString(),
-       images: [],
+        images: [],
+        color: (property as any).color || '#C9A84C',
       });
     } else {
       setEditingProperty(null);
@@ -142,7 +145,8 @@ const locations = [
         bedrooms: '',
         bathrooms: '',
         size: '',
-       images: [],
+        images: [],
+        color: '#C9A84C',
       });
     }
     setShowModal(true);
@@ -153,49 +157,43 @@ const locations = [
     setEditingProperty(null);
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  try {
-    const form = new FormData();
+    try {
+      const form = new FormData();
 
-    form.append("title", formData.title);
-    form.append("titleAr", formData.titleAr);
+      // Set fallback values for optional inputs to ensure database validity
+      form.append("title", formData.title || "Unnamed Property");
+      form.append("titleAr", formData.titleAr || "عقار بدون اسم");
+      form.append("description", formData.description || "No description provided");
+      form.append("descriptionAr", formData.descriptionAr || "لا يوجد وصف متوفر");
+      form.append("price", formData.price || "0");
+      form.append("location", formData.location || "General");
+      form.append("locationAr", formData.locationAr || "عام");
+      form.append("type", formData.type);
+      form.append("status", formData.status);
+      form.append("bedrooms", formData.bedrooms || "0");
+      form.append("bathrooms", formData.bathrooms || "0");
+      form.append("size", formData.size || "0");
+      form.append("color", formData.color || "#C9A84C");
 
-    form.append("description", formData.description);
-    form.append("descriptionAr", formData.descriptionAr);
+      formData.images.forEach((image) => {
+        form.append("images", image);
+      });
 
-    form.append("price", formData.price);
+      if (editingProperty) {
+        await updateProperty(editingProperty.id, form);
+      } else {
+        await createProperty(form);
+      }
 
-    form.append("location", formData.location);
-    form.append("locationAr", formData.locationAr);
-
-    form.append("type", formData.type);
-    form.append("status", formData.status);
-
-    form.append("bedrooms", formData.bedrooms);
-    form.append("bathrooms", formData.bathrooms);
-
-    form.append("size", formData.size);
-
-   formData.images.forEach((image) => {
-  form.append("images", image);
-});
-
-    if (editingProperty) {
-      await updateProperty(editingProperty.id, form);
-    } else {
-      await createProperty(form);
+      await fetchProperties();
+      handleCloseModal();
+    } catch (err) {
+      console.error(err);
     }
-
-    await fetchProperties();
-
-    handleCloseModal();
-
-  } catch (err) {
-    console.error(err);
-  }
-};
+  };
 
   const handleDelete = async (id: string) => {
   const confirmed = confirm(
@@ -486,10 +484,11 @@ const fetchProperties = async () => {
                 {filteredProperties.map((property) => (
                   <tr key={property.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <img
+                      <ProtectedImage
                         src={property.images[0]}
                         alt={language === 'en' ? property.title : property.titleAr}
-                        className="w-16 h-16 object-cover rounded-lg"
+                        containerClassName="w-16 h-16 rounded-lg"
+                        className="object-cover"
                       />
                     </td>
                     <td className="px-6 py-4">
@@ -563,10 +562,11 @@ const fetchProperties = async () => {
           {filteredProperties.map((property) => (
             <Card key={property.id} className="overflow-hidden">
               <div className="relative">
-                <img
+                <ProtectedImage
                   src={property.images?.[0] || '/placeholder.jpg'}
                   alt={language === 'en' ? property.title : property.titleAr}
-                  className="w-full h-48 object-cover"
+                  containerClassName="w-full h-48"
+                  className="object-cover"
                 />
                 <div className="absolute top-4 right-4">
                   <Badge variant={getStatusBadgeVariant(property.status)}>{t(`property.${property.status}`)}</Badge>
@@ -647,54 +647,50 @@ const fetchProperties = async () => {
 }
       >
         <form
-  id="propertyForm"
-  onSubmit={handleSubmit}
-  className="space-y-4"
->
+          id="propertyForm"
+          onSubmit={handleSubmit}
+          className="space-y-4"
+        >
           <div className="grid grid-cols-2 gap-4">
             <Input
               label={language === 'en' ? 'Title (English)' : 'العنوان (إنجليزي)'}
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              required
             />
             <Input
               label={language === 'en' ? 'Title (Arabic)' : 'العنوان (عربي)'}
               value={formData.titleAr}
               onChange={(e) => setFormData({ ...formData, titleAr: e.target.value })}
-              required
             />
           </div>
 
-         <div className="grid grid-cols-2 gap-4">
-  <TextArea
-    name="description"
-    label={language === 'en' ? 'Description (English)' : 'الوصف (إنجليزي)'}
-    value={formData.description}
-    onChange={(e) =>
-      setFormData({
-        ...formData,
-        description: e.target.value,
-      })
-    }
-    rows={3}
-    required
-  />
+          <div className="grid grid-cols-2 gap-4">
+            <TextArea
+              name="description"
+              label={language === 'en' ? 'Description (English)' : 'الوصف (إنجليزي)'}
+              value={formData.description}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  description: e.target.value,
+                })
+              }
+              rows={3}
+            />
 
-  <TextArea
-    name="descriptionAr"
-    label={language === 'en' ? 'Description (Arabic)' : 'الوصف (عربي)'}
-    value={formData.descriptionAr}
-    onChange={(e) =>
-      setFormData({
-        ...formData,
-        descriptionAr: e.target.value,
-      })
-    }
-    rows={3}
-    required
-  />
-</div>
+            <TextArea
+              name="descriptionAr"
+              label={language === 'en' ? 'Description (Arabic)' : 'الوصف (عربي)'}
+              value={formData.descriptionAr}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  descriptionAr: e.target.value,
+                })
+              }
+              rows={3}
+            />
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <Input
@@ -702,14 +698,12 @@ const fetchProperties = async () => {
               type="number"
               value={formData.price}
               onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-              required
             />
             <Input
               label={language === 'en' ? 'Size (m²)' : 'المساحة (م²)'}
               type="number"
               value={formData.size}
               onChange={(e) => setFormData({ ...formData, size: e.target.value })}
-              required
             />
           </div>
 
@@ -718,127 +712,141 @@ const fetchProperties = async () => {
               label={language === 'en' ? 'Location (English)' : 'الموقع (إنجليزي)'}
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              required
             />
             <Input
               label={language === 'en' ? 'Location (Arabic)' : 'الموقع (عربي)'}
               value={formData.locationAr}
               onChange={(e) => setFormData({ ...formData, locationAr: e.target.value })}
-              required
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
+            {/* Property Type */}
+            <div>
+              <label className="text-sm mb-1 block">
+                {language === 'en' ? 'Property Type' : 'نوع العقار'}
+              </label>
 
-  {/* Property Type */}
-  <div>
-    <label className="text-sm mb-1 block">
-      {language === 'en' ? 'Property Type' : 'نوع العقار'}
-    </label>
+              <Select
+                value={formData.type}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, type: value as PropertyType })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Type" />
+                </SelectTrigger>
 
-    <Select
-      value={formData.type}
-      onValueChange={(value) =>
-        setFormData({ ...formData, type: value as PropertyType })
-      }
-    >
-      <SelectTrigger>
-        <SelectValue placeholder="Select Type" />
-      </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="apartment">
+                    {language === 'en' ? 'Apartment' : 'شقة'}
+                  </SelectItem>
 
-      <SelectContent>
-        <SelectItem value="apartment">
-          {language === 'en' ? 'Apartment' : 'شقة'}
-        </SelectItem>
+                  <SelectItem value="villa">
+                    {language === 'en' ? 'Villa' : 'فيلا'}
+                  </SelectItem>
 
-        <SelectItem value="villa">
-          {language === 'en' ? 'Villa' : 'فيلا'}
-        </SelectItem>
+                  <SelectItem value="house">
+                    {language === 'en' ? 'House' : 'منزل'}
+                  </SelectItem>
 
-        <SelectItem value="house">
-          {language === 'en' ? 'House' : 'منزل'}
-        </SelectItem>
+                  <SelectItem value="land">
+                    {language === 'en' ? 'Land' : 'أرض'}
+                  </SelectItem>
 
-        <SelectItem value="land">
-          {language === 'en' ? 'Land' : 'أرض'}
-        </SelectItem>
+                  <SelectItem value="commercial">
+                    {language === 'en' ? 'Commercial' : 'تجاري'}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-        <SelectItem value="commercial">
-          {language === 'en' ? 'Commercial' : 'تجاري'}
-        </SelectItem>
-      </SelectContent>
-    </Select>
-  </div>
+            {/* Status */}
+            <div>
+              <label className="text-sm mb-1 block">
+                {language === 'en' ? 'Status' : 'الحالة'}
+              </label>
 
-  {/* Status */}
-  <div>
-    <label className="text-sm mb-1 block">
-      {language === 'en' ? 'Status' : 'الحالة'}
-    </label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, status: value as PropertyStatus })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Status" />
+                </SelectTrigger>
 
-    <Select
-      value={formData.status}
-      onValueChange={(value) =>
-        setFormData({ ...formData, status: value as PropertyStatus })
-      }
-    >
-      <SelectTrigger>
-        <SelectValue placeholder="Select Status" />
-      </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="available">
+                    {t('property.available')}
+                  </SelectItem>
 
-      <SelectContent>
-        <SelectItem value="available">
-          {t('property.available')}
-        </SelectItem>
+                  <SelectItem value="sold">
+                    {t('property.sold')}
+                  </SelectItem>
 
-        <SelectItem value="sold">
-          {t('property.sold')}
-        </SelectItem>
-
-        <SelectItem value="rented">
-          {t('property.rented')}
-        </SelectItem>
-      </SelectContent>
-    </Select>
-  </div>
-
-</div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label={language === 'en' ? 'Bedrooms' : 'غرف النوم'}
-              type="number"
-              value={formData.bedrooms}
-              onChange={(e) => setFormData({ ...formData, bedrooms: e.target.value })}
-              required
-            />
-            <Input
-              label={language === 'en' ? 'Bathrooms' : 'الحمامات'}
-              type="number"
-              value={formData.bathrooms}
-              onChange={(e) => setFormData({ ...formData, bathrooms: e.target.value })}
-              required
-            />
+                  <SelectItem value="rented">
+                    {t('property.rented')}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-       <div>
-  <label className="block text-sm mb-2">
-    {language === 'en' ? 'Property Images' : 'صور العقار'}
-  </label>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label={language === 'en' ? 'Bedrooms' : 'غرف النوم'}
+                type="number"
+                value={formData.bedrooms}
+                onChange={(e) => setFormData({ ...formData, bedrooms: e.target.value })}
+              />
+              <Input
+                label={language === 'en' ? 'Bathrooms' : 'الحمامات'}
+                type="number"
+                value={formData.bathrooms}
+                onChange={(e) => setFormData({ ...formData, bathrooms: e.target.value })}
+              />
+            </div>
 
-  <input
-    type="file"
-    multiple
-    accept="image/*"
-    onChange={(e) =>
-      setFormData({
-        ...formData,
-        images: Array.from(e.target.files || []),
-      })
-    }
-    className="w-full border rounded-lg p-2"
-  />
-</div>
+            {/* Color Picker */}
+            <div>
+              <label className="text-sm mb-1 block">
+                {language === 'en' ? 'Theme Color' : 'لون العقار المميز'}
+              </label>
+              <div className="flex items-center gap-2 mt-1">
+                <input
+                  type="color"
+                  value={formData.color}
+                  onChange={(e) => setFormData({ ...formData, color: e.target.value })}
+                  className="w-10 h-10 p-0 border border-gray-300 rounded-lg cursor-pointer bg-transparent"
+                />
+                <span className="text-xs font-mono text-[var(--text-secondary)] uppercase">
+                  {formData.color}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm mb-2">
+              {language === 'en' ? 'Property Images' : 'صور العقار'}
+            </label>
+
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  images: Array.from(e.target.files || []),
+                })
+              }
+              className="w-full border rounded-lg p-2"
+            />
+          </div>
         </form>
       </Modal>
     </div>

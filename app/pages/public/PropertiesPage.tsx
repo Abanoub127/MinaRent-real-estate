@@ -4,6 +4,7 @@ import { Heart, Bed, Bath, Maximize, MapPin, Search as SearchIcon, SlidersHorizo
 import { motion } from "framer-motion";
 import { useApp } from "../../contexts/AppContext";
 import { getProperties, Property, formatEGPShort, PropertiesResponse } from "../../../services/api";
+import { ProtectedImage } from "../../components/ProtectedImage";
 
 const TYPES = [
   { value: "any", keyEn: "Any", keyAr: "الكل" },
@@ -206,7 +207,7 @@ export const PropertiesPage: React.FC = () => {
               {results.map((p) => (
                 <motion.article variants={itemVariants} whileHover={{ y: -4 }} key={p.id || p._id} className="group overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-sm transition-shadow hover:shadow-xl">
                   <div className="relative overflow-hidden">
-                    <img src={p.images?.[0] || 'https://via.placeholder.com/600x400?text=No+Image'} alt={p.title} className="h-48 w-full object-cover transition duration-500 group-hover:scale-110" loading="lazy" />
+                    <ProtectedImage src={p.images?.[0] || 'https://via.placeholder.com/600x400?text=No+Image'} alt={p.title} containerClassName="h-48 w-full" className="transition duration-500 group-hover:scale-110" />
                     {p.featured && (
                       <span className="absolute start-3 top-3 rounded-lg bg-[var(--accent)] text-[var(--accent-foreground)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide shadow-sm">{language === 'en' ? 'HOT DEAL' : 'عرض مميز'}</span>
                     )}

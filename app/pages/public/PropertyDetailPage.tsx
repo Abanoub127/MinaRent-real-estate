@@ -4,6 +4,7 @@ import { Heart, Bed, Bath, Maximize, MapPin, Phone, MessageCircle, Star, Calenda
 import { motion, AnimatePresence } from "framer-motion";
 import { useApp } from "../../contexts/AppContext";
 import { getPropertyById, Property, formatEGPShort, getTestimonials } from "../../../services/api";
+import { ProtectedImage } from "../../components/ProtectedImage";
 
 export const PropertyDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -95,16 +96,21 @@ export const PropertyDetailPage: React.FC = () => {
           className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--card)] shadow-sm relative"
         >
           <AnimatePresence mode="wait">
-            <motion.img
+            <motion.div
               key={active}
               initial={{ opacity: 0, scale: 1.05 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4 }}
-              src={property.images?.[active] || 'https://via.placeholder.com/1200x800'}
-              alt={title}
-              className="h-[240px] sm:h-[320px] md:h-[400px] lg:h-[480px] w-full object-cover absolute inset-0"
-            />
+              className="absolute inset-0 w-full h-full"
+            >
+              <ProtectedImage
+                src={property.images?.[active] || 'https://via.placeholder.com/1200x800'}
+                alt={title}
+                containerClassName="w-full h-full"
+                className="h-[240px] sm:h-[320px] md:h-[400px] lg:h-[480px] w-full"
+              />
+            </motion.div>
           </AnimatePresence>
           {/* placeholder for height */}
           <div className="h-[240px] sm:h-[320px] md:h-[400px] lg:h-[480px] w-full" />
@@ -120,7 +126,7 @@ export const PropertyDetailPage: React.FC = () => {
                 active === i ? "border-[var(--primary)] ring-2 ring-[var(--primary)]/30 opacity-100" : "border-[var(--border)] opacity-70 hover:opacity-100"
               }`}
             >
-              <img src={g} alt="" className="h-20 w-28 sm:h-24 sm:w-36 lg:h-[148px] lg:w-full object-cover" />
+              <ProtectedImage src={g} alt="" containerClassName="h-20 w-28 sm:h-24 sm:w-36 lg:h-[148px] lg:w-full" className="w-full h-full" />
             </button>
           ))}
         </div>

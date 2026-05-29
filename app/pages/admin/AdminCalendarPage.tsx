@@ -1,78 +1,580 @@
 import React, { useState, useEffect } from 'react';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import interactionPlugin from '@fullcalendar/interaction';
+import { ChevronLeft, ChevronRight, Search, CalendarDays, DollarSign, User, Phone, CheckCircle2, Clock, Ban, Trash2, X } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
-import { getBookingCalendarEvents } from '../../../services/api';
+import { getProperties, getBookings, deleteBooking, Property, Booking, formatEGP } from '../../../services/api';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const AdminCalendarPage: React.FC = () => {
   const { language, isRtl } = useApp();
-  const [events, setEvents] = useState<any[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentDate, setCurrentDate] = useState<Date>(new Date(2026, 4, 1)); // Default to May 2026
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
-  useEffect(() => { fetchEvents(); }, []);
-
-  const fetchEvents = async () => {
+  // Fetch both properties and bookings on mount and month change
+  const fetchData = async () => {
+    setLoading(true);
     try {
-      const data = await getBookingCalendarEvents();
-      setEvents(data);
+      const [propsRes, bookingsRes] = await Promise.all([
+        getProperties(1, 100),
+        getBookings(),
+      ]);
+      setProperties(propsRes.properties || []);
+      setBookings(bookingsRes || []);
     } catch (error) {
-      console.error("Error fetching calendar events", error);
+      console.error("Error fetching calendar data:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) return (
-    <div className="flex justify-center items-center h-[60vh]">
-      <div className="w-10 h-10 border-3 border-[var(--border)] border-t-[var(--primary)] rounded-full animate-spin" />
-    </div>
-  );
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const currentYear = currentDate.getFullYear();
+  const currentMonth = currentDate.getMonth();
+
+  // Get total days in current month
+  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+  // Generate days array [1, 2, ..., 31]
+  const daysArray = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+
+  // Translate month and day names
+  const getMonthName = (date: Date) => {
+    return date.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
+      month: 'long',
+      year: 'numeric',
+    });
+  };
+
+  const getDayOfWeekName = (dayNum: number) => {
+    const d = new Date(currentYear, currentMonth, dayNum);
+    return d.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
+      weekday: 'short',
+    });
+  };
+
+  // Check if a day is a weekend (Friday or Saturday in Egypt)
+  const isWeekend = (dayNum: number) => {
+    const d = new Date(currentYear, currentMonth, dayNum);
+    const dayOfWeek = d.getDay(); // 0 = Sunday, 5 = Friday, 6 = Saturday
+    return dayOfWeek === 5 || dayOfWeek === 6;
+  };
+
+  // Filter properties by search query
+  const filteredProps = properties.filter((p) => {
+    const name = language === 'en' ? p.title : p.titleAr;
+    const location = language === 'en' ? p.location : p.locationAr;
+    return (
+      name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      location.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  });
+
+  // Navigate months
+  const prevMonth = () => {
+    setCurrentDate(new Date(currentYear, currentMonth - 1, 1));
+  };
+
+  const nextMonth = () => {
+    setCurrentDate(new Date(currentYear, currentMonth + 1, 1));
+  };
+
+  const setToday = () => {
+    const today = new Date();
+    setCurrentDate(new Date(today.getFullYear(), today.getMonth(), 1));
+  };
+
+  // Calculate dynamic row height based on count of visible properties to auto-fit
+  // Rows shrink as property count increases to keep the design clean without breaking layouts.
+  const getDynamicRowHeight = () => {
+    const baseHeight = 90; // Default height in px
+    const count = filteredProps.length;
+    if (count <= 3) return baseHeight;
+    if (count <= 6) return 76;
+    if (count <= 10) return 64;
+    return 54; // Minimum row height
+  };
+
+  const rowHeight = getDynamicRowHeight();
+
+  // Booking Click Handler
+  const handleBookingClick = (booking: Booking, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedBooking(booking);
+  };
+
+  // Delete Booking Handler
+  const handleDeleteBooking = async (bookingId: string) => {
+    const confirmed = window.confirm(
+      language === 'en'
+        ? 'Are you sure you want to delete this booking?'
+        : 'هل أنت متأكد من حذف هذا الحجز؟'
+    );
+    if (!confirmed) return;
+
+    try {
+      await deleteBooking(bookingId);
+      setSelectedBooking(null);
+      await fetchData();
+    } catch (err) {
+      console.error("Error deleting booking:", err);
+    }
+  };
 
   return (
-    <div className="bg-[var(--card)] p-6 rounded-2xl shadow-sm border border-[var(--border)] min-h-[70vh]">
-      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="space-y-6">
+      {/* Header Controls */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-[var(--foreground)]">{language === 'en' ? 'Bookings Calendar' : 'تقويم الحجوزات'}</h2>
-          <p className="text-[var(--text-secondary)] text-sm">{language === 'en' ? 'Manage your property bookings interactively.' : 'إدارة حجوزات عقاراتك بشكل تفاعلي.'}</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            {language === 'en' ? 'Reservations Timeline' : 'مخطط الحجوزات الزمني'}
+          </h1>
+          <p className="text-[var(--text-secondary)] text-sm mt-1">
+            {language === 'en'
+              ? 'Premium Hotel-style Property Management System (PMS) Calendar'
+              : 'لوحة تخطيط الحجوزات الاحترافية لإدارة العقارات والشاليهات'}
+          </p>
         </div>
-        <div className="flex items-center gap-3 text-xs font-semibold flex-wrap">
-          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-[#C9A84C]" />{language === 'en' ? 'Pending' : 'قيد الانتظار'}</span>
-          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-[#16A34A]" />{language === 'en' ? 'Active' : 'نشط'}</span>
-          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-[#2D4A8C]" />{language === 'en' ? 'Upcoming' : 'قادم'}</span>
-          <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-[#94A3B8]" />{language === 'en' ? 'Completed' : 'مكتمل'}</span>
+
+        {/* Legend */}
+        <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-[var(--foreground)] bg-[var(--card)] px-4 py-2.5 rounded-2xl border border-[var(--border)] shadow-sm">
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-full bg-emerald-500 shadow-sm" />
+            {language === 'en' ? 'Confirmed' : 'مؤكد'}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-full bg-amber-500 shadow-sm" />
+            {language === 'en' ? 'Pending' : 'قيد الانتظار'}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-full bg-rose-500 shadow-sm" />
+            {language === 'en' ? 'Cancelled' : 'ملغي'}
+          </span>
         </div>
       </div>
 
-      <div className="calendar-container shadow-sm rounded-2xl overflow-hidden border border-[var(--border)] p-4 bg-[var(--card)]" dir="ltr">
-        <FullCalendar
-          plugins={[dayGridPlugin, interactionPlugin]}
-          initialView="dayGridMonth"
-          events={events}
-          headerToolbar={{ left: 'prev,next today', center: 'title', right: 'dayGridMonth,dayGridWeek' }}
-          height={780}
-          eventClick={(info) => console.log('Event clicked', info.event.extendedProps)}
-          buttonText={{ today: language === 'en' ? 'Today' : 'اليوم', month: language === 'en' ? 'Month' : 'شهر', week: language === 'en' ? 'Week' : 'أسبوع' }}
-          locale={language === 'ar' ? 'ar' : 'en'}
-          direction={isRtl ? 'rtl' : 'ltr'}
-        />
+      {/* Toolbar & Filter Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[var(--card)] p-4 rounded-2xl border border-[var(--border)] shadow-sm">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={prevMonth}
+            className="p-2 border border-[var(--border)] rounded-xl hover:bg-[var(--secondary)] transition-all active:scale-95 text-[var(--text-secondary)]"
+          >
+            <ChevronLeft className={`w-5 h-5 ${isRtl ? 'rotate-180' : ''}`} />
+          </button>
+          <span className="text-base font-bold text-[var(--foreground)] min-w-[140px] text-center">
+            {getMonthName(currentDate)}
+          </span>
+          <button
+            onClick={nextMonth}
+            className="p-2 border border-[var(--border)] rounded-xl hover:bg-[var(--secondary)] transition-all active:scale-95 text-[var(--text-secondary)]"
+          >
+            <ChevronRight className={`w-5 h-5 ${isRtl ? 'rotate-180' : ''}`} />
+          </button>
+          <button
+            onClick={setToday}
+            className="ml-2 px-3 py-2 border border-[var(--border)] rounded-xl hover:bg-[var(--secondary)] text-sm font-semibold transition-all active:scale-95 text-[var(--foreground)]"
+          >
+            {language === 'en' ? 'Today' : 'اليوم'}
+          </button>
+        </div>
+
+        {/* Search */}
+        <div className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-[var(--primary)] transition-all w-full sm:w-64">
+          <Search className="h-4 w-4 text-[var(--text-secondary)] shrink-0" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={language === 'en' ? "Filter properties..." : "تصفية العقارات..."}
+            className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--text-secondary)] text-[var(--foreground)]"
+          />
+        </div>
       </div>
 
+      {loading ? (
+        <div className="flex justify-center items-center h-[50vh] bg-[var(--card)] rounded-2xl border border-[var(--border)]">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-10 h-10 border-3 border-[var(--border)] border-t-[var(--primary)] rounded-full animate-spin" />
+            <span className="text-sm text-[var(--text-secondary)]">{language === 'en' ? 'Loading Schedule...' : 'جاري تحميل المخطط...'}</span>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-sm overflow-hidden flex flex-col relative">
+          
+          {/* Main Grid Wrapper with Horizontal Scrolling */}
+          <div className="overflow-x-auto custom-scrollbar select-none">
+            <div className="min-w-max flex flex-col">
+              
+              {/* Grid Header (Days) */}
+              <div className="flex border-b border-[var(--border)] bg-[var(--secondary)]/40">
+                {/* Sticky Left Corner Spacer */}
+                <div className="w-56 sm:w-64 sticky left-0 z-40 bg-[var(--secondary)] border-r border-[var(--border)] shrink-0 h-16 flex items-center px-4 font-bold text-sm text-[var(--foreground)]" style={isRtl ? { borderRight: 'none', borderLeft: '1px solid var(--border)' } : {}}>
+                  {language === 'en' ? 'Property / Chalet' : 'العقار / الشاليه'}
+                </div>
+
+                {/* Day Columns */}
+                <div className="flex flex-1">
+                  {daysArray.map((day) => {
+                    const weekend = isWeekend(day);
+                    return (
+                      <div
+                        key={day}
+                        className={`w-14 sm:w-16 h-16 shrink-0 flex flex-col items-center justify-center border-r border-[var(--border)] text-center text-xs font-semibold ${
+                          weekend ? 'bg-orange-500/5 text-orange-600 dark:text-orange-400' : 'text-[var(--foreground)]'
+                        }`}
+                      >
+                        <span className="text-sm font-bold">{day}</span>
+                        <span className="text-[10px] opacity-75 font-normal">{getDayOfWeekName(day)}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Grid Body */}
+              <div className="flex flex-col divide-y divide-[var(--border)]">
+                {filteredProps.map((property) => {
+                  const propertyColor = property.color || '#C9A84C';
+
+                  // Get bookings for this property that overlap with the current month
+                  const startMonthDate = new Date(currentYear, currentMonth, 1);
+                  const endMonthDate = new Date(currentYear, currentMonth, daysInMonth, 23, 59, 59);
+
+                  const propertyBookings = bookings.filter((booking) => {
+                    const bPropId = typeof booking.propertyId === 'object' && booking.propertyId !== null 
+                      ? booking.propertyId._id 
+                      : booking.propertyId;
+                    
+                    if (bPropId !== property.id) return false;
+
+                    const bStart = new Date(booking.startDate);
+                    const bEnd = new Date(booking.endDate);
+                    return bStart <= endMonthDate && bEnd >= startMonthDate;
+                  });
+
+                  return (
+                    <div key={property.id} className="flex relative" style={{ height: `${rowHeight}px` }}>
+                      
+                      {/* Property Left Name Bar (Sticky) */}
+                      <div
+                        className="w-56 sm:w-64 sticky left-0 z-30 bg-[var(--card)] border-r border-[var(--border)] shrink-0 flex items-center gap-3 px-4 shadow-sm"
+                        style={isRtl ? { borderRight: 'none', borderLeft: '1px solid var(--border)' } : {}}
+                      >
+                        {/* Custom property color indicator pill */}
+                        <div
+                          className="w-3.5 h-3.5 rounded-full shrink-0 border border-black/10 shadow-sm"
+                          style={{ backgroundColor: propertyColor }}
+                        />
+                        <div className="min-w-0">
+                          <p
+                            className="font-bold text-xs sm:text-sm truncate"
+                            style={{ color: propertyColor }}
+                          >
+                            {language === 'en' ? property.title : property.titleAr}
+                          </p>
+                          <p className="text-[10px] text-[var(--text-secondary)] capitalize truncate mt-0.5">
+                            {property.type} • {formatEGP(property.price)}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Timeline Columns Grid Background */}
+                      <div className="flex flex-1 relative h-full">
+                        {daysArray.map((day) => {
+                          const weekend = isWeekend(day);
+                          return (
+                            <div
+                              key={day}
+                              className={`w-14 sm:w-16 h-full shrink-0 border-r border-[var(--border)] ${
+                                weekend ? 'bg-orange-500/[0.01]' : ''
+                              }`}
+                            />
+                          );
+                        })}
+
+                        {/* Absolutely Positioned Overlap Booking Blocks */}
+                        <div className="absolute inset-0 z-20 pointer-events-none flex items-center">
+                          {propertyBookings.map((booking) => {
+                            const bStart = new Date(booking.startDate);
+                            const bEnd = new Date(booking.endDate);
+
+                            // Clamp start/end day indexes inside the current month view
+                            const startDayIndex = bStart < startMonthDate ? 1 : bStart.getDate();
+                            const endDayIndex = bEnd > endMonthDate ? daysInMonth : bEnd.getDate();
+
+                            const span = endDayIndex - startDayIndex + 1;
+
+                            // Calculate percentages for fluid positioning
+                            const cellWidth = 100 / daysInMonth;
+                            const leftPercent = (startDayIndex - 1) * cellWidth;
+                            const widthPercent = span * cellWidth;
+
+                            // Status badge coloring
+                            let statusColor = 'bg-emerald-500';
+                            let textStatusColor = 'text-emerald-700 dark:text-emerald-300';
+                            if (booking.status === 'pending') {
+                              statusColor = 'bg-amber-500';
+                              textStatusColor = 'text-amber-700 dark:text-amber-300';
+                            } else if (booking.status === 'cancelled') {
+                              statusColor = 'bg-rose-500';
+                              textStatusColor = 'text-rose-700 dark:text-rose-300';
+                            }
+
+                            const clientName = typeof booking.clientId === 'object' && booking.clientId !== null
+                              ? booking.clientId.name
+                              : 'Client';
+
+                            const isSmallCell = span <= 2;
+
+                            return (
+                              <motion.div
+                                key={booking._id}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                whileHover={{ scale: 1.01, zIndex: 25 }}
+                                onClick={(e) => handleBookingClick(booking, e)}
+                                className="absolute pointer-events-auto cursor-pointer rounded-xl shadow-sm border overflow-hidden flex items-center px-2 transition-all"
+                                style={{
+                                  left: `${leftPercent}%`,
+                                  width: `${widthPercent}%`,
+                                  height: '84%',
+                                  backgroundColor: `${propertyColor}1a`, // 10% opacity property custom color
+                                  borderColor: propertyColor,
+                                  borderLeftWidth: '5px',
+                                }}
+                              >
+                                <div className="flex items-center justify-between w-full min-w-0 gap-1.5">
+                                  <div className="min-w-0">
+                                    <p className="font-bold text-[11px] truncate text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
+                                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${statusColor}`} />
+                                      {clientName}
+                                    </p>
+                                    {!isSmallCell && (
+                                      <p className="text-[9px] text-slate-500 dark:text-slate-400 font-medium truncate mt-0.5">
+                                        {booking.totalDays} {language === 'en' ? 'nights' : 'ليالي'} • {formatEGP(booking.totalPrice)}
+                                      </p>
+                                    )}
+                                  </div>
+                                  {!isSmallCell && (
+                                    <span className={`text-[8px] uppercase tracking-wide px-1.5 py-0.5 rounded-md font-bold shrink-0 bg-white/70 dark:bg-slate-800/80 shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] ${textStatusColor}`}>
+                                      {language === 'en' ? booking.status : (booking.status === 'confirmed' ? 'مؤكد' : booking.status === 'pending' ? 'انتظار' : 'ملغي')}
+                                    </span>
+                                  )}
+                                </div>
+                              </motion.div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {filteredProps.length === 0 && (
+                  <div className="p-12 text-center text-[var(--text-secondary)] font-medium bg-[var(--card)]">
+                    {language === 'en' ? 'No matching properties found' : 'لم يتم العثور على عقارات مطابقة'}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Booking Detail Modal (Interactive Glassmorphic Overlay) */}
+      <AnimatePresence>
+        {selectedBooking && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              onClick={() => setSelectedBooking(null)}
+            />
+
+            {/* Modal Box */}
+            <motion.div
+              initial={{ scale: 0.95, y: 15, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.95, y: 15, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+              className="relative w-full max-w-lg bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden z-10 p-6 flex flex-col gap-6"
+            >
+              {/* Title & Close */}
+              <div className="flex items-center justify-between border-b border-[var(--border)] pb-3">
+                <h3 className="text-lg font-bold text-[var(--foreground)] flex items-center gap-2">
+                  <CalendarDays className="w-5 h-5 text-[var(--primary)]" />
+                  {language === 'en' ? 'Reservation Details' : 'تفاصيل الحجز'}
+                </h3>
+                <button
+                  onClick={() => setSelectedBooking(null)}
+                  className="p-1 rounded-lg hover:bg-[var(--secondary)] text-[var(--text-secondary)] transition-all"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Details Content */}
+              <div className="space-y-4 text-sm text-[var(--foreground)]">
+                {/* Property Detail */}
+                <div className="flex items-start gap-3 p-3 rounded-xl bg-[var(--secondary)]/30 border border-[var(--border)]">
+                  <div className="w-4 h-4 rounded-full mt-1 shrink-0 border border-black/10" style={{ backgroundColor: (typeof selectedBooking.propertyId === 'object' && selectedBooking.propertyId !== null ? (selectedBooking.propertyId as any).color : '') || '#C9A84C' }} />
+                  <div>
+                    <h4 className="font-bold text-[var(--foreground)]">
+                      {language === 'en'
+                        ? (typeof selectedBooking.propertyId === 'object' && selectedBooking.propertyId !== null ? selectedBooking.propertyId.title : 'Property')
+                        : (typeof selectedBooking.propertyId === 'object' && selectedBooking.propertyId !== null ? selectedBooking.propertyId.titleAr : 'العقار')}
+                    </h4>
+                    <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                      {language === 'en'
+                        ? (typeof selectedBooking.propertyId === 'object' && selectedBooking.propertyId !== null ? selectedBooking.propertyId.location : '')
+                        : (typeof selectedBooking.propertyId === 'object' && selectedBooking.propertyId !== null ? selectedBooking.propertyId.locationAr : '')}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Client Detail */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 bg-[var(--primary)]/10 text-[var(--primary)] rounded-xl">
+                      <User className="w-4.5 h-4.5" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-[var(--text-secondary)]">{language === 'en' ? 'Client Name' : 'اسم العميل'}</p>
+                      <p className="font-bold text-[var(--foreground)]">
+                        {typeof selectedBooking.clientId === 'object' && selectedBooking.clientId !== null
+                          ? selectedBooking.clientId.name
+                          : 'Guest'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 bg-[var(--primary)]/10 text-[var(--primary)] rounded-xl">
+                      <Phone className="w-4.5 h-4.5" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-[var(--text-secondary)]">{language === 'en' ? 'Client Phone' : 'الهاتف'}</p>
+                      <p className="font-semibold text-[var(--foreground)]">
+                        {typeof selectedBooking.clientId === 'object' && selectedBooking.clientId !== null
+                          ? selectedBooking.clientId.phone
+                          : '—'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dates & Duration */}
+                <div className="grid grid-cols-3 gap-3 p-3 bg-[var(--secondary)]/20 border border-[var(--border)] rounded-xl text-center">
+                  <div>
+                    <p className="text-[10px] uppercase text-[var(--text-secondary)] font-bold">{language === 'en' ? 'Check-In' : 'الوصول'}</p>
+                    <p className="font-bold text-xs text-[var(--foreground)] mt-1">
+                      {new Date(selectedBooking.startDate).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}
+                    </p>
+                  </div>
+                  <div className="border-x border-[var(--border)] flex flex-col justify-center">
+                    <p className="text-[10px] uppercase text-[var(--text-secondary)] font-bold">{language === 'en' ? 'Duration' : 'المدة'}</p>
+                    <p className="font-extrabold text-sm text-[var(--primary)] mt-1">
+                      {selectedBooking.totalDays} {language === 'en' ? 'Nights' : 'ليالي'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase text-[var(--text-secondary)] font-bold">{language === 'en' ? 'Check-Out' : 'المغادرة'}</p>
+                    <p className="font-bold text-xs text-[var(--foreground)] mt-1">
+                      {new Date(selectedBooking.endDate).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Financial overview */}
+                <div className="grid grid-cols-3 gap-3 p-3 bg-emerald-500/5 border border-emerald-500/20 rounded-xl text-center">
+                  <div>
+                    <p className="text-[10px] uppercase text-emerald-700 dark:text-emerald-300 font-bold">{language === 'en' ? 'Total Price' : 'السعر الكلي'}</p>
+                    <p className="font-bold text-xs text-emerald-600 dark:text-emerald-400 mt-1">{formatEGP(selectedBooking.totalPrice)}</p>
+                  </div>
+                  <div className="border-x border-[var(--border)]">
+                    <p className="text-[10px] uppercase text-emerald-700 dark:text-emerald-300 font-bold">{language === 'en' ? 'Paid' : 'المدفوع'}</p>
+                    <p className="font-bold text-xs text-emerald-600 dark:text-emerald-400 mt-1">{formatEGP(selectedBooking.paidAmount || 0)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] uppercase text-emerald-700 dark:text-emerald-300 font-bold">{language === 'en' ? 'Remaining' : 'المتبقي'}</p>
+                    <p className="font-bold text-xs text-emerald-600 dark:text-emerald-400 mt-1">{formatEGP(selectedBooking.remainingAmount || 0)}</p>
+                  </div>
+                </div>
+
+                {/* Status Badges */}
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-[var(--text-secondary)] font-medium">{language === 'en' ? 'Status' : 'الحالة'}:</span>
+                  <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-lg border bg-white/70 dark:bg-slate-800/80`}>
+                    {selectedBooking.status === 'confirmed' && (
+                      <><CheckCircle2 className="w-4 h-4 text-emerald-500" /><span className="text-emerald-700 dark:text-emerald-300">{language === 'en' ? 'Confirmed' : 'مؤكد'}</span></>
+                    )}
+                    {selectedBooking.status === 'pending' && (
+                      <><Clock className="w-4 h-4 text-amber-500" /><span className="text-amber-700 dark:text-amber-300">{language === 'en' ? 'Pending' : 'قيد الانتظار'}</span></>
+                    )}
+                    {selectedBooking.status === 'cancelled' && (
+                      <><Ban className="w-4 h-4 text-rose-500" /><span className="text-rose-700 dark:text-rose-300">{language === 'en' ? 'Cancelled' : 'ملغي'}</span></>
+                    )}
+                  </span>
+                </div>
+
+                {/* Notes */}
+                {selectedBooking.notes && (
+                  <div className="p-3 bg-[var(--secondary)]/10 border border-[var(--border)] rounded-xl text-xs">
+                    <p className="font-semibold text-[var(--text-secondary)] mb-1">{language === 'en' ? 'Notes' : 'ملاحظات'}:</p>
+                    <p className="italic">{selectedBooking.notes}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer Actions */}
+              <div className="flex items-center justify-between border-t border-[var(--border)] pt-4 mt-2">
+                <button
+                  onClick={() => handleDeleteBooking(selectedBooking._id)}
+                  className="flex items-center gap-1.5 px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs rounded-xl shadow transition-all active:scale-95"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  {language === 'en' ? 'Delete' : 'حذف الحجز'}
+                </button>
+
+                <button
+                  onClick={() => setSelectedBooking(null)}
+                  className="px-4 py-2 border border-[var(--border)] hover:bg-[var(--secondary)] text-[var(--foreground)] font-bold text-xs rounded-xl transition-all"
+                >
+                  {language === 'en' ? 'Close' : 'إغلاق'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Inject custom horizontal scrollbar CSS styling */}
       <style>{`
-        .calendar-container .fc-theme-standard td,
-        .calendar-container .fc-theme-standard th { border-color: var(--border); }
-        .calendar-container .fc-col-header-cell { background-color: var(--secondary); color: var(--foreground); padding: 12px 0; font-weight: 600; font-size: 13px; }
-        .calendar-container .fc-daygrid-day-number { color: var(--foreground); font-weight: 500; padding: 8px; }
-        .calendar-container .fc-daygrid-day.fc-day-today { background-color: var(--secondary) !important; position: relative; }
-        .calendar-container .fc-daygrid-day.fc-day-today::before { content: ''; position: absolute; inset: 0; border: 2px solid var(--primary); pointer-events: none; z-index: 1; }
-        .calendar-container .fc-event { cursor: pointer; border-radius: 8px; padding: 4px 8px; font-size: 12px; font-weight: 600; transition: all 0.2s ease; border: none; box-shadow: var(--shadow-sm); }
-        .calendar-container .fc-event:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
-        .calendar-container .fc-button-primary { background-color: var(--primary); border-color: var(--primary); border-radius: 10px; font-weight: 600; text-transform: capitalize; }
-        .calendar-container .fc-button-primary:hover { opacity: 0.9; background-color: var(--primary); border-color: var(--primary); }
-        .calendar-container .fc-button-primary:not(:disabled).fc-button-active,
-        .calendar-container .fc-button-primary:not(:disabled):active { background-color: var(--primary); border-color: var(--primary); }
-        .calendar-container .fc-toolbar-title { color: var(--foreground); font-weight: 700; font-size: 1.25rem; }
-        .calendar-container .fc-scrollgrid { border-color: var(--border); }
+        .custom-scrollbar::-webkit-scrollbar {
+          height: 8px;
+          width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(0,0,0,0.02);
+          border-radius: 99px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: var(--border);
+          border-radius: 99px;
+          border: 2px solid var(--card);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: var(--primary);
+        }
       `}</style>
     </div>
   );

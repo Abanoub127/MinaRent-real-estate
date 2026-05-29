@@ -291,7 +291,7 @@ if (editingBooking) {
                       {booking.endDate ? new Date(booking.endDate).toLocaleDateString() : '—'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                      {booking.paidAmount ? `AED ${booking.paidAmount.toLocaleString()}` : '—'}
+                      {booking.paidAmount ? `${booking.paidAmount.toLocaleString()} EGP` : '—'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Select
@@ -373,13 +373,11 @@ if (editingBooking) {
               label={language === 'en' ? 'Client Name' : 'اسم العميل'}
               value={formData.clientName}
               onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
-              required
             />
             <Input
               label={language === 'en' ? 'Client Phone' : 'رقم الهاتف للعميل'}
               value={formData.clientPhone}
               onChange={(e) => setFormData({ ...formData, clientPhone: e.target.value })}
-              required
             />
           </div>
 
@@ -389,14 +387,12 @@ if (editingBooking) {
               type="date"
               value={formData.startDate}
               onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-              required
             />
             <Input
               label={language === 'en' ? 'End Date' : 'تاريخ النهاية'}
               type="date"
               value={formData.endDate}
               onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-              required
             />
           </div>
 

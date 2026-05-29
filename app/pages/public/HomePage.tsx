@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../../contexts/AppContext';
 import { getProperties, getTestimonials, Property, Testimonial, formatEGPShort, createTestimonial } from '../../../services/api';
 import { MRLogo } from '../../components/ui/MRLogo';
+import { ProtectedImage } from '../../components/ProtectedImage';
 
 export const HomePage: React.FC = () => {
   const { language, isRtl, t } = useApp();
@@ -198,7 +199,7 @@ export const HomePage: React.FC = () => {
               <motion.div key={property.id} variants={itemVariants}>
                 <Link to={`/properties/${property.id}`} className="group flex flex-col bg-[var(--card)] rounded-2xl border border-[var(--border)] overflow-hidden shadow-sm premium-card">
                   <div className="relative aspect-[4/3] overflow-hidden">
-                    <img src={property.images[0] || 'https://via.placeholder.com/600x400?text=No+Image'} alt={property.title} className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" loading="lazy" />
+                    <ProtectedImage src={property.images[0] || 'https://via.placeholder.com/600x400?text=No+Image'} alt={property.title} containerClassName="w-full h-full" className="transform transition-transform duration-700 group-hover:scale-110" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div className="absolute top-3 left-3">
                       <span className="px-3 py-1 bg-white/90 backdrop-blur text-[var(--foreground)] text-xs font-bold rounded-lg capitalize">{language === 'en' ? property.type : (property.type === 'villa' ? 'فيلا' : property.type === 'apartment' ? 'شقة' : property.type)}</span>
