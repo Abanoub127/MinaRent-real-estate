@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Calendar as CalendarIcon, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { Plus, Edit, Trash2, Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 import { Card } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
@@ -12,6 +12,7 @@ import {
   SelectItem,
   SelectValue,
 } from '../../components/ui/Select';
+
 import { BASE_URL as API } from '../../../services/api';
 
 const authHeaders = () => ({
@@ -23,6 +24,7 @@ type BookingStatus = 'pending' | 'confirmed' | 'cancelled';
 
 interface Booking {
   _id: string;
+
   propertyId: {
     _id: string;
     title: string;
@@ -30,19 +32,23 @@ interface Booking {
     location: string;
     locationAr: string;
   };
+
   clientId: {
     _id: string;
     name: string;
     phone: string;
     email: string;
   };
+
   startDate: string;
   endDate: string;
+
   paidAmount?: number;
+
   status: BookingStatus;
+
   notes?: string;
 }
-
 export const BookingsPage: React.FC = () => {
   const { t, language } = useApp();
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -70,7 +76,9 @@ export const BookingsPage: React.FC = () => {
       ]);
       const [bData, pData] = await Promise.all([bRes.json(), pRes.json()]);
       setBookings(Array.isArray(bData) ? bData : []);
-      setProperties(Array.isArray(pData) ? pData : pData.properties || []);
+      setProperties(
+        Array.isArray(pData) ? pData : pData.properties || []
+      );
     } catch (err) {
       console.error(err);
     } finally {
@@ -78,7 +86,9 @@ export const BookingsPage: React.FC = () => {
     }
   };
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => {
+    fetchAll();
+  }, []);
 
   const handleOpenModal = (booking?: Booking) => {
     if (booking) {
@@ -119,7 +129,11 @@ export const BookingsPage: React.FC = () => {
     const body = JSON.stringify({ ...formData, paidAmount: Number(formData.paidAmount) || 0 });
     try {
       if (editingBooking) {
-        await fetch(`${API}/bookings/${editingBooking._id}`, { method: 'PUT', headers: authHeaders(), body });
+        await fetch(`${API}/bookings/${editingBooking._id}`, {
+          method: 'PUT',
+          headers: authHeaders(),
+          body,
+        });
       } else {
         await fetch(`${API}/bookings`, { method: 'POST', headers: authHeaders(), body });
       }
@@ -152,12 +166,19 @@ export const BookingsPage: React.FC = () => {
       console.error(err);
     }
   };
+let modalTitle = '';
 
-  // Fixed: moved modal title into component body (not top-level)
-  const modalTitle = editingBooking
-    ? (language === 'en' ? 'Edit Booking' : 'تعديل الحجز')
-    : (language === 'en' ? 'Add Booking' : 'إضافة حجز');
-
+if (editingBooking) {
+  modalTitle =
+    language === 'en'
+      ? 'Edit Booking'
+      : 'تعديل الحجز';
+} else {
+  modalTitle =
+    language === 'en'
+      ? 'Add Booking'
+      : 'إضافة حجز';
+};
   const getStatusLabel = (status: BookingStatus) => {
     const map = {
       pending: language === 'en' ? 'Pending' : 'قيد الانتظار',
@@ -167,84 +188,58 @@ export const BookingsPage: React.FC = () => {
     return map[status] || status;
   };
 
-  const statusConfig = {
-    pending: {
-      icon: Clock,
-      color: 'text-amber-600 dark:text-amber-400',
-      bg: 'bg-amber-50 dark:bg-amber-900/20',
-      border: 'border-amber-200 dark:border-amber-800/30',
-      badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-    },
-    confirmed: {
-      icon: CheckCircle2,
-      color: 'text-emerald-600 dark:text-emerald-400',
-      bg: 'bg-emerald-50 dark:bg-emerald-900/20',
-      border: 'border-emerald-200 dark:border-emerald-800/30',
-      badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-    },
-    cancelled: {
-      icon: XCircle,
-      color: 'text-red-600 dark:text-red-400',
-      bg: 'bg-red-50 dark:bg-red-900/20',
-      border: 'border-red-200 dark:border-red-800/30',
-      badge: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-    },
-  };
-
-  if (loading) {
-    return (
-      <div className="space-y-6 animate-pulse">
-        <div className="h-8 w-48 bg-[var(--secondary)] rounded-xl" />
-        <div className="grid grid-cols-3 gap-5">
-          {[1, 2, 3].map(i => <div key={i} className="h-28 bg-[var(--card)] border border-[var(--border)] rounded-2xl" />)}
-        </div>
-        <div className="h-96 bg-[var(--card)] border border-[var(--border)] rounded-2xl" />
-      </div>
-    );
-  }
+  if (loading) return <div className="text-center py-10">Loading...</div>;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">{t('admin.bookings')}</h1>
-          <p className="text-[var(--text-secondary)] text-sm mt-0.5">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('admin.bookings')}</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
             {language === 'en' ? 'Manage property viewings and appointments' : 'إدارة معاينات وحجوزات العقارات'}
           </p>
         </div>
-        <Button onClick={() => handleOpenModal()} className="flex items-center gap-2 self-start sm:self-auto">
-          <Plus className="w-4 h-4" />
+        <Button onClick={() => handleOpenModal()} className="flex items-center gap-2">
+          <Plus className="w-5 h-5" />
           {language === 'en' ? 'Add Booking' : 'إضافة حجز'}
         </Button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {(['pending', 'confirmed', 'cancelled'] as BookingStatus[]).map((s) => {
-          const cfg = statusConfig[s];
-          const Icon = cfg.icon;
-          const count = bookings.filter(b => b.status === s).length;
+          const colors = {
+            pending: 'yellow',
+            confirmed: 'green',
+            cancelled: 'red',
+          };
+          const icons = { pending: Clock, confirmed: CalendarIcon, cancelled: Trash2 };
+          const Icon = icons[s];
+          const color = colors[s];
           return (
-            <div key={s} className={`p-5 rounded-2xl border ${cfg.border} ${cfg.bg} flex items-center gap-4`}>
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-white dark:bg-black/20 shadow-sm shrink-0`}>
-                <Icon className={`w-6 h-6 ${cfg.color}`} />
+            <Card key={s} className="p-6">
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 bg-${color}-100 dark:bg-${color}-900 rounded-lg flex items-center justify-center`}>
+                  <Icon className={`w-6 h-6 text-${color}-600 dark:text-${color}-400`} />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{getStatusLabel(s)}</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {bookings.filter((b) => b.status === s).length}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-sm text-[var(--text-secondary)]">{getStatusLabel(s)}</p>
-                <p className={`text-3xl font-bold ${cfg.color}`}>{count}</p>
-              </div>
-            </div>
+            </Card>
           );
         })}
       </div>
 
       {/* Table */}
-      <Card className="overflow-hidden">
+      <Card>
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead>
-              <tr className="bg-[var(--secondary)] border-b border-[var(--border)]">
+            <thead className="bg-gray-50 dark:bg-gray-700">
+              <tr>
                 {[
                   language === 'en' ? 'Property' : 'العقار',
                   language === 'en' ? 'Client' : 'العميل',
@@ -253,43 +248,57 @@ export const BookingsPage: React.FC = () => {
                   language === 'en' ? 'Paid' : 'المدفوع',
                   language === 'en' ? 'Status' : 'الحالة',
                   language === 'en' ? 'Actions' : 'الإجراءات',
-                ].map(h => (
-                  <th key={h} className="px-5 py-3.5 text-start text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wide">
+                ].map((h) => (
+                  <th key={h} className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--border)]">
-              {bookings.map(booking => {
-                const id = booking._id;
-                const cfg = statusConfig[booking.status] || statusConfig.pending;
-                return (
-                  <tr key={id} className="hover:bg-[var(--secondary)]/50 transition-colors">
-                    <td className="px-5 py-4">
-                      <div className="text-sm font-semibold text-[var(--foreground)]">
-                        {language === 'en' ? booking.propertyId?.title || '—' : booking.propertyId?.titleAr || '—'}
-                      </div>
-                      <div className="text-xs text-[var(--text-secondary)] mt-0.5">
-                        {language === 'en' ? booking.propertyId?.location || '' : booking.propertyId?.locationAr || ''}
-                      </div>
+           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+  {bookings.map((booking) => {
+    const id = booking._id;
+
+    return (
+      <tr key={id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+        <td className="px-6 py-4">
+          <div className="text-sm font-medium text-gray-900 dark:text-white">
+            {language === 'en'
+              ? booking.propertyId?.title || '—'
+              : booking.propertyId?.titleAr || '—'}
+          </div>
+
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            {language === 'en'
+              ? booking.propertyId?.location || ''
+              : booking.propertyId?.locationAr || ''}
+          </div>
+        </td>
+
+        <td className="px-6 py-4">
+          <div className="text-sm text-gray-900 dark:text-white">
+            {booking.clientId?.name || '—'}
+          </div>
+
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            {booking.clientId?.phone || ''}
+          </div>
+        </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                      {booking.startDate ? new Date(booking.startDate).toLocaleDateString() : '—'}
                     </td>
-                    <td className="px-5 py-4">
-                      <div className="text-sm font-semibold text-[var(--foreground)]">{booking.clientId?.name || '—'}</div>
-                      <div className="text-xs text-[var(--text-secondary)] mt-0.5" dir="ltr">{booking.clientId?.phone || ''}</div>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                      {booking.endDate ? new Date(booking.endDate).toLocaleDateString() : '—'}
                     </td>
-                    <td className="px-5 py-4 whitespace-nowrap text-sm text-[var(--foreground)]">
-                      {booking.startDate ? new Date(booking.startDate).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US') : '—'}
-                    </td>
-                    <td className="px-5 py-4 whitespace-nowrap text-sm text-[var(--foreground)]">
-                      {booking.endDate ? new Date(booking.endDate).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US') : '—'}
-                    </td>
-                    <td className="px-5 py-4 whitespace-nowrap text-sm font-semibold text-[var(--foreground)]">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                       {booking.paidAmount ? `${booking.paidAmount.toLocaleString()} EGP` : '—'}
                     </td>
-                    <td className="px-5 py-4 whitespace-nowrap">
-                      <Select value={booking.status} onValueChange={(val) => handleStatusChange(id, val as BookingStatus)}>
-                        <SelectTrigger className="w-36 h-8 text-xs">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <Select
+                        value={booking.status}
+                        onValueChange={(val) => handleStatusChange(id, val as BookingStatus)}
+                      >
+                        <SelectTrigger className="w-36">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -299,19 +308,17 @@ export const BookingsPage: React.FC = () => {
                         </SelectContent>
                       </Select>
                     </td>
-                    <td className="px-5 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleOpenModal(booking)}
-                          className="p-2 text-[var(--primary)] hover:bg-[var(--primary)]/10 rounded-lg transition-colors"
-                          title={language === 'en' ? 'Edit' : 'تعديل'}
+                          className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(id)}
-                          className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                          title={language === 'en' ? 'Delete' : 'حذف'}
+                          className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -322,8 +329,7 @@ export const BookingsPage: React.FC = () => {
               })}
               {bookings.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="text-center py-14 text-[var(--text-secondary)] text-sm">
-                    <CalendarIcon className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                  <td colSpan={7} className="text-center py-8 text-gray-500 dark:text-gray-400">
                     {language === 'en' ? 'No bookings yet' : 'لا توجد حجوزات بعد'}
                   </td>
                 </tr>
@@ -347,15 +353,13 @@ export const BookingsPage: React.FC = () => {
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-xs font-semibold text-[var(--text-secondary)] mb-1.5 block">
-              {language === 'en' ? 'Property' : 'العقار'}
-            </label>
+            <label className="text-sm mb-1 block">{language === 'en' ? 'Property' : 'العقار'}</label>
             <Select value={formData.propertyId} onValueChange={(v) => setFormData({ ...formData, propertyId: v })}>
               <SelectTrigger>
                 <SelectValue placeholder={language === 'en' ? 'Select Property' : 'اختر العقار'} />
               </SelectTrigger>
               <SelectContent>
-                {properties.map(p => (
+                {properties.map((p) => (
                   <SelectItem key={p._id || p.id} value={String(p._id || p.id)}>
                     {language === 'en' ? p.title : p.titleAr}
                   </SelectItem>
@@ -363,27 +367,48 @@ export const BookingsPage: React.FC = () => {
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
               label={language === 'en' ? 'Client Name' : 'اسم العميل'}
               value={formData.clientName}
-              onChange={e => setFormData({ ...formData, clientName: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
             />
             <Input
-              label={language === 'en' ? 'Client Phone' : 'رقم الهاتف'}
+              label={language === 'en' ? 'Client Phone' : 'رقم الهاتف للعميل'}
               value={formData.clientPhone}
-              onChange={e => setFormData({ ...formData, clientPhone: e.target.value })}
+              onChange={(e) => setFormData({ ...formData, clientPhone: e.target.value })}
             />
           </div>
+
           <div className="grid grid-cols-2 gap-4">
-            <Input label={language === 'en' ? 'Start Date' : 'تاريخ البداية'} type="date" value={formData.startDate} onChange={e => setFormData({ ...formData, startDate: e.target.value })} />
-            <Input label={language === 'en' ? 'End Date' : 'تاريخ النهاية'} type="date" value={formData.endDate} onChange={e => setFormData({ ...formData, endDate: e.target.value })} />
+            <Input
+              label={language === 'en' ? 'Start Date' : 'تاريخ البداية'}
+              type="date"
+              value={formData.startDate}
+              onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+            />
+            <Input
+              label={language === 'en' ? 'End Date' : 'تاريخ النهاية'}
+              type="date"
+              value={formData.endDate}
+              onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+            />
           </div>
-          <Input label={language === 'en' ? 'Paid Amount (EGP)' : 'المبلغ المدفوع (جنيه)'} type="number" value={formData.paidAmount} onChange={e => setFormData({ ...formData, paidAmount: e.target.value })} />
+
+          <Input
+            label={language === 'en' ? 'Paid Amount (EGP)' : 'المبلغ المدفوع (جنيه)'}
+            type="number"
+            value={formData.paidAmount}
+            onChange={(e) => setFormData({ ...formData, paidAmount: e.target.value })}
+          />
+
           <div>
-            <label className="text-xs font-semibold text-[var(--text-secondary)] mb-1.5 block">{language === 'en' ? 'Status' : 'الحالة'}</label>
-            <Select value={formData.status} onValueChange={v => setFormData({ ...formData, status: v as BookingStatus })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+            <label className="text-sm mb-1 block">{language === 'en' ? 'Status' : 'الحالة'}</label>
+            <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v as BookingStatus })}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="pending">{language === 'en' ? 'Pending' : 'قيد الانتظار'}</SelectItem>
                 <SelectItem value="confirmed">{language === 'en' ? 'Confirmed' : 'مؤكد'}</SelectItem>
@@ -391,14 +416,24 @@ export const BookingsPage: React.FC = () => {
               </SelectContent>
             </Select>
           </div>
-          <TextArea
-            name="notes"
-            label={language === 'en' ? 'Notes' : 'ملاحظات'}
-            value={formData.notes}
-            onChange={e => setFormData({ ...formData, notes: e.target.value })}
-            rows={3}
-            placeholder={language === 'en' ? 'Additional notes...' : 'ملاحظات إضافية...'}
-          />
+
+         <TextArea
+  name="notes"
+  label={language === 'en' ? 'Notes' : 'ملاحظات'}
+  value={formData.notes}
+  onChange={(e) =>
+    setFormData({
+      ...formData,
+      notes: e.target.value,
+    })
+  }
+  rows={3}
+  placeholder={
+    language === 'en'
+      ? 'Additional notes...'
+      : 'ملاحظات إضافية...'
+  }
+/>
         </form>
       </Modal>
     </div>

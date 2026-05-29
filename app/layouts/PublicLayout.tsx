@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router';
-import { Menu, X, Sun, Moon, Languages, Phone, Mail, ArrowUp } from 'lucide-react';
+import { Menu, X, Sun, Moon, Languages, MapPin, Building, Phone, Mail, ArrowUp, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../contexts/AppContext';
 import { MRLogo } from '../components/ui/MRLogo';
@@ -43,7 +43,7 @@ export const PublicLayout: React.FC = () => {
         <div
           className={`max-w-6xl mx-auto rounded-2xl border transition-all duration-500 ${
             scrolled
-              ? 'bg-[var(--card)]/90 backdrop-blur-xl shadow-lg border-[var(--border)]'
+              ? 'bg-[var(--card)]/85 backdrop-blur-xl shadow-lg border-[var(--border)]'
               : 'bg-[var(--card)]/95 backdrop-blur-md border-[var(--border)] shadow-md'
           }`}
         >
@@ -72,7 +72,7 @@ export const PublicLayout: React.FC = () => {
                       <motion.div
                         layoutId="nav-indicator"
                         className="absolute bottom-0 left-3 right-3 h-0.5 bg-[var(--primary)] rounded-full"
-                        transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                       />
                     )}
                   </Link>
@@ -87,11 +87,7 @@ export const PublicLayout: React.FC = () => {
                 className="p-2.5 rounded-xl hover:bg-[var(--secondary)] text-[var(--text-secondary)] hover:text-[var(--foreground)] transition-all"
                 aria-label="Toggle theme"
               >
-                {theme === 'light' ? (
-                  <Moon className="w-[18px] h-[18px]" />
-                ) : (
-                  <Sun className="w-[18px] h-[18px]" />
-                )}
+                {theme === 'light' ? <Moon className="w-[18px] h-[18px]" /> : <Sun className="w-[18px] h-[18px]" />}
               </button>
               <button
                 onClick={toggleLanguage}
@@ -250,8 +246,7 @@ export const PublicLayout: React.FC = () => {
           </div>
           <div className="mt-12 pt-8 border-t border-[var(--border)] text-center">
             <p className="text-[var(--text-secondary)] text-sm">
-              © {new Date().getFullYear()} Mina Rent.{' '}
-              {isRtl ? 'جميع الحقوق محفوظة.' : 'All rights reserved.'}
+              © {new Date().getFullYear()} Mina Rent. {isRtl ? 'جميع الحقوق محفوظة.' : 'All rights reserved.'}
             </p>
           </div>
         </div>
