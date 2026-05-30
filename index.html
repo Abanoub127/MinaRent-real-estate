@@ -18,66 +18,6 @@
 
   <script type="module" src="/app/main.tsx"></script>
 
-  <!-- Anti-Screenshot & Security Script -->
-  <script>
-    // Prevent Right Click
-    document.addEventListener('contextmenu', event => event.preventDefault());
 
-    // Prevent Keyboard Shortcuts (Copy, Print, Screenshot tools)
-    document.addEventListener('keydown', (e) => {
-      // Prevent PrintScreen key
-      if (e.key === 'PrintScreen') {
-        navigator.clipboard.writeText(''); // Clear clipboard
-        e.preventDefault();
-        alert('Screenshots are disabled for security reasons.');
-      }
-      
-      // Prevent Ctrl+P (Print)
-      if (e.ctrlKey && e.key === 'p') {
-        e.preventDefault();
-      }
-
-      // Prevent Ctrl+C / Ctrl+X (Copy/Cut)
-      if (e.ctrlKey && (e.key === 'c' || e.key === 'x')) {
-        e.preventDefault();
-      }
-
-      // Prevent Windows+Shift+S (Snipping Tool on Windows) - Cannot be fully blocked by JS but we try to intercept keys
-      if (e.metaKey && e.shiftKey && e.key === 's') {
-        navigator.clipboard.writeText('');
-      }
-
-      // Prevent F12 and Ctrl+Shift+I (Developer Tools)
-      if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I')) {
-        e.preventDefault();
-      }
-    });
-
-    // Optional: Add a subtle overlay when window loses focus (deters background recording)
-    window.addEventListener('blur', () => {
-      const overlay = document.createElement('div');
-      overlay.id = 'security-overlay';
-      overlay.style.position = 'fixed';
-      overlay.style.top = '0';
-      overlay.style.left = '0';
-      overlay.style.width = '100vw';
-      overlay.style.height = '100vh';
-      overlay.style.backgroundColor = '#000';
-      overlay.style.zIndex = '999999';
-      overlay.style.display = 'flex';
-      overlay.style.alignItems = 'center';
-      overlay.style.justifyContent = 'center';
-      overlay.style.color = '#fff';
-      overlay.style.fontSize = '24px';
-      overlay.style.fontFamily = 'sans-serif';
-      overlay.innerText = 'Content Protected';
-      document.body.appendChild(overlay);
-    });
-
-    window.addEventListener('focus', () => {
-      const overlay = document.getElementById('security-overlay');
-      if (overlay) overlay.remove();
-    });
-  </script>
 </body>
 </html>

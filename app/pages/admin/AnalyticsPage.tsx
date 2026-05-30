@@ -90,7 +90,7 @@ export const AnalyticsPage: React.FC = () => {
   const fetchAnalytics = async () => {
     try {
       const [propertiesRes, statsRes] = await Promise.all([
-        fetch(`${API}/properties`, {
+        fetch(`${API}/properties?limit=1000`, {
           headers: authHeaders(),
         }),
 
@@ -107,7 +107,7 @@ export const AnalyticsPage: React.FC = () => {
       setProperties(
         Array.isArray(propertiesData)
           ? propertiesData
-          : []
+          : propertiesData.properties || []
       );
 
       setStats(statsData);

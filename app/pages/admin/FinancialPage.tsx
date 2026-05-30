@@ -357,7 +357,7 @@ export const FinancialPage: React.FC = () => {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  outerRadius={100}
+                  outerRadius={80}
                   dataKey="value"
                   label
                 >
@@ -401,7 +401,7 @@ export const FinancialPage: React.FC = () => {
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  outerRadius={100}
+                  outerRadius={80}
                   dataKey="value"
                   label
                 >

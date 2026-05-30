@@ -97,54 +97,54 @@
 }
 
 .dark {
-  --background: #020617; /* Slate 950 */
-  --foreground: #F8FAFC;
-  --card: #0F172A; /* Slate 900 */
+  --background: #080C16;
+  --foreground: #FFFFFF;
+  --card: #101625;
   --card-foreground: #F8FAFC;
-  --popover: #0F172A;
+  --popover: #101625;
   --popover-foreground: #F8FAFC;
-  --primary: #5A7FCC;
-  --primary-light: #8BA8E0;
+  --primary: #6B8CD9;
+  --primary-light: #9CB2EA;
   --primary-foreground: #020617;
-  --secondary: #1E293B; /* Slate 800 */
-  --secondary-foreground: #F8FAFC;
-  --muted: #1E293B;
-  --muted-foreground: #94A3B8; /* Slate 400 */
-  --accent: #D4B96A;
-  --accent-foreground: #020617;
-  --destructive: #EF4444;
-  --destructive-foreground: #FEE2E2;
-  --border: #1E293B;
-  --input: #1E293B;
-  --input-background: #0F172A;
-  --switch-background: #1B2B5B;
-  --text-secondary: #8BA8E0;
+  --secondary: #1A243D;
+  --secondary-foreground: #FFFFFF;
+  --muted: #1A243D;
+  --muted-foreground: #9AA6B8;
+  --accent: #E2C578;
+  --accent-foreground: #080C16;
+  --destructive: #F85149;
+  --destructive-foreground: #FFFFFF;
+  --border: #212C4D;
+  --input: #212C4D;
+  --input-background: #0B101D;
+  --switch-background: #2D4A8C;
+  --text-secondary: #9AA6B8;
 
-  --ring: #5A7FCC;
+  --ring: #6B8CD9;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
 
-  --chart-1: #5A7FCC;
-  --chart-2: #D4B96A;
-  --chart-3: #8BA8E0;
-  --chart-4: #2D4A8C;
+  --chart-1: #6B8CD9;
+  --chart-2: #E2C578;
+  --chart-3: #9CB2EA;
+  --chart-4: #3B5EAB;
   --chart-5: #C9A84C;
 
-  --sidebar: #060B19;
-  --sidebar-foreground: #BFD0F0;
-  --sidebar-primary: #D4B96A;
-  --sidebar-primary-foreground: #060B19;
-  --sidebar-accent: #0B1437;
-  --sidebar-accent-foreground: #BFD0F0;
-  --sidebar-border: #111C44;
-  --sidebar-ring: #D4B96A;
+  --sidebar: #050810;
+  --sidebar-foreground: #D3E0F8;
+  --sidebar-primary: #E2C578;
+  --sidebar-primary-foreground: #050810;
+  --sidebar-accent: #101625;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #1A243D;
+  --sidebar-ring: #E2C578;
 
-  --tooltip-bg: #0B1437;
+  --tooltip-bg: #1A243D;
 
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.35), 0 4px 6px -4px rgb(0 0 0 / 0.2);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.2);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.7), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
 }
 
 @theme inline {

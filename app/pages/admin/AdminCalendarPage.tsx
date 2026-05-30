@@ -428,7 +428,8 @@ export const AdminCalendarPage: React.FC = () => {
                                 onClick={(e) => handleBookingClick(booking, e)}
                                 className="absolute pointer-events-auto cursor-pointer rounded-lg sm:rounded-xl shadow-sm border overflow-hidden flex items-center px-1.5 sm:px-2 transition-all"
                                 style={{
-                                  left: `${leftPercent}%`,
+                                  left: isRtl ? 'auto' : `${leftPercent}%`,
+                                  right: isRtl ? `${leftPercent}%` : 'auto',
                                   width: `${widthPercent}%`,
                                   height: '84%',
                                   backgroundColor: `${propertyColor}1a`,

@@ -214,9 +214,12 @@ export const PropertyDetailPage: React.FC = () => {
                 }`}
               >
                 <Heart className={`h-4 w-4 ${isSaved ? "fill-[var(--primary)] text-[var(--primary)]" : ""}`} />{" "}
+                <span className="flex-1 text-center">
                 {isSaved
                   ? (language === 'en' ? 'Saved' : 'تم الحفظ')
                   : (language === 'en' ? 'Save Property' : 'حفظ العقار')}
+                </span>
+                <span className="text-xs font-bold bg-[var(--background)] px-2 py-0.5 rounded-md border border-[var(--border)]">{property.likes || 0}</span>
               </button>
             </div>
           </motion.div>

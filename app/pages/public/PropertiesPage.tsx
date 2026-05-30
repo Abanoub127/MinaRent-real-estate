@@ -221,7 +221,7 @@ export const PropertiesPage: React.FC = () => {
                     )}
                     <button
                       onClick={(e) => toggleSaveProperty(p.id || p._id || '', e)}
-                      className="absolute end-3 top-3 z-10 p-2 rounded-full bg-[var(--card)]/80 hover:bg-[var(--card)] text-[var(--text-secondary)] hover:text-red-500 backdrop-blur shadow-md transition-all active:scale-95"
+                      className="absolute end-3 top-3 z-10 px-2.5 py-1.5 flex items-center gap-1.5 rounded-full bg-[var(--card)]/80 hover:bg-[var(--card)] text-[var(--text-secondary)] hover:text-red-500 backdrop-blur shadow-md transition-all active:scale-95"
                       aria-label="Save Property"
                     >
                       <Heart
@@ -231,6 +231,7 @@ export const PropertiesPage: React.FC = () => {
                             : ""
                         }`}
                       />
+                      <span className="text-xs font-bold leading-none mt-[1px]">{p.likes || 0}</span>
                     </button>
                     <Link to={`/properties/${p.id || p._id}`} className="absolute inset-x-3 bottom-3 flex items-center justify-center gap-1.5 rounded-xl bg-[var(--primary)]/90 px-3 py-2.5 text-xs font-semibold text-white opacity-0 backdrop-blur transition group-hover:opacity-100">
                       <Eye className="h-3.5 w-3.5" /> {language === 'en' ? 'View Details' : 'عرض التفاصيل'}

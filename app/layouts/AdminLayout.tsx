@@ -4,12 +4,14 @@ import {
   LayoutDashboard, Building, Users, CalendarDays, CalendarRange,
   DollarSign, PieChart, Settings, LogOut, Menu,
   Sun, Moon, Languages, Bell, MessageSquare, Globe,
-  ChevronDown, X, CheckCheck, Mail
+  ChevronDown, X, CheckCheck, Mail, CircleAlert, User, Wallet, Clock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../contexts/AppContext';
 import { getNotifications, markAllNotificationsRead, markNotificationRead, type Notification } from '../../services/api';
 import { MRLogo } from '../components/ui/MRLogo';
+import { formatDistanceToNow } from 'date-fns';
+import { ar, enUS } from 'date-fns/locale';
 
 export const AdminLayout: React.FC = () => {
   const { theme, toggleTheme, language, isRtl, toggleLanguage, t, user, tenant, logout } = useApp();
@@ -18,6 +20,7 @@ export const AdminLayout: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [activeTab, setActiveTab] = useState<'all' | 'property' | 'booking' | 'system'>('all');
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -55,10 +58,17 @@ export const AdminLayout: React.FC = () => {
 
   const handleNotificationClick = async (n: Notification) => {
     setShowNotifications(false);
+    if (!n.isRead) {
+      try {
+        await markNotificationRead(n.id);
+        setNotifications(prev => prev.map(notif => notif.id === n.id ? { ...notif, isRead: true } : notif));
+      } catch { /* ignore */ }
+    }
     if (n.type === 'message') navigate('/admin/messages');
     else if (n.type === 'booking') navigate('/admin/bookings');
     else if (n.type === 'comment') navigate('/admin/testimonials');
     else if (n.type === 'property') navigate('/admin/properties');
+    // For users/system/transactions, they might not have a specific page yet, or go to dashboard
   };
 
   const handleLogout = () => { logout(); navigate('/login'); };
@@ -77,13 +87,31 @@ export const AdminLayout: React.FC = () => {
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'booking': return '📅';
-      case 'message': return '✉️';
-      case 'comment': return '💬';
-      case 'property': return '🏠';
-      default: return '🔔';
+      case 'booking': return <CalendarDays className="w-5 h-5 text-blue-500" />;
+      case 'message': return <Mail className="w-5 h-5 text-indigo-500" />;
+      case 'comment': return <MessageSquare className="w-5 h-5 text-teal-500" />;
+      case 'property': return <Building className="w-5 h-5 text-[var(--primary)]" />;
+      case 'transaction': return <Wallet className="w-5 h-5 text-green-500" />;
+      case 'user': return <User className="w-5 h-5 text-purple-500" />;
+      default: return <CircleAlert className="w-5 h-5 text-orange-500" />;
     }
   };
+
+  const getNotificationBg = (type: string) => {
+    switch (type) {
+      case 'booking': return 'bg-blue-500/10 border-blue-500/20';
+      case 'message': return 'bg-indigo-500/10 border-indigo-500/20';
+      case 'comment': return 'bg-teal-500/10 border-teal-500/20';
+      case 'property': return 'bg-[var(--primary)]/10 border-[var(--primary)]/20';
+      case 'transaction': return 'bg-green-500/10 border-green-500/20';
+      case 'user': return 'bg-purple-500/10 border-purple-500/20';
+      default: return 'bg-orange-500/10 border-orange-500/20';
+    }
+  };
+
+  const filteredNotifications = activeTab === 'all' 
+    ? notifications 
+    : notifications.filter(n => n.type === activeTab || (activeTab === 'system' && ['system', 'transaction', 'user'].includes(n.type)));
 
   return (
     <div className="min-h-screen bg-[var(--background)] flex overflow-hidden">
@@ -225,37 +253,86 @@ export const AdminLayout: React.FC = () => {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.96 }}
                     transition={{ duration: 0.15 }}
-                    className={`absolute ${isRtl ? 'left-0' : 'right-0'} top-12 w-80 bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-xl overflow-hidden z-50`}
+                    className={`absolute ${isRtl ? 'left-0' : 'right-0'} top-12 w-[340px] sm:w-[400px] bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-xl overflow-hidden z-50`}
                   >
-                    <div className="flex items-center justify-between p-4 border-b border-[var(--border)]">
-                      <h3 className="font-bold text-[var(--foreground)] text-sm">
-                        {language === 'en' ? 'Notifications' : 'الإشعارات'}
-                      </h3>
-                      <span className="text-xs text-[var(--text-secondary)]">
-                        {language === 'en' ? 'All caught up ✓' : 'تم قراءة الكل ✓'}
-                      </span>
+                    <div className="flex flex-col border-b border-[var(--border)]">
+                      <div className="flex items-center justify-between p-4">
+                        <h3 className="font-bold text-[var(--foreground)] flex items-center gap-2">
+                          {language === 'en' ? 'Notifications' : 'الإشعارات'}
+                          {unreadCount > 0 && (
+                            <span className="bg-[var(--primary)] text-white text-[10px] px-2 py-0.5 rounded-full">
+                              {unreadCount} {language === 'en' ? 'New' : 'جديد'}
+                            </span>
+                          )}
+                        </h3>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setShowNotifications(false); }}
+                          className="p-1 text-[var(--text-secondary)] hover:bg-[var(--secondary)] rounded-md transition-colors"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      
+                      {/* Tabs */}
+                      <div className="flex px-2 pb-2 gap-1 overflow-x-auto scrollbar-hide">
+                        {(['all', 'property', 'booking', 'system'] as const).map(tab => (
+                          <button
+                            key={tab}
+                            onClick={(e) => { e.stopPropagation(); setActiveTab(tab); }}
+                            className={`px-3 py-1.5 text-xs font-semibold rounded-lg whitespace-nowrap transition-colors ${
+                              activeTab === tab 
+                                ? 'bg-[var(--primary)]/10 text-[var(--primary)]' 
+                                : 'text-[var(--text-secondary)] hover:bg-[var(--secondary)]'
+                            }`}
+                          >
+                            {tab === 'all' && (language === 'en' ? 'All' : 'الكل')}
+                            {tab === 'property' && (language === 'en' ? 'Properties' : 'عقارات')}
+                            {tab === 'booking' && (language === 'en' ? 'Bookings' : 'حجوزات')}
+                            {tab === 'system' && (language === 'en' ? 'System' : 'نظام ومالية')}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <div className="max-h-72 overflow-y-auto">
-                      {notifications.length === 0 ? (
-                        <div className="p-8 text-center text-[var(--text-secondary)] text-sm">
-                          {language === 'en' ? 'No notifications yet' : 'لا توجد إشعارات بعد'}
+
+                    <div className="max-h-[360px] overflow-y-auto custom-scrollbar">
+                      {filteredNotifications.length === 0 ? (
+                        <div className="p-10 text-center flex flex-col items-center justify-center gap-3">
+                          <div className="w-12 h-12 rounded-full bg-[var(--secondary)] flex items-center justify-center">
+                            <CheckCheck className="w-6 h-6 text-[var(--text-secondary)] opacity-50" />
+                          </div>
+                          <p className="text-[var(--text-secondary)] text-sm font-medium">
+                            {language === 'en' ? 'You are all caught up!' : 'لا توجد إشعارات حالياً'}
+                          </p>
                         </div>
                       ) : (
-                        notifications.map(n => (
+                        filteredNotifications.map(n => (
                           <button
                             key={n.id}
                             onClick={() => handleNotificationClick(n)}
-                            className="w-full text-left p-3 hover:bg-[var(--secondary)] transition-colors border-b border-[var(--border)] last:border-0"
+                            className={`w-full text-left p-4 hover:bg-[var(--secondary)] transition-all border-b border-[var(--border)] last:border-0 relative ${!n.isRead ? 'bg-[var(--primary)]/[0.02]' : ''}`}
                           >
+                            {!n.isRead && (
+                              <span className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--primary)] rounded-r-full" />
+                            )}
                             <div className="flex items-start gap-3">
-                              <span className="text-lg mt-0.5">{getNotificationIcon(n.type)}</span>
+                              <div className={`p-2.5 rounded-xl border shrink-0 ${getNotificationBg(n.type)}`}>
+                                {getNotificationIcon(n.type)}
+                              </div>
                               <div className="flex-1 min-w-0">
-                                <p className="text-sm truncate text-[var(--foreground)]">
+                                <p className={`text-sm mb-1 ${!n.isRead ? 'font-bold text-[var(--foreground)]' : 'font-medium text-[var(--foreground)]/90'}`}>
                                   {n.title}
                                 </p>
-                                <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">{n.body}</p>
-                                <p className="text-[10px] text-[var(--text-secondary)] mt-1">
-                                  {new Date(n.createdAt).toLocaleString(language === 'ar' ? 'ar-EG-u-ca-gregory-nu-latn' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                <p className="text-xs text-[var(--text-secondary)] leading-relaxed line-clamp-2">
+                                  {n.body}
+                                </p>
+                                <p className="text-[11px] font-medium text-[var(--text-secondary)]/80 mt-2 flex items-center gap-1">
+                                  <Clock className="w-3 h-3" />
+                                  <span className="ltr-content">
+                                    {formatDistanceToNow(new Date(n.createdAt), { 
+                                      addSuffix: true,
+                                      locale: language === 'ar' ? ar : enUS
+                                    })}
+                                  </span>
                                 </p>
                               </div>
                             </div>

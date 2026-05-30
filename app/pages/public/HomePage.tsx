@@ -234,7 +234,7 @@ export const HomePage: React.FC = () => {
                     </div>
                     <button
                       onClick={(e) => toggleSaveProperty(property.id || property._id || '', e)}
-                      className="absolute end-3 top-3 z-10 p-2 rounded-full bg-[var(--card)]/80 hover:bg-[var(--card)] text-[var(--text-secondary)] hover:text-red-500 backdrop-blur shadow-md transition-all active:scale-95"
+                      className="absolute end-3 top-3 z-10 px-2.5 py-1.5 flex items-center gap-1.5 rounded-full bg-[var(--card)]/80 hover:bg-[var(--card)] text-[var(--text-secondary)] hover:text-red-500 backdrop-blur shadow-md transition-all active:scale-95"
                       aria-label="Save Property"
                     >
                       <Heart
@@ -244,6 +244,7 @@ export const HomePage: React.FC = () => {
                             : ""
                         }`}
                       />
+                      <span className="text-xs font-bold leading-none mt-[1px]">{property.likes || 0}</span>
                     </button>
                     <div className="absolute bottom-3 right-3 z-10">
                       <span className="px-3 py-1.5 bg-[var(--accent)] text-[var(--accent-foreground)] text-sm font-bold rounded-lg shadow-lg">{formatEGPShort(property.price)}</span>
