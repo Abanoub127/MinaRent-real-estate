@@ -1,7 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
-  ChevronLeft,
-  ChevronRight,
   Search,
   X,
   Plus,
@@ -13,8 +11,6 @@ import {
   Settings,
   MoreHorizontal,
   TrendingUp,
-  MessageSquare,
-  Filter,
 } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 import {
@@ -42,14 +38,14 @@ interface DayRow {
 type FilterStatus = 'all' | 'confirmed' | 'pending' | 'cancelled' | 'available';
 
 export const ReservationsTimelineApp: React.FC = () => {
-  const { language, isRtl } = useApp();
+  const { language } = useApp();
   const [properties, setProperties] = useState<Property[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
   // State management
-  const [currentDate, setCurrentDate] = useState<Date>(new Date(2026, 4, 30)); // Today
-  const [viewDaysCount, setViewDaysCount] = useState(30); // Show 30 days
+  const [currentDate] = useState<Date>(new Date(2026, 4, 30)); // Today
+  const [viewDaysCount] = useState(30); // Show 30 days
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
@@ -189,14 +185,6 @@ export const ReservationsTimelineApp: React.FC = () => {
   };
 
   // Format date for display
-  const formatDateShort = (date: Date) => {
-    const options: Intl.DateTimeFormatOptions = {
-      month: 'short',
-      day: 'numeric',
-    };
-    return date.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', options);
-  };
-
   const isToday = (date: Date) => {
     const today = new Date(2026, 4, 30); // Your current date
     return (
@@ -377,7 +365,7 @@ export const ReservationsTimelineApp: React.FC = () => {
                 const status = getCellStatus(date, property);
 
                 return (
-                  <div
+                  <button
                     key={`${date.toISOString()}-${property._id}`}
                     className={`w-32 flex-shrink-0 px-2 py-3 border-r border-gray-200 ${getStatusBgColor(
                       status

@@ -7,7 +7,6 @@ import {
   Settings2,
   Search,
   Calendar,
-  ChevronLeft,
   ChevronRight,
   Plus,
   X,
@@ -18,7 +17,6 @@ import {
   MoreVertical,
   Home,
   Building2,
-  MessageSquare,
   TrendingUp,
 } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
@@ -35,12 +33,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 type FilterStatus = 'all' | 'confirmed' | 'pending' | 'cancelled' | 'available';
 
 export const ResponsiveTimelineApp: React.FC = () => {
-  const { language, isRtl } = useApp();
+  const { language } = useApp();
   const [properties, setProperties] = useState<Property[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
-  const [currentDate, setCurrentDate] = useState<Date>(new Date(2026, 4, 1));
+  const [currentDate] = useState<Date>(new Date(2026, 4, 1));
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
@@ -49,7 +47,6 @@ export const ResponsiveTimelineApp: React.FC = () => {
 
   const gridBodyRef = useRef<HTMLDivElement>(null);
   const propertyHeaderRef = useRef<HTMLDivElement>(null);
-  const horizontalScrollRef = useRef<HTMLDivElement>(null);
 
   // Fetch data
   const fetchData = async () => {

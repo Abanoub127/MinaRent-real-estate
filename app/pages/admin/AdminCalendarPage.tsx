@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { ChevronLeft, ChevronRight, Search, CalendarDays, DollarSign, User, Phone, CheckCircle2, Clock, Ban, Trash2, X, Calendar, LayoutGrid } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Search, CalendarDays, User, Phone, CheckCircle2, Clock, Ban, Trash2, X, Calendar, LayoutGrid } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 import { getProperties, getBookings, deleteBooking, Property, Booking, formatEGP, formatDate } from '../../../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
