@@ -21,6 +21,7 @@ const AdminCalendarPage = lazy(() => import('./pages/admin/AdminCalendarPage').t
 const AdminCommentsPage = lazy(() => import('./pages/admin/AdminCommentsPage').then(m => ({ default: m.AdminCommentsPage })));
 const MessagesPage = lazy(() => import('./pages/admin/MessagesPage').then(m => ({ default: m.MessagesPage })));
 const ReservationsTimelineApp = lazy(() => import('./pages/admin/ReservationsTimelineApp').then(m => ({ default: m.ReservationsTimelineApp })));
+const ResponsiveTimelineApp = lazy(() => import('./pages/admin/ResponsiveTimelineApp').then(m => ({ default: m.ResponsiveTimelineApp })));
 
 // Loading fallback
 const PageLoader = () => (
@@ -69,6 +70,7 @@ export const router = createBrowserRouter([
       { path: 'settings', element: <SuspenseWrap><SettingsPage /></SuspenseWrap> },
       { path: 'calendar', element: <SuspenseWrap><AdminCalendarPage /></SuspenseWrap> },
       { path: 'timeline', element: <SuspenseWrap><ReservationsTimelineApp /></SuspenseWrap> },
+      { path: 'timeline-responsive', element: <SuspenseWrap><ResponsiveTimelineApp /></SuspenseWrap> },
       { path: 'testimonials', element: <SuspenseWrap><AdminCommentsPage /></SuspenseWrap> },
     ],
   },
