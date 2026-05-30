@@ -97,26 +97,26 @@
 }
 
 .dark {
-  --background: #080E1F;
-  --foreground: #E3ECF8;
-  --card: #0B1437;
-  --card-foreground: #E3ECF8;
-  --popover: #0B1437;
-  --popover-foreground: #E3ECF8;
+  --background: #020617; /* Slate 950 */
+  --foreground: #F8FAFC;
+  --card: #0F172A; /* Slate 900 */
+  --card-foreground: #F8FAFC;
+  --popover: #0F172A;
+  --popover-foreground: #F8FAFC;
   --primary: #5A7FCC;
   --primary-light: #8BA8E0;
-  --primary-foreground: #080E1F;
-  --secondary: #111C44;
-  --secondary-foreground: #E3ECF8;
-  --muted: #111C44;
-  --muted-foreground: #8BA8E0;
+  --primary-foreground: #020617;
+  --secondary: #1E293B; /* Slate 800 */
+  --secondary-foreground: #F8FAFC;
+  --muted: #1E293B;
+  --muted-foreground: #94A3B8; /* Slate 400 */
   --accent: #D4B96A;
-  --accent-foreground: #080E1F;
+  --accent-foreground: #020617;
   --destructive: #EF4444;
   --destructive-foreground: #FEE2E2;
-  --border: #1B2B5B;
-  --input: #111C44;
-  --input-background: #0D1A3A;
+  --border: #1E293B;
+  --input: #1E293B;
+  --input-background: #0F172A;
   --switch-background: #1B2B5B;
   --text-secondary: #8BA8E0;
 
@@ -195,11 +195,24 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: 'Cairo', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
     max-width: 100vw;
+    
+    /* Anti-copy measures */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  /* Anti-screenshot/print measure: Hide content when printing */
+  @media print {
+    body {
+      display: none !important;
+    }
   }
 
   html {
@@ -210,7 +223,7 @@
   }
 
   h1 {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Cairo', 'Inter', sans-serif;
     font-size: var(--text-2xl);
     font-weight: 700;
     line-height: 1.3;
@@ -218,7 +231,7 @@
   }
 
   h2 {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Cairo', 'Inter', sans-serif;
     font-size: var(--text-xl);
     font-weight: 700;
     line-height: 1.35;
@@ -480,4 +493,87 @@
 }
 .page-enter {
   animation: pageEnter 0.4s ease-out;
+}
+
+/* ── RTL Support Utilities ── */
+.ltr-always {
+  direction: ltr !important;
+  unicode-bidi: embed;
+}
+.ltr-isolate {
+  direction: ltr !important;
+  unicode-bidi: isolate;
+}
+
+/* Keep brand names in correct order */
+[dir="rtl"] .brand-name {
+  direction: ltr;
+  display: inline-block;
+}
+
+/* Phone, email, URL — always LTR */
+[dir="rtl"] .ltr-content {
+  direction: ltr;
+  unicode-bidi: embed;
+  text-align: left;
+}
+
+/* ── Mobile Responsive Improvements ── */
+
+/* Consistent button sizing on mobile */
+@media (max-width: 639px) {
+  .btn-mobile-full {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Prevent horizontal overflow globally */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Tables: horizontal scroll wrapper on mobile */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Cards: prevent content overflow */
+.card-safe {
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* ── Mobile-First Breakpoint Helpers ── */
+@media (max-width: 479px) {
+  /* Extra small devices */
+  .xs-stack {
+    flex-direction: column !important;
+  }
+  .xs-full {
+    width: 100% !important;
+  }
+  .xs-text-sm {
+    font-size: 0.8125rem !important;
+  }
+}
+
+@media (max-width: 639px) {
+  /* Small devices */
+  .sm-stack {
+    flex-direction: column !important;
+  }
+  .sm-full {
+    width: 100% !important;
+  }
+}
+
+/* ── Consistent Interactive Element Sizing ── */
+@media (max-width: 639px) {
+  /* Ensure touch targets are at least 44px */
+  button, [role="button"], a {
+    min-height: 36px;
+  }
 }

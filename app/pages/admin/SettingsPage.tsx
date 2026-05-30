@@ -322,7 +322,7 @@ const notificationLabels: Record<
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+      <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
         {language === 'en'
           ? 'Settings'
           : 'الإعدادات'}
@@ -330,7 +330,7 @@ const notificationLabels: Record<
 
       {/* Profile Settings */}
       <Card>
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
               <User className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -355,7 +355,7 @@ const notificationLabels: Record<
             onSubmit={handleProfileSubmit}
             className="space-y-4"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
                 name="name"
                 label={
@@ -421,7 +421,7 @@ const notificationLabels: Record<
 
       {/* Password Settings */}
       <Card>
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
               <Lock className="w-6 h-6 text-purple-600 dark:text-purple-400" />
@@ -464,7 +464,7 @@ const notificationLabels: Record<
               required
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input
                 name="newPassword"
                 label={
@@ -513,7 +513,7 @@ const notificationLabels: Record<
 
       {/* Appearance */}
       <Card>
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
               {theme === 'light' ? (
@@ -594,7 +594,7 @@ const notificationLabels: Record<
 
       {/* Notifications */}
       <Card>
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
               <Bell className="w-6 h-6 text-green-600 dark:text-green-400" />

@@ -34,8 +34,8 @@ export const DashboardPage: React.FC = () => {
   return (
     <motion.div variants={cV} initial="hidden" animate="visible" className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div><h1 className="text-2xl font-bold text-[var(--foreground)]">{language==='en'?'Overview':'نظرة عامة'}</h1><p className="text-[var(--text-secondary)] text-sm mt-0.5">{language==='en'?'Here is what is happening with your properties today.':'إليك ما يحدث مع عقاراتك اليوم.'}</p></div>
-        <span className="px-4 py-2 bg-[var(--secondary)] text-[var(--primary)] font-semibold rounded-xl text-sm">{new Date().toLocaleDateString(language==='ar'?'ar-EG':'en-US',{month:'long',year:'numeric'})}</span>
+        <div><h1 className="text-xl sm:text-2xl font-bold text-[var(--foreground)]">{language==='en'?'Overview':'نظرة عامة'}</h1><p className="text-[var(--text-secondary)] text-xs sm:text-sm mt-0.5">{language==='en'?'Here is what is happening with your properties today.':'إليك ما يحدث مع عقاراتك اليوم.'}</p></div>
+        <span className="px-4 py-2 bg-[var(--secondary)] text-[var(--primary)] font-semibold rounded-xl text-sm">{new Date().toLocaleDateString(language==='ar'?'ar-EG-u-ca-gregory-nu-latn':'en-US',{month:'long',year:'numeric'})}</span>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -52,9 +52,9 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       <div className="grid lg:grid-cols-3 gap-5">
-        <motion.div variants={iV} className="lg:col-span-2 bg-[var(--card)] p-6 rounded-2xl border border-[var(--border)] shadow-sm">
+        <motion.div variants={iV} className="lg:col-span-2 bg-[var(--card)] p-4 sm:p-6 rounded-2xl border border-[var(--border)] shadow-sm">
           <h3 className="text-lg font-bold text-[var(--foreground)] mb-4">{t('dashboard.revenueChart')}</h3>
-          <div className="h-[280px] w-full"><ResponsiveContainer width="100%" height="100%"><AreaChart data={stats.monthlyRevenueData||[]} margin={{top:10,right:10,left:0,bottom:0}}>
+          <div className="h-[220px] sm:h-[280px] w-full"><ResponsiveContainer width="100%" height="100%"><AreaChart data={stats.monthlyRevenueData||[]} margin={{top:10,right:10,left:0,bottom:0}}>
             <defs><linearGradient id="cr" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/><stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/></linearGradient></defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)"/>
             <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill:'var(--text-secondary)',fontSize:12}} dy={10}/>
@@ -63,7 +63,7 @@ export const DashboardPage: React.FC = () => {
             <Area type="monotone" dataKey="revenue" stroke="var(--primary)" strokeWidth={2.5} fillOpacity={1} fill="url(#cr)"/>
           </AreaChart></ResponsiveContainer></div>
         </motion.div>
-        <motion.div variants={iV} className="bg-[var(--card)] p-6 rounded-2xl border border-[var(--border)] shadow-sm flex flex-col">
+        <motion.div variants={iV} className="bg-[var(--card)] p-4 sm:p-6 rounded-2xl border border-[var(--border)] shadow-sm flex flex-col">
           <h3 className="text-lg font-bold text-[var(--foreground)] mb-5">{language==='en'?'Booking Status':'حالة الحجوزات'}</h3>
           <div className="flex-1 flex flex-col justify-center gap-4">
             <div className="flex items-center justify-between p-4 bg-[var(--secondary)] rounded-xl"><div className="flex items-center gap-3"><div className="w-10 h-10 rounded-full bg-[var(--primary)]/10 flex items-center justify-center"><CheckCircle className="w-5 h-5 text-[var(--primary)]"/></div><span className="font-semibold text-[var(--foreground)] text-sm">{language==='en'?'Confirmed':'مؤكدة'}</span></div><span className="text-xl font-bold text-[var(--primary)]">{stats.confirmedBookings}</span></div>
@@ -74,11 +74,11 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-5">
-        <motion.div variants={iV} className="bg-[var(--card)] p-6 rounded-2xl border border-[var(--border)] shadow-sm">
+        <motion.div variants={iV} className="bg-[var(--card)] p-4 sm:p-6 rounded-2xl border border-[var(--border)] shadow-sm">
           <h3 className="text-lg font-bold text-[var(--foreground)] mb-5">{language==='en'?'Recent Properties':'أحدث العقارات'}</h3>
           <div className="space-y-3">{recentProperties.map(p=>(<div key={p.id} className="flex items-center gap-4 p-3 hover:bg-[var(--secondary)] rounded-xl transition-colors"><img src={p.images[0]||''} alt="" className="w-14 h-14 rounded-lg object-cover" loading="lazy"/><div className="flex-1 min-w-0"><h4 className="font-bold text-[var(--foreground)] text-sm truncate">{language==='en'?p.title:p.titleAr}</h4><p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">{language==='en'?p.location:p.locationAr}</p></div><span className="font-bold text-[var(--primary)] text-sm">{formatEGPShort(p.price)}</span></div>))}</div>
         </motion.div>
-        <motion.div variants={iV} className="bg-[var(--card)] p-6 rounded-2xl border border-[var(--border)] shadow-sm">
+        <motion.div variants={iV} className="bg-[var(--card)] p-4 sm:p-6 rounded-2xl border border-[var(--border)] shadow-sm">
           <h3 className="text-lg font-bold text-[var(--foreground)] mb-5">{language==='en'?'Recent Bookings':'أحدث الحجوزات'}</h3>
           <div className="space-y-3">{recentBookings.map(b=>(<div key={b.id} className="flex items-center gap-4 p-3 hover:bg-[var(--secondary)] rounded-xl transition-colors"><div className="w-10 h-10 rounded-full bg-[var(--primary)]/10 flex items-center justify-center shrink-0"><Users className="w-5 h-5 text-[var(--primary)]"/></div><div className="flex-1 min-w-0"><h4 className="font-bold text-[var(--foreground)] text-sm truncate">{typeof b.clientId==='object'&&b.clientId!==null?b.clientId.name:'Client'}</h4><p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">{typeof b.propertyId==='object'&&b.propertyId!==null?(language==='en'?b.propertyId.title:b.propertyId.titleAr):'Property'}</p></div><span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${b.status==='confirmed'?'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':b.status==='pending'?'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400':'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>{language==='en'?b.status:(b.status==='confirmed'?'مؤكد':b.status==='pending'?'قيد الانتظار':'ملغى')}</span></div>))}{recentBookings.length===0&&<div className="text-center py-8 text-[var(--text-secondary)] text-sm">{language==='en'?'No recent bookings.':'لا توجد حجوزات.'}</div>}</div>
         </motion.div>

@@ -36,7 +36,7 @@ export const ContactPage: React.FC = () => {
   return (
     <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="mx-auto max-w-7xl px-4 py-8 w-full page-enter">
       <div className="text-center mb-12">
-        <h1 className="text-3xl md:text-4xl font-bold text-[var(--foreground)] tracking-tight">{t('contact.title')}</h1>
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--foreground)] tracking-tight">{t('contact.title')}</h1>
         <p className="mt-3 text-[var(--text-secondary)] max-w-lg mx-auto">{language === 'en' ? 'Have a question? We\'d love to hear from you.' : 'لديك سؤال؟ يسعدنا سماع رأيك.'}</p>
       </div>
 
@@ -50,14 +50,14 @@ export const ContactPage: React.FC = () => {
               </div>
               <div>
                 <p className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide">{language === 'en' ? info.labelEn : info.labelAr}</p>
-                <p className="text-sm font-bold text-[var(--foreground)] mt-1" dir={info.icon === Phone ? 'ltr' : undefined}>{language === 'en' ? info.valueEn : info.valueAr}</p>
+                <p className="text-sm font-bold text-[var(--foreground)] mt-1 ltr-content">{language === 'en' ? info.valueEn : info.valueAr}</p>
               </div>
             </motion.div>
           ))}
         </div>
 
         {/* Form */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="lg:col-span-3 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-8 shadow-sm">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="lg:col-span-3 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-8 shadow-sm">
           <h2 className="text-xl font-bold text-[var(--foreground)] mb-6">{language === 'en' ? 'Send us a message' : 'أرسل لنا رسالة'}</h2>
 
           <AnimatePresence>

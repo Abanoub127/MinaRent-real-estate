@@ -183,7 +183,7 @@ export const PublicLayout: React.FC = () => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="fixed bottom-8 right-8 z-40 p-3 bg-[var(--primary)] text-white rounded-xl shadow-lg shadow-[var(--primary)]/25 hover:shadow-xl hover:-translate-y-1 transition-all"
+            className={`fixed bottom-8 ${isRtl ? 'left-8' : 'right-8'} z-40 p-3 bg-[var(--primary)] text-white rounded-xl shadow-lg shadow-[var(--primary)]/25 hover:shadow-xl hover:-translate-y-1 transition-all`}
             aria-label="Scroll to top"
           >
             <ArrowUp className="w-5 h-5" />
@@ -231,15 +231,15 @@ export const PublicLayout: React.FC = () => {
               <ul className="space-y-3">
                 <li className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
                   <Phone className="w-4 h-4 text-[var(--accent)] shrink-0" />
-                  <span dir="ltr">01279229000</span>
+                  <span className="ltr-content">01279229000</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
                   <Phone className="w-4 h-4 text-[var(--accent)] shrink-0" />
-                  <span dir="ltr">+20 10 65655100</span>
+                  <span className="ltr-content">+20 10 65655100</span>
                 </li>
                 <li className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
                   <Mail className="w-4 h-4 text-[var(--accent)] shrink-0" />
-                  <span className="break-all">minarent23@gmail.com</span>
+                  <span className="ltr-content break-all">minarent23@gmail.com</span>
                 </li>
               </ul>
             </div>

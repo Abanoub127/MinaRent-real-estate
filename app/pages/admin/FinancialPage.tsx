@@ -30,7 +30,7 @@ import {
   Tooltip,
 } from 'recharts';
 
-import { BASE_URL as API } from '../../../services/api';
+import { BASE_URL as API, formatDate } from '../../../services/api';
 
 const authHeaders = () => {
   const token = localStorage.getItem('token');
@@ -245,14 +245,14 @@ export const FinancialPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
           {t('admin.financial')}
         </h1>
 
         <Button
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-2"
+          className="flex items-center justify-center gap-2 w-full sm:w-auto"
         >
           <Plus className="w-5 h-5" />
 
@@ -263,8 +263,8 @@ export const FinancialPage: React.FC = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+        <Card className="p-4 sm:p-6">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
@@ -288,7 +288,7 @@ export const FinancialPage: React.FC = () => {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
@@ -312,7 +312,7 @@ export const FinancialPage: React.FC = () => {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
@@ -474,9 +474,7 @@ export const FinancialPage: React.FC = () => {
                           {transaction.category}{' '}
                           •{' '}
                           {transaction.date
-                            ? new Date(
-                                transaction.date,
-                              ).toLocaleDateString()
+                            ? formatDate(transaction.date, language)
                             : '—'}
                         </p>
                       </div>

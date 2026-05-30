@@ -3,7 +3,7 @@ import { Link } from "react-router";
 import { Heart, Bed, Bath, Maximize, MapPin, Search as SearchIcon, SlidersHorizontal, Eye, ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
 import { motion } from "framer-motion";
 import { useApp } from "../../contexts/AppContext";
-import { getProperties, Property, formatEGPShort, PropertiesResponse } from "../../../services/api";
+import { getProperties, Property, formatEGPShort, PropertiesResponse, togglePropertyLike } from "../../../services/api";
 import { ProtectedImage } from "../../components/ProtectedImage";
 
 const TYPES = [
@@ -38,18 +38,26 @@ export const PropertiesPage: React.FC = () => {
     setSavedProperties(saved);
   }, []);
 
-  const toggleSaveProperty = (propId: string, e: React.MouseEvent) => {
+  const toggleSaveProperty = async (propId: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     const saved = JSON.parse(localStorage.getItem("savedProperties") || "[]");
+    const isSaved = saved.includes(propId);
     let newSaved;
-    if (saved.includes(propId)) {
+    if (isSaved) {
       newSaved = saved.filter((id: string) => id !== propId);
     } else {
       newSaved = [...saved, propId];
     }
     localStorage.setItem("savedProperties", JSON.stringify(newSaved));
     setSavedProperties(newSaved);
+    
+    // Call backend to update likes count
+    try {
+      await togglePropertyLike(propId, isSaved ? 'remove' : 'add');
+    } catch (error) {
+      console.error('Failed to toggle like on backend:', error);
+    }
   };
 
   const fetchProperties = async (page: number) => {
@@ -88,14 +96,14 @@ export const PropertiesPage: React.FC = () => {
   const locations = Array.from(new Set(properties.map((p) => language === 'en' ? p.location : p.locationAr).filter(Boolean)));
 
   const containerVariants = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };
-  const itemVariants = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } } };
+  const itemVariants = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } } };
 
   return (
     <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="mx-auto mt-6 mb-24 max-w-7xl px-4 w-full">
       <div className="flex flex-wrap items-end justify-between gap-4 mb-2">
         <div>
           <p className="text-sm font-semibold text-[var(--primary)] mb-1">{language === 'en' ? 'Explore' : 'استكشف'}</p>
-          <h1 className="text-3xl font-bold tracking-tight md:text-4xl text-[var(--foreground)]">{language === 'en' ? 'Find your next home' : 'ابحث عن منزلك القادم'}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight md:text-4xl text-[var(--foreground)]">{language === 'en' ? 'Find your next home' : 'ابحث عن منزلك القادم'}</h1>
           <p className="mt-1.5 text-sm text-[var(--text-secondary)]">{language === 'en' ? 'Browse curated listings across the city' : 'تصفح القوائم المنسقة عبر المدينة'}</p>
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto">

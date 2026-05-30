@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Mail, MailOpen, Reply, Trash2, Search, Filter, Send, X, Eye } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../../contexts/AppContext';
-import { getMessages, markMessageRead, markMessageUnread, replyToMessage, deleteMessage, Message, MessagesResponse } from '../../../services/api';
+import { getMessages, markMessageRead, markMessageUnread, replyToMessage, deleteMessage, Message, MessagesResponse, formatDateShort } from '../../../services/api';
 
 export const MessagesPage: React.FC = () => {
   const { language } = useApp();
@@ -84,7 +84,7 @@ export const MessagesPage: React.FC = () => {
                   <div className="flex items-start gap-3">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-sm font-bold ${m.status === 'unread' ? 'bg-[var(--primary)]/10 text-[var(--primary)]' : 'bg-[var(--secondary)] text-[var(--text-secondary)]'}`}>{m.senderName[0].toUpperCase()}</div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2"><span className={`text-sm truncate ${m.status === 'unread' ? 'font-bold text-[var(--foreground)]' : 'font-medium text-[var(--foreground)]'}`}>{m.senderName}</span><span className="text-[10px] text-[var(--text-secondary)] shrink-0">{new Date(m.createdAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric' })}</span></div>
+                      <div className="flex items-center justify-between gap-2"><span className={`text-sm truncate ${m.status === 'unread' ? 'font-bold text-[var(--foreground)]' : 'font-medium text-[var(--foreground)]'}`}>{m.senderName}</span><span className="text-[10px] text-[var(--text-secondary)] shrink-0">{formatDateShort(m.createdAt, language)}</span></div>
                       <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">{m.message}</p>
                       <span className={`inline-block mt-1.5 px-2 py-0.5 rounded text-[9px] font-bold uppercase ${statusColors[m.status] || ''}`}>{m.status}</span>
                     </div>
@@ -113,7 +113,7 @@ export const MessagesPage: React.FC = () => {
                   <button onClick={() => handleDelete(selected.id)} className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg text-red-500"><Trash2 className="w-4 h-4" /></button>
                 </div>
               </div>
-              <div className="text-xs text-[var(--text-secondary)] mb-3">{new Date(selected.createdAt).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US')}</div>
+              <div className="text-xs text-[var(--text-secondary)] mb-3" dir="ltr">{new Date(selected.createdAt).toLocaleString('en-US')}</div>
               <div className="bg-[var(--secondary)] p-4 rounded-xl text-sm text-[var(--foreground)] leading-relaxed whitespace-pre-wrap mb-5">{selected.message}</div>
               {selected.reply && (
                 <div className="mb-5"><p className="text-xs font-semibold text-[var(--text-secondary)] mb-2 flex items-center gap-1"><Reply className="w-3.5 h-3.5" /> {language === 'en' ? 'Your reply' : 'ردك'}</p><div className="bg-green-50 dark:bg-green-900/10 p-4 rounded-xl text-sm text-green-800 dark:text-green-300 leading-relaxed whitespace-pre-wrap">{selected.reply}</div></div>

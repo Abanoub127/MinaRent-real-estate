@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
-import { Search, MapPin, Home, Building2, Star, Users, Shield, ArrowRight, Send, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, MapPin, Home, Building2, Star, Users, Shield, ArrowRight, Send, TrendingUp, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../../contexts/AppContext';
-import { getProperties, getTestimonials, Property, Testimonial, formatEGPShort, createTestimonial } from '../../../services/api';
+import { getProperties, getTestimonials, Property, Testimonial, formatEGPShort, createTestimonial, togglePropertyLike } from '../../../services/api';
 import { MRLogo } from '../../components/ui/MRLogo';
 import { ProtectedImage } from '../../components/ProtectedImage';
 
@@ -25,7 +25,35 @@ export const HomePage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const testimonialsPerPage = 6;
 
-  useEffect(() => { fetchData(); }, []);
+  // Saved Properties
+  const [savedProperties, setSavedProperties] = useState<string[]>([]);
+
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("savedProperties") || "[]");
+    setSavedProperties(saved);
+    fetchData(); 
+  }, []);
+
+  const toggleSaveProperty = async (propId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const saved = JSON.parse(localStorage.getItem("savedProperties") || "[]");
+    const isSaved = saved.includes(propId);
+    let newSaved;
+    if (isSaved) {
+      newSaved = saved.filter((id: string) => id !== propId);
+    } else {
+      newSaved = [...saved, propId];
+    }
+    localStorage.setItem("savedProperties", JSON.stringify(newSaved));
+    setSavedProperties(newSaved);
+    
+    try {
+      await togglePropertyLike(propId, isSaved ? 'remove' : 'add');
+    } catch (error) {
+      console.error('Failed to toggle like on backend:', error);
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -53,7 +81,7 @@ export const HomePage: React.FC = () => {
   };
 
   const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
-  const itemVariants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } } };
+  const itemVariants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } } };
 
   // Pagination logic
   const totalPages = Math.ceil(testimonials.length / testimonialsPerPage);
@@ -201,10 +229,23 @@ export const HomePage: React.FC = () => {
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <ProtectedImage src={property.images[0] || 'https://via.placeholder.com/600x400?text=No+Image'} alt={property.title} containerClassName="w-full h-full" className="transform transition-transform duration-700 group-hover:scale-110" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="absolute top-3 left-3">
-                      <span className="px-3 py-1 bg-white/90 backdrop-blur text-[var(--foreground)] text-xs font-bold rounded-lg capitalize">{language === 'en' ? property.type : (property.type === 'villa' ? 'فيلا' : property.type === 'apartment' ? 'شقة' : property.type)}</span>
+                    <div className="absolute top-3 left-3 z-10 flex gap-2">
+                      <span className="px-3 py-1 bg-white/90 backdrop-blur text-[var(--foreground)] text-xs font-bold rounded-lg capitalize shadow-sm">{language === 'en' ? property.type : (property.type === 'villa' ? 'فيلا' : property.type === 'apartment' ? 'شقة' : property.type)}</span>
                     </div>
-                    <div className="absolute bottom-3 right-3">
+                    <button
+                      onClick={(e) => toggleSaveProperty(property.id || property._id || '', e)}
+                      className="absolute end-3 top-3 z-10 p-2 rounded-full bg-[var(--card)]/80 hover:bg-[var(--card)] text-[var(--text-secondary)] hover:text-red-500 backdrop-blur shadow-md transition-all active:scale-95"
+                      aria-label="Save Property"
+                    >
+                      <Heart
+                        className={`h-4 w-4 transition-colors ${
+                          savedProperties.includes(property.id || property._id || '')
+                            ? "fill-red-500 text-red-500"
+                            : ""
+                        }`}
+                      />
+                    </button>
+                    <div className="absolute bottom-3 right-3 z-10">
                       <span className="px-3 py-1.5 bg-[var(--accent)] text-[var(--accent-foreground)] text-sm font-bold rounded-lg shadow-lg">{formatEGPShort(property.price)}</span>
                     </div>
                   </div>

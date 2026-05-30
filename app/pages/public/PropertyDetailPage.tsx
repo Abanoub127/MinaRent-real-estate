@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router";
 import { Heart, Bed, Bath, Maximize, MapPin, Phone, MessageCircle, Star, Calendar, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useApp } from "../../contexts/AppContext";
-import { getPropertyById, Property, formatEGPShort, getTestimonials } from "../../../services/api";
+import { getPropertyById, Property, formatEGPShort, getTestimonials, togglePropertyLike } from "../../../services/api";
 import { ProtectedImage } from "../../components/ProtectedImage";
 
 export const PropertyDetailPage: React.FC = () => {
@@ -36,11 +36,12 @@ export const PropertyDetailPage: React.FC = () => {
       .catch(() => setLoading(false));
   }, [id]);
 
-  const toggleSave = () => {
+  const toggleSave = async () => {
     if (!id) return;
     const saved = JSON.parse(localStorage.getItem("savedProperties") || "[]");
+    const wasSaved = saved.includes(id);
     let newSaved;
-    if (saved.includes(id)) {
+    if (wasSaved) {
       newSaved = saved.filter((savedId: string) => savedId !== id);
       setIsSaved(false);
     } else {
@@ -48,6 +49,11 @@ export const PropertyDetailPage: React.FC = () => {
       setIsSaved(true);
     }
     localStorage.setItem("savedProperties", JSON.stringify(newSaved));
+    try {
+      await togglePropertyLike(id, wasSaved ? 'remove' : 'add');
+    } catch (error) {
+      console.error('Failed to toggle like on backend:', error);
+    }
   };
 
   if (loading) {
@@ -151,7 +157,7 @@ export const PropertyDetailPage: React.FC = () => {
           <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Spec icon={Bed} label={language === 'en' ? "Bedrooms" : "غرف النوم"} value={property.bedrooms} />
             <Spec icon={Bath} label={language === 'en' ? "Bathrooms" : "الحمامات"} value={property.bathrooms} />
-            <Spec icon={Maximize} label={language === 'en' ? "Size" : "المساحة"} value={`${property.size} ${language === 'en' ? 'sqft' : 'م²'}`} />
+            <Spec icon={Maximize} label={language === 'en' ? "Size" : "المساحة"} value={`${property.size} m²`} />
             <Spec icon={Calendar} label={language === 'en' ? "Status" : "الحالة"} value={language === 'en' ? property.status : (property.status === 'available' ? 'متاح' : property.status === 'sold' ? 'مباع' : 'مؤجر')} />
           </div>
 

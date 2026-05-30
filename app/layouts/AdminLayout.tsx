@@ -255,7 +255,7 @@ export const AdminLayout: React.FC = () => {
                                 </p>
                                 <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">{n.body}</p>
                                 <p className="text-[10px] text-[var(--text-secondary)] mt-1">
-                                  {new Date(n.createdAt).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                  {new Date(n.createdAt).toLocaleString(language === 'ar' ? 'ar-EG-u-ca-gregory-nu-latn' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                                 </p>
                               </div>
                             </div>
@@ -285,7 +285,7 @@ export const AdminLayout: React.FC = () => {
         )}
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-5 lg:p-8">
           <div className="max-w-7xl mx-auto">
             <Outlet />
           </div>

@@ -273,19 +273,19 @@ const fetchProperties = async () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('admin.properties')}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{t('admin.properties')}</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             {language === 'en' ? 'Manage your property listings' : 'إدارة قوائم العقارات'}
           </p>
         </div>
-        <Button onClick={() => handleOpenModal()} className="flex items-center gap-2">
+        <Button onClick={() => handleOpenModal()} className="flex items-center justify-center gap-2 w-full sm:w-auto">
           <Plus className="w-5 h-5" />
           {t('propertiesMgmt.add')}
         </Button>
       </div>
 
       {/* Search and Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
 
   <Input
     icon={<Search className="w-5 h-5" />}
@@ -460,22 +460,28 @@ const fetchProperties = async () => {
             <table className="w-full">
               <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
                     {language === 'en' ? 'Image' : 'الصورة'}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
                     {t('propertiesMgmt.title')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
                     {t('propertiesMgmt.price')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
                     {language === 'en' ? 'Location' : 'الموقع'}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
                     {t('propertiesMgmt.status')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
+                    {language === 'en' ? 'Views' : 'المشاهدات'}
+                  </th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
+                    {language === 'en' ? 'Likes' : 'الإعجابات'}
+                  </th>
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
                     {t('propertiesMgmt.actions')}
                   </th>
                 </tr>
@@ -533,6 +539,16 @@ const fetchProperties = async () => {
                   </SelectContent>
                 </Select>
               </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <div className="flex items-center justify-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white">
+                        <span className="text-blue-500">👁</span> {property.views || 0}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                      <div className="flex items-center justify-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white">
+                        <span className="text-red-500">❤️</span> {property.likes || 0}
+                      </div>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <button
@@ -558,7 +574,7 @@ const fetchProperties = async () => {
           </div>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {filteredProperties.map((property) => (
             <Card key={property.id} className="overflow-hidden">
               <div className="relative">
@@ -579,9 +595,15 @@ const fetchProperties = async () => {
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                   {language === 'en' ? property.location : property.locationAr}
                 </p>
-                <p className="text-lg font-bold text-blue-600 dark:text-blue-400 mb-3">
-                  {formatEGPShort(property.price)}
-                </p>
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                    {formatEGPShort(property.price)}
+                  </p>
+                  <div className="flex gap-3 text-xs font-bold text-gray-500 dark:text-gray-400">
+                    <span className="flex items-center gap-1"><span className="text-blue-500">👁</span> {property.views || 0}</span>
+                    <span className="flex items-center gap-1"><span className="text-red-500">❤️</span> {property.likes || 0}</span>
+                  </div>
+                </div>
                 <div className="flex gap-2">
                   <Button variant="secondary" size="sm" onClick={() => handleOpenModal(property)} className="flex-1">
                     <Edit className="w-4 h-4 mr-1" />
@@ -651,7 +673,7 @@ const fetchProperties = async () => {
           onSubmit={handleSubmit}
           className="space-y-4"
         >
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label={language === 'en' ? 'Title (English)' : 'العنوان (إنجليزي)'}
               value={formData.title}
@@ -664,7 +686,7 @@ const fetchProperties = async () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <TextArea
               name="description"
               label={language === 'en' ? 'Description (English)' : 'الوصف (إنجليزي)'}
@@ -692,7 +714,7 @@ const fetchProperties = async () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label={language === 'en' ? 'Price (EGP)' : 'السعر (ج.م)'}
               type="number"
@@ -707,7 +729,7 @@ const fetchProperties = async () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label={language === 'en' ? 'Location (English)' : 'الموقع (إنجليزي)'}
               value={formData.location}
@@ -720,7 +742,7 @@ const fetchProperties = async () => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Property Type */}
             <div>
               <label className="text-sm mb-1 block">
@@ -794,7 +816,7 @@ const fetchProperties = async () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="grid grid-cols-2 gap-4">
               <Input
                 label={language === 'en' ? 'Bedrooms' : 'غرف النوم'}

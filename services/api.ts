@@ -13,6 +13,43 @@ export const formatEGPShort = (amount: number): string => {
   return `${amount} EGP`;
 };
 
+// ================== Date Formatting ==================
+// Forces Gregorian calendar + Latin numerals in ALL locales to prevent
+// Arabic locale from using Hijri calendar or Arabic-Indic numerals.
+
+export const formatDate = (
+  dateStr: string | Date,
+  language: 'en' | 'ar',
+  options?: Intl.DateTimeFormatOptions
+): string => {
+  const date = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
+  if (isNaN(date.getTime())) return '—';
+  const locale = language === 'ar' ? 'ar-EG-u-ca-gregory-nu-latn' : 'en-US';
+  const defaultOptions: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    ...options,
+  };
+  return date.toLocaleDateString(locale, defaultOptions);
+};
+
+export const formatDateShort = (
+  dateStr: string | Date,
+  language: 'en' | 'ar',
+  options?: Intl.DateTimeFormatOptions
+): string => {
+  const date = typeof dateStr === 'string' ? new Date(dateStr) : dateStr;
+  if (isNaN(date.getTime())) return '—';
+  const locale = language === 'ar' ? 'ar-EG-u-ca-gregory-nu-latn' : 'en-US';
+  const defaultOptions: Intl.DateTimeFormatOptions = {
+    month: 'short',
+    day: 'numeric',
+    ...options,
+  };
+  return date.toLocaleDateString(locale, defaultOptions);
+};
+
 // ================== Types ==================
 export type PropertyType =
   | 'apartment'
@@ -47,6 +84,8 @@ export type Property = {
   lng?: number;
   featured?: boolean;
   views?: number;
+  likes?: number;
+  color?: string;
   createdAt?: string;
 };
 
@@ -265,6 +304,14 @@ export const updateProperty = async (id: string, propertyData: FormData) => {
 
 export const deleteProperty = async (id: string) => {
   return apiFetch(`${BASE_URL}/properties/${id}`, { method: 'DELETE' });
+};
+
+export const togglePropertyLike = async (id: string, action: 'add' | 'remove') => {
+  return apiFetch(`${BASE_URL}/properties/${id}/like`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action }),
+  });
 };
 
 // ================== Testimonials ==================

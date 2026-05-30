@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from '../../components/ui/Select';
 
-import { BASE_URL as API } from '../../../services/api';
+import { BASE_URL as API, formatDate } from '../../../services/api';
 
 const authHeaders = () => ({
   'Content-Type': 'application/json',
@@ -192,21 +192,21 @@ if (editingBooking) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('admin.bookings')}</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{t('admin.bookings')}</h1>
+          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
             {language === 'en' ? 'Manage property viewings and appointments' : 'إدارة معاينات وحجوزات العقارات'}
           </p>
         </div>
-        <Button onClick={() => handleOpenModal()} className="flex items-center gap-2">
+        <Button onClick={() => handleOpenModal()} className="flex items-center justify-center gap-2 w-full sm:w-auto">
           <Plus className="w-5 h-5" />
           {language === 'en' ? 'Add Booking' : 'إضافة حجز'}
         </Button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
         {(['pending', 'confirmed', 'cancelled'] as BookingStatus[]).map((s) => {
           const colors = {
             pending: 'yellow',
@@ -217,7 +217,7 @@ if (editingBooking) {
           const Icon = icons[s];
           const color = colors[s];
           return (
-            <Card key={s} className="p-6">
+            <Card key={s} className="p-4 sm:p-6">
               <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 bg-${color}-100 dark:bg-${color}-900 rounded-lg flex items-center justify-center`}>
                   <Icon className={`w-6 h-6 text-${color}-600 dark:text-${color}-400`} />
@@ -249,7 +249,7 @@ if (editingBooking) {
                   language === 'en' ? 'Status' : 'الحالة',
                   language === 'en' ? 'Actions' : 'الإجراءات',
                 ].map((h) => (
-                  <th key={h} className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
+                  <th key={h} className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase whitespace-nowrap">
                     {h}
                   </th>
                 ))}
@@ -261,7 +261,7 @@ if (editingBooking) {
 
     return (
       <tr key={id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-        <td className="px-6 py-4">
+        <td className="px-3 sm:px-6 py-3 sm:py-4">
           <div className="text-sm font-medium text-gray-900 dark:text-white">
             {language === 'en'
               ? booking.propertyId?.title || '—'
@@ -275,7 +275,7 @@ if (editingBooking) {
           </div>
         </td>
 
-        <td className="px-6 py-4">
+        <td className="px-3 sm:px-6 py-3 sm:py-4">
           <div className="text-sm text-gray-900 dark:text-white">
             {booking.clientId?.name || '—'}
           </div>
@@ -284,16 +284,16 @@ if (editingBooking) {
             {booking.clientId?.phone || ''}
           </div>
         </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {booking.startDate ? new Date(booking.startDate).toLocaleDateString() : '—'}
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                      {booking.startDate ? formatDate(booking.startDate, language) : '—'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {booking.endDate ? new Date(booking.endDate).toLocaleDateString() : '—'}
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                      {booking.endDate ? formatDate(booking.endDate, language) : '—'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                       {booking.paidAmount ? `${booking.paidAmount.toLocaleString()} EGP` : '—'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                       <Select
                         value={booking.status}
                         onValueChange={(val) => handleStatusChange(id, val as BookingStatus)}
@@ -308,7 +308,7 @@ if (editingBooking) {
                         </SelectContent>
                       </Select>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleOpenModal(booking)}
