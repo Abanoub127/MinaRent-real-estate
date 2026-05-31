@@ -29,6 +29,7 @@ import {
   formatDate,
 } from '../../../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ProtectedImage } from '../../components/ProtectedImage';
 
 type FilterStatus = 'all' | 'confirmed' | 'pending' | 'cancelled' | 'available';
 
@@ -420,9 +421,10 @@ export const ResponsiveTimelineApp: React.FC = () => {
                   {/* Property Image */}
                   <div className="relative w-full h-20 md:h-24 bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white text-xs md:text-sm font-semibold text-center px-2">
                     {property.images?.[0] ? (
-                      <img
+                      <ProtectedImage
                         src={property.images[0]}
                         alt={property.title}
+                        containerClassName="w-full h-full"
                         className="w-full h-full object-cover"
                       />
                     ) : (
@@ -448,7 +450,7 @@ export const ResponsiveTimelineApp: React.FC = () => {
                       {formatEGP(property.price)}/night
                     </p>
                     <p className="text-xs md:text-sm font-bold text-[#534AB7] mt-1">
-                      {getOccupancyPercentage(property._id)}% occupied
+                      {getOccupancyPercentage(property._id as string)}% occupied
                     </p>
                   </div>
                 </div>
@@ -495,8 +497,8 @@ export const ResponsiveTimelineApp: React.FC = () => {
               {filteredProperties.map((property) => (
                 <div key={property._id} className="flex-shrink-0 w-32 md:w-40">
                   {dateRange.map((date) => {
-                    const cellBookings = getBookingsForCell(date, property._id);
-                    const status = getCellStatus(date, property._id);
+                    const cellBookings = getBookingsForCell(date, property._id as string);
+                    const status = getCellStatus(date, property._id as string);
 
                     return (
                       <div
@@ -678,7 +680,7 @@ export const ResponsiveTimelineApp: React.FC = () => {
                       {language === 'ar' ? 'الدخول' : 'Check-in'}
                     </div>
                     <div className={`font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                      {formatDate(selectedBooking.startDate)}
+                      {formatDate(selectedBooking.startDate, language)}
                     </div>
                   </div>
                   <div>
@@ -686,7 +688,7 @@ export const ResponsiveTimelineApp: React.FC = () => {
                       {language === 'ar' ? 'الخروج' : 'Check-out'}
                     </div>
                     <div className={`font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                      {formatDate(selectedBooking.endDate)}
+                      {formatDate(selectedBooking.endDate, language)}
                     </div>
                   </div>
                 </div>

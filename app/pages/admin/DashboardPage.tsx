@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useApp } from '../../contexts/AppContext';
 import { getStats, Stats, formatEGPShort, getProperties, Property, getBookings, Booking } from '../../../services/api';
+import { ProtectedImage } from '../../components/ProtectedImage';
 
 export const DashboardPage: React.FC = () => {
   const { language, t } = useApp();
@@ -76,7 +77,7 @@ export const DashboardPage: React.FC = () => {
       <div className="grid lg:grid-cols-2 gap-5">
         <motion.div variants={iV} className="bg-[var(--card)] p-4 sm:p-6 rounded-2xl border border-[var(--border)] shadow-sm">
           <h3 className="text-lg font-bold text-[var(--foreground)] mb-5">{language==='en'?'Recent Properties':'أحدث العقارات'}</h3>
-          <div className="space-y-3">{recentProperties.map(p=>(<div key={p.id} className="flex items-center gap-4 p-3 hover:bg-[var(--secondary)] rounded-xl transition-colors"><img src={p.images[0]||''} alt="" className="w-14 h-14 rounded-lg object-cover" loading="lazy"/><div className="flex-1 min-w-0"><h4 className="font-bold text-[var(--foreground)] text-sm truncate">{language==='en'?p.title:p.titleAr}</h4><p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">{language==='en'?p.location:p.locationAr}</p></div><span className="font-bold text-[var(--primary)] text-sm">{formatEGPShort(p.price)}</span></div>))}</div>
+          <div className="space-y-3">{recentProperties.map(p=>(<div key={p.id} className="flex items-center gap-4 p-3 hover:bg-[var(--secondary)] rounded-xl transition-colors"><ProtectedImage src={p.images[0]||''} alt="" containerClassName="w-14 h-14 shrink-0" className="w-full h-full rounded-lg object-cover" loading="lazy" showDate={false}/><div className="flex-1 min-w-0"><h4 className="font-bold text-[var(--foreground)] text-sm truncate">{language==='en'?p.title:p.titleAr}</h4><p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">{language==='en'?p.location:p.locationAr}</p></div><span className="font-bold text-[var(--primary)] text-sm">{formatEGPShort(p.price)}</span></div>))}</div>
         </motion.div>
         <motion.div variants={iV} className="bg-[var(--card)] p-4 sm:p-6 rounded-2xl border border-[var(--border)] shadow-sm">
           <h3 className="text-lg font-bold text-[var(--foreground)] mb-5">{language==='en'?'Recent Bookings':'أحدث الحجوزات'}</h3>

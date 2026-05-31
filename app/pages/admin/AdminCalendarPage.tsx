@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Search, CalendarDays, User, Phone, CheckCirc
 import { useApp } from '../../contexts/AppContext';
 import { getProperties, getBookings, deleteBooking, Property, Booking, formatEGP, formatDate } from '../../../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ProtectedImage } from '../../components/ProtectedImage';
 
 type ViewMode = 'week' | 'month';
 type StatusFilter = 'all' | 'confirmed' | 'pending' | 'cancelled' | 'available';
@@ -69,13 +70,28 @@ export const AdminCalendarPage: React.FC = () => {
     return date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getFullYear() === today.getFullYear();
   };
 
-  // Filtered properties (shared)
-  const filteredProps = useMemo(() =>
-    properties.filter((p) => {
+  // Filtered and sorted properties (shared)
+  const sortedFilteredProps = useMemo(() => {
+    const filtered = properties.filter((p) => {
       const name = language === 'en' ? p.title : p.titleAr;
       const location = language === 'en' ? p.location : p.locationAr;
       return name.toLowerCase().includes(searchQuery.toLowerCase()) || location.toLowerCase().includes(searchQuery.toLowerCase());
-    }), [properties, searchQuery, language]);
+    });
+
+    return filtered.sort((a, b) => {
+      // Priority 1: Property Type
+      const typeA = a.type || '';
+      const typeB = b.type || '';
+      const typeCompare = typeA.localeCompare(typeB);
+      
+      if (typeCompare !== 0) return typeCompare;
+
+      // Priority 2: Property Name (locale-aware based on current language)
+      const nameA = language === 'en' ? a.title : a.titleAr;
+      const nameB = language === 'en' ? b.title : b.titleAr;
+      return nameA.localeCompare(nameB);
+    });
+  }, [properties, searchQuery, language]);
 
   // ─── Booking Lookup Map (optimised for grid) ─────────
   const bookingMap = useMemo(() => {
@@ -185,7 +201,7 @@ export const AdminCalendarPage: React.FC = () => {
     return getMonthName(currentDate);
   };
   const cellWidthClass = viewMode === 'week' ? 'w-24 sm:w-32 md:w-40' : 'w-14 sm:w-16';
-  const getDynamicRowHeight = () => { const c = filteredProps.length; if (c <= 3) return 90; if (c <= 6) return 76; if (c <= 10) return 64; return 54; };
+  const getDynamicRowHeight = () => { const c = sortedFilteredProps.length; if (c <= 3) return 90; if (c <= 6) return 76; if (c <= 10) return 64; return 54; };
   const rowHeight = getDynamicRowHeight();
 
   // Cell dimming for mobile filter
@@ -283,7 +299,7 @@ export const AdminCalendarPage: React.FC = () => {
                 <span className="text-sm text-[var(--text-secondary)]">{language === 'en' ? 'Loading...' : 'جاري التحميل...'}</span>
               </div>
             </div>
-          ) : filteredProps.length === 0 ? (
+          ) : sortedFilteredProps.length === 0 ? (
             <div className="flex-1 flex items-center justify-center bg-[var(--background)]">
               <div className="text-center p-8">
                 <Building className="w-10 h-10 mx-auto text-[var(--text-secondary)] opacity-40 mb-3" />
@@ -306,14 +322,14 @@ export const AdminCalendarPage: React.FC = () => {
                   </div>
 
                   {/* Property Columns */}
-                  {filteredProps.map((property) => {
+                  {sortedFilteredProps.map((property) => {
                     const occupancy = getOccupancyRate(property.id);
                     return (
                       <div key={property.id} className={`w-[116px] sm:w-[130px] shrink-0 flex flex-col items-center justify-center py-2.5 px-1.5 gap-1 ${isRtl ? 'border-l' : 'border-r'} border-[var(--border)]`}>
                         {/* Thumbnail */}
                         <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl overflow-hidden border-2 border-[var(--border)] shadow-sm bg-[var(--secondary)]">
                           {property.images?.[0] ? (
-                            <img src={property.images[0]} alt="" className="w-full h-full object-cover" loading="lazy" />
+                            <ProtectedImage src={property.images[0]} alt="" containerClassName="w-full h-full" className="w-full h-full object-cover" loading="lazy" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center"><Building className="w-5 h-5 text-[var(--text-secondary)] opacity-50" /></div>
                           )}
@@ -364,7 +380,7 @@ export const AdminCalendarPage: React.FC = () => {
                         </div>
 
                         {/* Booking Cells */}
-                        {filteredProps.map((property) => {
+                        {sortedFilteredProps.map((property) => {
                           const booking = getBookingForCell(dayInfo.date, property.id);
                           const dimmed = shouldDimCell(booking);
 
@@ -534,7 +550,7 @@ export const AdminCalendarPage: React.FC = () => {
 
                   {/* Grid Body */}
                   <div className="flex flex-col divide-y divide-[var(--border)]">
-                    {filteredProps.map((property) => {
+                    {sortedFilteredProps.map((property) => {
                       const propertyColor = (property as any).color || '#C9A84C';
                       const viewStartDate = desktopDaysArray[0].date;
                       const viewEndDate = desktopDaysArray[desktopDaysArray.length - 1].date;
@@ -633,7 +649,7 @@ export const AdminCalendarPage: React.FC = () => {
                       );
                     })}
 
-                    {filteredProps.length === 0 && (
+                    {sortedFilteredProps.length === 0 && (
                       <div className="p-8 sm:p-12 text-center text-[var(--text-secondary)] font-medium bg-[var(--card)]">
                         {language === 'en' ? 'No matching properties found' : 'لم يتم العثور على عقارات مطابقة'}
                       </div>

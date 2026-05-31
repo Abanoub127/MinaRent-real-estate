@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 
 interface ProtectedImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   containerClassName?: string;
   watermarkText?: string;
+  showDate?: boolean;
 }
 
 export const ProtectedImage: React.FC<ProtectedImageProps> = ({
@@ -10,14 +11,18 @@ export const ProtectedImage: React.FC<ProtectedImageProps> = ({
   alt = 'Real Estate',
   className = '',
   containerClassName = '',
-  watermarkText = 'MINA RENT',
+  watermarkText = 'Mina Rent • www.mina-rent.com',
+  showDate = true,
   ...props
 }) => {
-
+  const currentDate = useMemo(() => {
+    const today = new Date();
+    return today.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  }, []);
 
   return (
     <div
-      className={`relative overflow-hidden select-none ${containerClassName}`}
+      className={`protected-image relative overflow-hidden select-none ${containerClassName}`}
       style={{
         WebkitTouchCallout: 'none',
         WebkitUserSelect: 'none',
@@ -25,29 +30,12 @@ export const ProtectedImage: React.FC<ProtectedImageProps> = ({
         MozUserSelect: 'none',
         msUserSelect: 'none',
         userSelect: 'none',
+        pointerEvents: 'auto',
       }}
       onContextMenu={(e) => e.preventDefault()}
+      onDragStart={(e) => e.preventDefault()}
     >
-      {/* Transparent pointer-events overlay blocking mouse interactions with the raw image element */}
-      <div 
-        className="absolute inset-0 z-10 bg-transparent cursor-default" 
-        onContextMenu={(e) => e.preventDefault()}
-        onDragStart={(e) => e.preventDefault()}
-      />
-
-      {/* Elegant, repeating diagonal watermark grid */}
-      <div className="absolute inset-0 pointer-events-none z-20 overflow-hidden flex flex-wrap justify-around items-center select-none opacity-[0.06] dark:opacity-[0.04]">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <span
-            key={i}
-            className="text-[9px] sm:text-[11px] font-semibold tracking-widest uppercase rotate-[-28deg] m-3 text-slate-700 dark:text-slate-300 font-sans"
-          >
-            {watermarkText}
-          </span>
-        ))}
-      </div>
-
-      {/* The actual image */}
+      {/* The actual image with strict non-draggable properties */}
       <img
         src={src}
         alt={alt}
@@ -55,8 +43,31 @@ export const ProtectedImage: React.FC<ProtectedImageProps> = ({
         onContextMenu={(e) => e.preventDefault()}
         onDragStart={(e) => e.preventDefault()}
         draggable="false"
+        style={{
+          WebkitUserDrag: 'none',
+          userSelect: 'none',
+        } as React.CSSProperties}
         {...props}
       />
+
+      {/* Transparent pointer-events overlay blocking mouse interactions with the raw image element */}
+      <div 
+        className="absolute inset-0 z-10 bg-transparent cursor-default" 
+        onContextMenu={(e) => e.preventDefault()}
+        onDragStart={(e) => e.preventDefault()}
+      />
+
+      {/* Dynamic Watermark System */}
+      <div className="absolute bottom-2 right-2 z-20 pointer-events-none flex flex-col items-end opacity-70">
+        <span className="text-[10px] sm:text-xs font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] tracking-wide">
+          {watermarkText}
+        </span>
+        {showDate && (
+          <span className="text-[8px] sm:text-[9px] font-semibold text-white/80 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+            {currentDate}
+          </span>
+        )}
+      </div>
     </div>
   );
 };

@@ -11,6 +11,7 @@ import {
   Settings,
   MoreHorizontal,
   TrendingUp,
+  MessageSquare,
 } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 import {
@@ -176,7 +177,7 @@ export const ReservationsTimelineApp: React.FC = () => {
   const getOccupancyPercentage = (property: Property) => {
     const propertyBookings = bookings.filter(
       (b) =>
-        b.propertyId._id === property._id &&
+        (b.propertyId as any)._id === property._id &&
         b.status !== 'cancelled'
     );
     const totalDays = propertyBookings.reduce((sum, b) => sum + b.totalDays, 0);
@@ -386,10 +387,10 @@ export const ReservationsTimelineApp: React.FC = () => {
                         )}`}
                       >
                         <div className="font-semibold truncate">
-                          {cellBookings[0].clientId.name}
+                          {(cellBookings[0].clientId as any).name}
                         </div>
                         <div className="text-xs opacity-80 mt-1">
-                          {cellBookings[0].clientId.phone}
+                          {(cellBookings[0].clientId as any).phone}
                         </div>
                         <div className="flex items-center justify-center gap-1 mt-2">
                           {status === 'confirmed' && (
@@ -408,7 +409,7 @@ export const ReservationsTimelineApp: React.FC = () => {
                         {language === 'ar' ? 'متاح' : 'Available'}
                       </div>
                     )}
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -487,13 +488,13 @@ export const ReservationsTimelineApp: React.FC = () => {
                     {language === 'ar' ? 'بيانات الضيف' : 'Guest Information'}
                   </h3>
                   <div className="text-lg font-bold text-gray-900">
-                    {selectedBooking.clientId.name}
+                    {(selectedBooking.clientId as any).name}
                   </div>
                   <div className="text-sm text-gray-600">
-                    {selectedBooking.clientId.phone}
+                    {(selectedBooking.clientId as any).phone}
                   </div>
                   <div className="text-sm text-gray-600">
-                    {selectedBooking.clientId.email}
+                    {(selectedBooking.clientId as any).email}
                   </div>
                 </div>
 
@@ -503,10 +504,10 @@ export const ReservationsTimelineApp: React.FC = () => {
                     {language === 'ar' ? 'العقار' : 'Property'}
                   </h3>
                   <div className="text-lg font-bold text-gray-900">
-                    {selectedBooking.propertyId.title}
+                    {(selectedBooking.propertyId as any).title}
                   </div>
                   <div className="text-sm text-gray-600">
-                    {selectedBooking.propertyId.location}
+                    {(selectedBooking.propertyId as any).location}
                   </div>
                 </div>
 
@@ -521,7 +522,7 @@ export const ReservationsTimelineApp: React.FC = () => {
                         {language === 'ar' ? 'التحقق من الدخول' : 'Check-in'}
                       </div>
                       <div className="text-sm font-bold text-gray-900">
-                        {formatDate(selectedBooking.startDate)}
+                        {formatDate(selectedBooking.startDate, language)}
                       </div>
                     </div>
                     <div className="text-gray-400">→</div>
@@ -530,7 +531,7 @@ export const ReservationsTimelineApp: React.FC = () => {
                         {language === 'ar' ? 'التحقق من الخروج' : 'Check-out'}
                       </div>
                       <div className="text-sm font-bold text-gray-900">
-                        {formatDate(selectedBooking.endDate)}
+                        {formatDate(selectedBooking.endDate, language)}
                       </div>
                     </div>
                   </div>
