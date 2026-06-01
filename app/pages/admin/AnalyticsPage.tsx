@@ -345,69 +345,71 @@ const conversionData = [
                 : 'تحليلات الحجوزات'}
             </h3>
 
-            <ResponsiveContainer
-              width="100%"
-              height={300}
-            >
-              <BarChart data={conversionData}>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="#374151"
-                  opacity={0.1}
-                />
+            <div dir="ltr">
+              <ResponsiveContainer
+                width="100%"
+                height={300}
+              >
+                <BarChart data={conversionData}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#374151"
+                    opacity={0.1}
+                  />
 
-                <XAxis
-                  dataKey="month"
-                  stroke="#6B7280"
-                />
+                  <XAxis
+                    dataKey="month"
+                    stroke="#6B7280"
+                  />
 
-                <YAxis stroke="#6B7280" />
+                  <YAxis stroke="#6B7280" />
 
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor:
-                      'var(--tooltip-bg, #fff)',
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor:
+                        'var(--tooltip-bg, #fff)',
 
-                    border:
-                      '1px solid #e5e7eb',
+                      border:
+                        '1px solid #e5e7eb',
 
-                    borderRadius: '8px',
-                  }}
-                />
+                      borderRadius: '8px',
+                    }}
+                  />
 
-                <Legend />
+                  <Legend />
 
-                <Bar
-                  dataKey="views"
-                  fill="#3B82F6"
-                  name={
-                    language === 'en'
-                      ? 'Views'
-                      : 'المشاهدات'
-                  }
-                />
+                  <Bar
+                    dataKey="views"
+                    fill="#3B82F6"
+                    name={
+                      language === 'en'
+                        ? 'Views'
+                        : 'المشاهدات'
+                    }
+                  />
 
-                <Bar
-                  dataKey="bookings"
-                  fill="#10B981"
-                  name={
-                    language === 'en'
-                      ? 'Bookings'
-                      : 'الحجوزات'
-                  }
-                />
+                  <Bar
+                    dataKey="bookings"
+                    fill="#10B981"
+                    name={
+                      language === 'en'
+                        ? 'Bookings'
+                        : 'الحجوزات'
+                    }
+                  />
 
-                <Bar
-                  dataKey="sales"
-                  fill="#F59E0B"
-                  name={
-                    language === 'en'
-                      ? 'Confirmed'
-                      : 'المؤكد'
-                  }
-                />
-              </BarChart>
-            </ResponsiveContainer>
+                  <Bar
+                    dataKey="sales"
+                    fill="#F59E0B"
+                    name={
+                      language === 'en'
+                        ? 'Confirmed'
+                        : 'المؤكد'
+                    }
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </Card>
 
@@ -419,47 +421,49 @@ const conversionData = [
                 : 'العقارات حسب النوع'}
             </h3>
 
-            <ResponsiveContainer
-              width="100%"
-              height={300}
-            >
-              <BarChart data={propertyTypeData}>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="#374151"
-                  opacity={0.1}
-                />
+            <div dir="ltr">
+              <ResponsiveContainer
+                width="100%"
+                height={300}
+              >
+                <BarChart data={propertyTypeData}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="#374151"
+                    opacity={0.1}
+                  />
 
-                <XAxis
-                  dataKey="type"
-                  stroke="#6B7280"
-                />
+                  <XAxis
+                    dataKey="type"
+                    stroke="#6B7280"
+                  />
 
-                <YAxis stroke="#6B7280" />
+                  <YAxis stroke="#6B7280" />
 
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor:
-                      'var(--tooltip-bg, #fff)',
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor:
+                        'var(--tooltip-bg, #fff)',
 
-                    border:
-                      '1px solid #e5e7eb',
+                      border:
+                        '1px solid #e5e7eb',
 
-                    borderRadius: '8px',
-                  }}
-                />
+                      borderRadius: '8px',
+                    }}
+                  />
 
-                <Bar
-                  dataKey="count"
-                  fill="#8B5CF6"
-                  name={
-                    language === 'en'
-                      ? 'Count'
-                      : 'العدد'
-                  }
-                />
-              </BarChart>
-            </ResponsiveContainer>
+                  <Bar
+                    dataKey="count"
+                    fill="#8B5CF6"
+                    name={
+                      language === 'en'
+                        ? 'Count'
+                        : 'العدد'
+                    }
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </Card>
       </div>

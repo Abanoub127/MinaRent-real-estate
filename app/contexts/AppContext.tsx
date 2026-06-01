@@ -201,10 +201,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   });
 
   const [language, setLanguage] = useState<Language>(() => {
-    // Always default to English on first load
+    // Default to Arabic on first load
     const saved = localStorage.getItem('language');
-    // If nothing saved, default to 'en'
-    return (saved as Language) || 'en';
+    // If nothing saved, default to 'ar'
+    return (saved as Language) || 'ar';
   });
 
   const [user, setUser] = useState<User | null>(null);

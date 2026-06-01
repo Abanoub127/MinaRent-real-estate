@@ -347,39 +347,41 @@ export const FinancialPage: React.FC = () => {
                 : 'الإيرادات حسب الفئة'}
             </h3>
 
-            <ResponsiveContainer
-              width="100%"
-              height={300}
-            >
-              <PieChart>
-                <Pie
-                  data={revenueChartData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={80}
-                  dataKey="value"
-                  label
-                >
-                  {revenueChartData.map(
-                    (_, index) => (
-                      <Cell
-                        key={`revenue-${index}`}
-                        fill={
-                          COLORS[
-                            index % COLORS.length
-                          ]
-                        }
-                      />
-                    ),
-                  )}
-                </Pie>
+            <div dir="ltr">
+              <ResponsiveContainer
+                width="100%"
+                height={300}
+              >
+                <PieChart>
+                  <Pie
+                    data={revenueChartData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={80}
+                    dataKey="value"
+                    label
+                  >
+                    {revenueChartData.map(
+                      (_, index) => (
+                        <Cell
+                          key={`revenue-${index}`}
+                          fill={
+                            COLORS[
+                              index % COLORS.length
+                            ]
+                          }
+                        />
+                      ),
+                    )}
+                  </Pie>
 
-                <Tooltip />
+                  <Tooltip />
 
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </Card>
 
@@ -391,39 +393,41 @@ export const FinancialPage: React.FC = () => {
                 : 'المصروفات حسب الفئة'}
             </h3>
 
-            <ResponsiveContainer
-              width="100%"
-              height={300}
-            >
-              <PieChart>
-                <Pie
-                  data={expenseChartData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={80}
-                  dataKey="value"
-                  label
-                >
-                  {expenseChartData.map(
-                    (_, index) => (
-                      <Cell
-                        key={`expense-${index}`}
-                        fill={
-                          COLORS[
-                            index % COLORS.length
-                          ]
-                        }
-                      />
-                    ),
-                  )}
-                </Pie>
+            <div dir="ltr">
+              <ResponsiveContainer
+                width="100%"
+                height={300}
+              >
+                <PieChart>
+                  <Pie
+                    data={expenseChartData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={80}
+                    dataKey="value"
+                    label
+                  >
+                    {expenseChartData.map(
+                      (_, index) => (
+                        <Cell
+                          key={`expense-${index}`}
+                          fill={
+                            COLORS[
+                              index % COLORS.length
+                            ]
+                          }
+                        />
+                      ),
+                    )}
+                  </Pie>
 
-                <Tooltip />
+                  <Tooltip />
 
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </Card>
       </div>

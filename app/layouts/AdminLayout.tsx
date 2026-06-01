@@ -97,6 +97,18 @@ export const AdminLayout: React.FC = () => {
     }
   };
 
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'booking': return <CalendarDays className="w-5 h-5 text-blue-500 dark:text-blue-400" />;
+      case 'message': return <MessageSquare className="w-5 h-5 text-green-500 dark:text-green-400" />;
+      case 'comment': return <MessageSquare className="w-5 h-5 text-indigo-500 dark:text-indigo-400" />;
+      case 'property': return <Building className="w-5 h-5 text-orange-500 dark:text-orange-400" />;
+      case 'transaction': return <DollarSign className="w-5 h-5 text-emerald-500 dark:text-emerald-400" />;
+      case 'user': return <User className="w-5 h-5 text-purple-500 dark:text-purple-400" />;
+      default: return <CircleAlert className="w-5 h-5 text-gray-500 dark:text-gray-400" />;
+    }
+  };
+
   const filteredNotifications = activeTab === 'all' 
     ? notifications 
     : notifications.filter(n => n.type === activeTab || (activeTab === 'system' && ['system', 'transaction', 'user'].includes(n.type)));
@@ -191,7 +203,7 @@ export const AdminLayout: React.FC = () => {
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Header */}
-        <header className="h-16 bg-[var(--card)] border-b border-[var(--border)] flex items-center justify-between px-4 sm:px-6 z-10" style={{ boxShadow: 'var(--shadow-sm)' }}>
+        <header className="h-16 bg-[var(--card)] border-b border-[var(--border)] flex items-center justify-between px-4 sm:px-6 z-40 relative" style={{ boxShadow: 'var(--shadow-sm)' }}>
           <div className="flex items-center gap-3">
             <button onClick={() => setIsMobileOpen(true)} className="lg:hidden p-2 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--secondary)]">
               <Menu className="w-5 h-5" />
@@ -241,7 +253,11 @@ export const AdminLayout: React.FC = () => {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 8, scale: 0.96 }}
                     transition={{ duration: 0.15 }}
-                    className={`absolute ${isRtl ? 'left-0' : 'right-0'} top-12 w-[340px] sm:w-[400px] bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-xl overflow-hidden z-50`}
+                    className={`
+                      fixed left-4 right-4 top-20 w-auto
+                      sm:absolute sm:top-12 ${isRtl ? 'sm:left-0 sm:right-auto' : 'sm:right-0 sm:left-auto'} sm:w-[400px] 
+                      bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-xl overflow-hidden z-50
+                    `}
                   >
                     <div className="flex flex-col border-b border-[var(--border)]">
                       <div className="flex items-center justify-between p-4">
@@ -262,79 +278,83 @@ export const AdminLayout: React.FC = () => {
                       </div>
                       
                       {/* Tabs */}
-                      <div className="flex px-2 pb-2 gap-1 overflow-x-auto scrollbar-hide">
-                        {(['all', 'property', 'booking', 'system'] as const).map(tab => (
-                          <button
-                            key={tab}
-                            onClick={(e) => { e.stopPropagation(); setActiveTab(tab); }}
-                            className={`px-3 py-1.5 text-xs font-semibold rounded-lg whitespace-nowrap transition-colors ${
-                              activeTab === tab 
-                                ? 'bg-[var(--primary)]/10 text-[var(--primary)]' 
-                                : 'text-[var(--text-secondary)] hover:bg-[var(--secondary)]'
-                            }`}
-                          >
-                            {tab === 'all' && (language === 'en' ? 'All' : 'الكل')}
-                            {tab === 'property' && (language === 'en' ? 'Properties' : 'عقارات')}
-                            {tab === 'booking' && (language === 'en' ? 'Bookings' : 'حجوزات')}
-                            {tab === 'system' && (language === 'en' ? 'System' : 'نظام ومالية')}
-                          </button>
-                        ))}
+                      <div className="flex px-4 py-3 gap-2 overflow-x-auto scrollbar-hide border-b border-[var(--border)] bg-[var(--card)] relative z-10">
+                        {(['all', 'property', 'booking', 'system'] as const).map(tab => {
+                          const isActive = activeTab === tab;
+                          return (
+                            <button
+                              key={tab}
+                              onClick={(e) => { e.stopPropagation(); setActiveTab(tab); }}
+                              className={`flex-shrink-0 px-4 py-2 text-xs font-bold rounded-full transition-all duration-200 outline-none ${
+                                isActive 
+                                  ? 'bg-[var(--primary)] text-white shadow-md shadow-[var(--primary)]/30' 
+                                  : 'bg-[var(--secondary)] text-[var(--text-secondary)] hover:bg-[var(--border)] hover:text-[var(--foreground)]'
+                              }`}
+                            >
+                              {tab === 'all' && (language === 'en' ? 'All' : 'الكل')}
+                              {tab === 'property' && (language === 'en' ? 'Properties' : 'عقارات')}
+                              {tab === 'booking' && (language === 'en' ? 'Bookings' : 'حجوزات')}
+                              {tab === 'system' && (language === 'en' ? 'System & Finance' : 'نظام ومالية')}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
-                    <div className="max-h-[480px] overflow-y-auto custom-scrollbar">
-                      {filteredNotifications.length === 0 ? (
-                        <div className="p-10 text-center flex flex-col items-center justify-center gap-3">
-                          <div className="w-12 h-12 rounded-full bg-[var(--secondary)] flex items-center justify-center">
-                            <CheckCheck className="w-6 h-6 text-[var(--text-secondary)] opacity-50" />
+                      <div className="max-h-[480px] overflow-y-auto custom-scrollbar bg-[var(--card)]">
+                        {filteredNotifications.length === 0 ? (
+                          <div className="p-10 text-center flex flex-col items-center justify-center gap-3">
+                            <div className="w-12 h-12 rounded-full bg-[var(--secondary)] flex items-center justify-center">
+                              <CheckCheck className="w-6 h-6 text-[var(--text-secondary)] opacity-50" />
+                            </div>
+                            <p className="text-[var(--text-secondary)] text-sm font-medium">
+                              {language === 'en' ? 'You are all caught up!' : 'لا توجد إشعارات حالياً'}
+                            </p>
                           </div>
-                          <p className="text-[var(--text-secondary)] text-sm font-medium">
-                            {language === 'en' ? 'You are all caught up!' : 'لا توجد إشعارات حالياً'}
-                          </p>
-                        </div>
-                      ) : (
-                        filteredNotifications.map(n => (
-                          <button
-                            key={n.id}
-                            onClick={() => handleNotificationClick(n)}
-                            className={`w-full text-left p-4 hover:bg-[var(--secondary)] transition-all border-b border-[var(--border)] last:border-0 relative ${!n.isRead ? 'bg-[var(--primary)]/[0.02]' : ''}`}
-                          >
-                            {!n.isRead && (
-                              <span className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--primary)] rounded-r-full" />
-                            )}
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <p className={`text-sm ${!n.isRead ? 'font-bold text-[var(--foreground)]' : 'font-semibold text-[var(--foreground)]/90'}`}>
+                        ) : (
+                          filteredNotifications.map(n => (
+                            <button
+                              key={n.id}
+                              onClick={() => handleNotificationClick(n)}
+                              className={`w-full text-left p-4 hover:bg-[var(--secondary)] transition-all border-b border-[var(--border)] last:border-0 relative group flex items-start gap-4 ${!n.isRead ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
+                            >
+                              {!n.isRead && (
+                                <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-r-full" />
+                              )}
+                              
+                              {/* Icon Box */}
+                              <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center border border-[var(--border)] ${!n.isRead ? 'bg-white dark:bg-gray-800 shadow-sm' : 'bg-[var(--secondary)]'}`}>
+                                 {getNotificationIcon(n.type)}
+                              </div>
+
+                              <div className="flex-1 min-w-0 flex flex-col">
+                                <div className="flex items-center justify-between gap-2 mb-1">
+                                  <p className={`text-sm truncate ${!n.isRead ? 'font-bold text-[var(--foreground)]' : 'font-semibold text-[var(--text-secondary)]'}`}>
                                     {n.title}
                                   </p>
-                                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--secondary)] text-[var(--text-secondary)] whitespace-nowrap font-medium">
-                                    {getNotificationTypeLabel(n.type)}
-                                  </span>
+                                  <p className="text-[10px] font-medium text-[var(--text-secondary)] whitespace-nowrap opacity-80 flex items-center gap-1 shrink-0">
+                                    <Clock className="w-3 h-3" />
+                                    <span className="ltr-content">
+                                      {formatDistanceToNow(new Date(n.createdAt), { 
+                                        addSuffix: true,
+                                        locale: language === 'ar' ? ar : enUS
+                                      })}
+                                    </span>
+                                  </p>
                                 </div>
-                                <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-2 break-words">
+                                <p className={`text-xs leading-relaxed line-clamp-2 mb-1 ${!n.isRead ? 'text-[var(--text-secondary)] font-medium' : 'text-[var(--text-secondary)]/80'}`}>
                                   {n.body}
                                 </p>
                                 {n.description && (
-                                  <p className="text-[11px] text-[var(--text-secondary)]/80 leading-relaxed mb-2 italic break-words">
+                                  <p className="text-[11px] text-[var(--text-secondary)]/70 italic line-clamp-1 truncate">
                                     {n.description}
                                   </p>
                                 )}
-                                <p className="text-[11px] font-medium text-[var(--text-secondary)]/70 flex items-center gap-1">
-                                  <Clock className="w-3 h-3" />
-                                  <span className="ltr-content">
-                                    {formatDistanceToNow(new Date(n.createdAt), { 
-                                      addSuffix: true,
-                                      locale: language === 'ar' ? ar : enUS
-                                    })}
-                                  </span>
-                                </p>
                               </div>
-                            </div>
-                          </button>
-                        ))
-                      )}
-                    </div>
+                            </button>
+                          ))
+                        )}
+                      </div>
                   </motion.div>
                 )}
               </AnimatePresence>

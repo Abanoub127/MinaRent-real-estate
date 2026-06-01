@@ -445,6 +445,7 @@ const notificationLabels: Record<
           <form
             onSubmit={handlePasswordSubmit}
             className="space-y-4"
+            autoComplete="off"
           >
             <Input
               name="currentPassword"
@@ -454,6 +455,7 @@ const notificationLabels: Record<
                   : 'كلمة المرور الحالية'
               }
               type="password"
+              autoComplete="new-password"
               value={passwordData.current}
               onChange={(e) =>
                 setPasswordData({
@@ -473,6 +475,7 @@ const notificationLabels: Record<
                     : 'كلمة المرور الجديدة'
                 }
                 type="password"
+                autoComplete="new-password"
                 value={passwordData.new}
                 onChange={(e) =>
                   setPasswordData({
@@ -491,6 +494,7 @@ const notificationLabels: Record<
                     : 'تأكيد كلمة المرور'
                 }
                 type="password"
+                autoComplete="new-password"
                 value={passwordData.confirm}
                 onChange={(e) =>
                   setPasswordData({
