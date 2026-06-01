@@ -165,6 +165,7 @@ export type Notification = {
   type: NotificationType;
   title: string;
   body: string;
+  description?: string;
   isRead: boolean;
   relatedId?: string;
   relatedModel?: string;

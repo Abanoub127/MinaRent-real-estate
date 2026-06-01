@@ -85,27 +85,15 @@ export const AdminLayout: React.FC = () => {
     { name: t('admin.settings'), path: '/admin/settings', icon: Settings },
   ];
 
-  const getNotificationIcon = (type: string) => {
+  const getNotificationTypeLabel = (type: string) => {
     switch (type) {
-      case 'booking': return <CalendarDays className="w-5 h-5 text-blue-500" />;
-      case 'message': return <Mail className="w-5 h-5 text-indigo-500" />;
-      case 'comment': return <MessageSquare className="w-5 h-5 text-teal-500" />;
-      case 'property': return <Building className="w-5 h-5 text-[var(--primary)]" />;
-      case 'transaction': return <Wallet className="w-5 h-5 text-green-500" />;
-      case 'user': return <User className="w-5 h-5 text-purple-500" />;
-      default: return <CircleAlert className="w-5 h-5 text-orange-500" />;
-    }
-  };
-
-  const getNotificationBg = (type: string) => {
-    switch (type) {
-      case 'booking': return 'bg-blue-500/10 border-blue-500/20';
-      case 'message': return 'bg-indigo-500/10 border-indigo-500/20';
-      case 'comment': return 'bg-teal-500/10 border-teal-500/20';
-      case 'property': return 'bg-[var(--primary)]/10 border-[var(--primary)]/20';
-      case 'transaction': return 'bg-green-500/10 border-green-500/20';
-      case 'user': return 'bg-purple-500/10 border-purple-500/20';
-      default: return 'bg-orange-500/10 border-orange-500/20';
+      case 'booking': return language === 'en' ? 'Booking' : 'حجز';
+      case 'message': return language === 'en' ? 'Message' : 'رسالة';
+      case 'comment': return language === 'en' ? 'Comment' : 'تعليق';
+      case 'property': return language === 'en' ? 'Property' : 'عقار';
+      case 'transaction': return language === 'en' ? 'Transaction' : 'معاملة';
+      case 'user': return language === 'en' ? 'User' : 'مستخدم';
+      default: return language === 'en' ? 'System' : 'نظام';
     }
   };
 
@@ -294,7 +282,7 @@ export const AdminLayout: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="max-h-[360px] overflow-y-auto custom-scrollbar">
+                    <div className="max-h-[480px] overflow-y-auto custom-scrollbar">
                       {filteredNotifications.length === 0 ? (
                         <div className="p-10 text-center flex flex-col items-center justify-center gap-3">
                           <div className="w-12 h-12 rounded-full bg-[var(--secondary)] flex items-center justify-center">
@@ -314,18 +302,25 @@ export const AdminLayout: React.FC = () => {
                             {!n.isRead && (
                               <span className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--primary)] rounded-r-full" />
                             )}
-                            <div className="flex items-start gap-3">
-                              <div className={`p-2.5 rounded-xl border shrink-0 ${getNotificationBg(n.type)}`}>
-                                {getNotificationIcon(n.type)}
-                              </div>
+                            <div className="flex items-start justify-between gap-3">
                               <div className="flex-1 min-w-0">
-                                <p className={`text-sm mb-1 ${!n.isRead ? 'font-bold text-[var(--foreground)]' : 'font-medium text-[var(--foreground)]/90'}`}>
-                                  {n.title}
-                                </p>
-                                <p className="text-xs text-[var(--text-secondary)] leading-relaxed line-clamp-2">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <p className={`text-sm ${!n.isRead ? 'font-bold text-[var(--foreground)]' : 'font-semibold text-[var(--foreground)]/90'}`}>
+                                    {n.title}
+                                  </p>
+                                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--secondary)] text-[var(--text-secondary)] whitespace-nowrap font-medium">
+                                    {getNotificationTypeLabel(n.type)}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-2 break-words">
                                   {n.body}
                                 </p>
-                                <p className="text-[11px] font-medium text-[var(--text-secondary)]/80 mt-2 flex items-center gap-1">
+                                {n.description && (
+                                  <p className="text-[11px] text-[var(--text-secondary)]/80 leading-relaxed mb-2 italic break-words">
+                                    {n.description}
+                                  </p>
+                                )}
+                                <p className="text-[11px] font-medium text-[var(--text-secondary)]/70 flex items-center gap-1">
                                   <Clock className="w-3 h-3" />
                                   <span className="ltr-content">
                                     {formatDistanceToNow(new Date(n.createdAt), { 

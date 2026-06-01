@@ -160,23 +160,40 @@ const locations = [
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Validation
+    if (!formData.title.trim() || !formData.titleAr.trim()) {
+      alert(language === 'en' ? 'Please fill in all title fields' : 'الرجاء ملء جميع حقول العنوان');
+      return;
+    }
+    if (!formData.price || Number(formData.price) <= 0) {
+      alert(language === 'en' ? 'Please enter a valid price' : 'الرجاء إدخال سعر صحيح');
+      return;
+    }
+    if (!formData.location.trim() || !formData.locationAr.trim()) {
+      alert(language === 'en' ? 'Please fill in all location fields' : 'الرجاء ملء جميع حقول الموقع');
+      return;
+    }
+    if (!editingProperty && formData.images.length === 0) {
+      alert(language === 'en' ? 'Please add at least one image' : 'الرجاء إضافة صورة واحدة على الأقل');
+      return;
+    }
+
     try {
       const form = new FormData();
 
-      // Set fallback values for optional inputs to ensure database validity
-      form.append("title", formData.title || "Unnamed Property");
-      form.append("titleAr", formData.titleAr || "عقار بدون اسم");
-      form.append("description", formData.description || "No description provided");
-      form.append("descriptionAr", formData.descriptionAr || "لا يوجد وصف متوفر");
-      form.append("price", formData.price || "0");
-      form.append("location", formData.location || "General");
-      form.append("locationAr", formData.locationAr || "عام");
+      form.append("title", formData.title.trim());
+      form.append("titleAr", formData.titleAr.trim());
+      form.append("description", formData.description.trim());
+      form.append("descriptionAr", formData.descriptionAr.trim());
+      form.append("price", formData.price);
+      form.append("location", formData.location.trim());
+      form.append("locationAr", formData.locationAr.trim());
       form.append("type", formData.type);
       form.append("status", formData.status);
       form.append("bedrooms", formData.bedrooms || "0");
       form.append("bathrooms", formData.bathrooms || "0");
       form.append("size", formData.size || "0");
-      form.append("color", formData.color || "#C9A84C");
+      form.append("color", formData.color);
 
       formData.images.forEach((image) => {
         form.append("images", image);
@@ -192,6 +209,7 @@ const locations = [
       handleCloseModal();
     } catch (err) {
       console.error(err);
+      alert(language === 'en' ? 'Error saving property' : 'حدث خطأ في حفظ العقار');
     }
   };
 
@@ -671,25 +689,32 @@ const fetchProperties = async () => {
         <form
           id="propertyForm"
           onSubmit={handleSubmit}
-          className="space-y-4"
+          className="space-y-6"
         >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label={language === 'en' ? 'Title (English)' : 'العنوان (إنجليزي)'}
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            />
-            <Input
-              label={language === 'en' ? 'Title (Arabic)' : 'العنوان (عربي)'}
-              value={formData.titleAr}
-              onChange={(e) => setFormData({ ...formData, titleAr: e.target.value })}
-            />
-          </div>
+          {/* English Title */}
+          <Input
+            required
+            label={language === 'en' ? 'Title (English)' : 'العنوان (إنجليزي)'}
+            placeholder={language === 'en' ? 'e.g. Luxury Apartment' : 'مثال: شقة فاخرة'}
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          />
+          
+          {/* Arabic Title */}
+          <Input
+            required
+            label={language === 'en' ? 'Title (Arabic)' : 'العنوان (عربي)'}
+            placeholder={language === 'en' ? 'e.g. شقة فاخرة' : 'مثال: شقة فاخرة'}
+            value={formData.titleAr}
+            onChange={(e) => setFormData({ ...formData, titleAr: e.target.value })}
+          />
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* English Description */}
             <TextArea
               name="description"
               label={language === 'en' ? 'Description (English)' : 'الوصف (إنجليزي)'}
+              placeholder={language === 'en' ? 'Property details in English...' : 'تفاصيل العقار بالإنجليزية...'}
               value={formData.description}
               onChange={(e) =>
                 setFormData({
@@ -700,9 +725,11 @@ const fetchProperties = async () => {
               rows={3}
             />
 
+            {/* Arabic Description */}
             <TextArea
               name="descriptionAr"
               label={language === 'en' ? 'Description (Arabic)' : 'الوصف (عربي)'}
+              placeholder={language === 'en' ? 'Property details in Arabic...' : 'تفاصيل العقار بالعربية...'}
               value={formData.descriptionAr}
               onChange={(e) =>
                 setFormData({
@@ -715,28 +742,43 @@ const fetchProperties = async () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Price */}
             <Input
+              required
               label={language === 'en' ? 'Price (EGP)' : 'السعر (ج.م)'}
               type="number"
+              placeholder="0"
+              min="1"
+              step="1000"
               value={formData.price}
               onChange={(e) => setFormData({ ...formData, price: e.target.value })}
             />
+            {/* Size */}
             <Input
               label={language === 'en' ? 'Size (m²)' : 'المساحة (م²)'}
               type="number"
+              placeholder="0"
+              min="0"
+              step="10"
               value={formData.size}
               onChange={(e) => setFormData({ ...formData, size: e.target.value })}
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Location English */}
             <Input
+              required
               label={language === 'en' ? 'Location (English)' : 'الموقع (إنجليزي)'}
+              placeholder={language === 'en' ? 'e.g. Downtown Cairo' : 'مثال: وسط القاهرة'}
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
             />
+            {/* Location Arabic */}
             <Input
+              required
               label={language === 'en' ? 'Location (Arabic)' : 'الموقع (عربي)'}
+              placeholder={language === 'en' ? 'e.g. وسط القاهرة' : 'مثال: وسط القاهرة'}
               value={formData.locationAr}
               onChange={(e) => setFormData({ ...formData, locationAr: e.target.value })}
             />
@@ -745,7 +787,7 @@ const fetchProperties = async () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Property Type */}
             <div>
-              <label className="text-sm mb-1 block">
+              <label className="text-sm font-medium block mb-1.5">
                 {language === 'en' ? 'Property Type' : 'نوع العقار'}
               </label>
 
@@ -785,7 +827,7 @@ const fetchProperties = async () => {
 
             {/* Status */}
             <div>
-              <label className="text-sm mb-1 block">
+              <label className="text-sm font-medium block mb-1.5">
                 {language === 'en' ? 'Status' : 'الحالة'}
               </label>
 
@@ -816,58 +858,75 @@ const fetchProperties = async () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label={language === 'en' ? 'Bedrooms' : 'غرف النوم'}
-                type="number"
-                value={formData.bedrooms}
-                onChange={(e) => setFormData({ ...formData, bedrooms: e.target.value })}
-              />
-              <Input
-                label={language === 'en' ? 'Bathrooms' : 'الحمامات'}
-                type="number"
-                value={formData.bathrooms}
-                onChange={(e) => setFormData({ ...formData, bathrooms: e.target.value })}
-              />
-            </div>
-
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* Bedrooms */}
+            <Input
+              label={language === 'en' ? 'Bedrooms' : 'غرف النوم'}
+              type="number"
+              min="0"
+              placeholder="0"
+              value={formData.bedrooms}
+              onChange={(e) => setFormData({ ...formData, bedrooms: e.target.value })}
+            />
+            {/* Bathrooms */}
+            <Input
+              label={language === 'en' ? 'Bathrooms' : 'الحمامات'}
+              type="number"
+              min="0"
+              placeholder="0"
+              value={formData.bathrooms}
+              onChange={(e) => setFormData({ ...formData, bathrooms: e.target.value })}
+            />
             {/* Color Picker */}
             <div>
-              <label className="text-sm mb-1 block">
-                {language === 'en' ? 'Theme Color' : 'لون العقار المميز'}
+              <label className="text-sm font-medium block mb-1.5">
+                {language === 'en' ? 'Theme Color' : 'لون العقار'}
               </label>
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex items-center gap-2">
                 <input
                   type="color"
                   value={formData.color}
                   onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                  className="w-10 h-10 p-0 border border-gray-300 rounded-lg cursor-pointer bg-transparent"
+                  className="w-12 h-10 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer"
                 />
-                <span className="text-xs font-mono text-[var(--text-secondary)] uppercase">
+                <span className="text-xs font-mono text-gray-500 dark:text-gray-400 uppercase flex-1">
                   {formData.color}
                 </span>
               </div>
             </div>
           </div>
 
+          {/* Images */}
           <div>
-            <label className="block text-sm mb-2">
+            <label className="text-sm font-medium block mb-1.5">
               {language === 'en' ? 'Property Images' : 'صور العقار'}
+              {!editingProperty && <span className="text-red-500">*</span>}
             </label>
 
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  images: Array.from(e.target.files || []),
-                })
-              }
-              className="w-full border rounded-lg p-2"
-            />
+            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-blue-500 transition-colors cursor-pointer relative">
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    images: Array.from(e.target.files || []),
+                  })
+                }
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+              <div className="pointer-events-none">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  {language === 'en' ? 'Click to upload images' : 'انقر لتحميل الصور'}
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {formData.images.length > 0 
+                    ? `${formData.images.length} ${language === 'en' ? 'file(s) selected' : 'ملف محدد'}` 
+                    : language === 'en' ? 'PNG, JPG, GIF (max 5MB)' : 'PNG, JPG, GIF (الحد الأقصى 5 ميجابايت)'}
+                </p>
+              </div>
+            </div>
           </div>
         </form>
       </Modal>
