@@ -33,7 +33,9 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config', 'G-QEQFHDTQYE');
+  gtag('config', 'G-QEQFHDTQYE', {
+    cookie_domain: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'none' : 'auto'
+  });
 </script>
  
 </head>
