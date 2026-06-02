@@ -1,11 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
-  Bell,
-  Moon,
-  Sun,
-  Settings2,
   Search,
   Calendar,
+  ChevronLeft,
   ChevronRight,
   Plus,
   X,
@@ -14,6 +11,8 @@ import {
   Clock,
   XCircle,
   Building2,
+  LayoutGrid,
+  Rows,
 } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 import {
@@ -28,18 +27,22 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ProtectedImage } from '../../components/ProtectedImage';
 
 type FilterStatus = 'all' | 'confirmed' | 'pending' | 'cancelled' | 'available';
+type ViewMode = 'month' | 'week';
 
 export const AdminCalendarPage: React.FC = () => {
   const { language } = useApp();
   const [properties, setProperties] = useState<Property[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
-  const [currentDate] = useState<Date>(new Date(2026, 4, 1));
+  const [currentDate, setCurrentDate] = useState<Date>(() => {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), 1);
+  });
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [showDetailSheet, setShowDetailSheet] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [viewportWidth, setViewportWidth] = useState<number>(
     typeof window !== 'undefined' ? window.innerWidth : 1024
   );
@@ -49,45 +52,56 @@ export const AdminCalendarPage: React.FC = () => {
   const propertyHeaderRef = useRef<HTMLDivElement>(null);
   const todayRowRef = useRef<HTMLDivElement>(null);
 
-  const today = useMemo(() => new Date(2026, 4, 30), []);
+  const today = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }, []);
+
+  const goToPrevMonth = useCallback(() => {
+    setCurrentDate(d => new Date(d.getFullYear(), d.getMonth() - 1, 1));
+  }, []);
+
+  const goToNextMonth = useCallback(() => {
+    setCurrentDate(d => new Date(d.getFullYear(), d.getMonth() + 1, 1));
+  }, []);
+
+  const goToCurrentMonth = useCallback(() => {
+    const now = new Date();
+    setCurrentDate(new Date(now.getFullYear(), now.getMonth(), 1));
+  }, []);
 
   // Responsive config
-  const responsiveConfig = useMemo(() => {
+  const rc = useMemo(() => {
     const mobile = viewportWidth < 768;
     const tablet = viewportWidth >= 768 && viewportWidth < 1024;
-
     return {
       mobile,
       tablet,
-      gap: mobile ? 6 : tablet ? 10 : 12,
-      dateColumnWidth: mobile ? 48 : tablet ? 60 : 72,
-      cellHeight: mobile ? 56 : 72,
-      headerHeight: mobile ? 110 : 140,
+      gap: mobile ? 3 : 6,
+      dateColW: mobile ? 32 : 52,
+      cellH: mobile ? 36 : 48,     // desktop also smaller now
+      headerH: mobile ? 72 : 100,  // desktop header smaller
     };
   }, [viewportWidth]);
 
-  // Dynamic column width — fills available space, never less than minWidth
+  // Filtered properties (declared early so columnWidth can use it)
+  const filteredProperties = useMemo(
+    () =>
+      properties.filter(
+        (p) =>
+          p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.titleAr?.includes(searchQuery) ||
+          p.location.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
+    [properties, searchQuery]
+  );
+
+  // Dynamic column width
   const columnWidth = useMemo(() => {
-    const count = properties.filter(
-      (p) =>
-        p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.titleAr?.includes(searchQuery) ||
-        p.location.toLowerCase().includes(searchQuery.toLowerCase())
-    ).length;
+    const count = filteredProperties.length;
+    if (count === 0) return 100;
+    const minW = rc.mobile ? 52 : 90;
+    const available = viewportWidth - rc.dateColW - rc.gap * (count + 1) - 8;
+    return Math.max(available / count, minW);
+  }, [viewportWidth, filteredProperties.length, rc]);
 
-    if (count === 0) return 120;
-
-    const minWidth = responsiveConfig.mobile ? 90 : 110;
-    const available =
-      viewportWidth -
-      responsiveConfig.dateColumnWidth -
-      responsiveConfig.gap * (count + 1) -
-      16;
-    const computed = available / count;
-    return Math.max(computed, minWidth);
-  }, [viewportWidth, properties, searchQuery, responsiveConfig]);
-
-  // Handle resize
   useEffect(() => {
     const handleResize = () => {
       setViewportWidth(window.innerWidth);
@@ -98,7 +112,6 @@ export const AdminCalendarPage: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Fetch data
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -118,52 +131,54 @@ export const AdminCalendarPage: React.FC = () => {
     fetchData();
   }, []);
 
-  // Sync horizontal scroll between header and body
+  // Sync horizontal scroll
   useEffect(() => {
-    const headerEl = propertyHeaderRef.current;
-    const bodyEl = gridBodyRef.current;
-    if (!headerEl || !bodyEl) return;
-
-    const syncFromHeader = () => { bodyEl.scrollLeft = headerEl.scrollLeft; };
-    const syncFromBody = () => { headerEl.scrollLeft = bodyEl.scrollLeft; };
-
-    headerEl.addEventListener('scroll', syncFromHeader);
-    bodyEl.addEventListener('scroll', syncFromBody);
-    return () => {
-      headerEl.removeEventListener('scroll', syncFromHeader);
-      bodyEl.removeEventListener('scroll', syncFromBody);
-    };
+    const h = propertyHeaderRef.current;
+    const b = gridBodyRef.current;
+    if (!h || !b) return;
+    const sh = () => { b.scrollLeft = h.scrollLeft; };
+    const sb = () => { h.scrollLeft = b.scrollLeft; };
+    h.addEventListener('scroll', sh);
+    b.addEventListener('scroll', sb);
+    return () => { h.removeEventListener('scroll', sh); b.removeEventListener('scroll', sb); };
   }, []);
 
-  // Scroll to today
   const scrollToToday = useCallback(() => {
-    if (todayRowRef.current && gridBodyRef.current) {
-      const container = gridBodyRef.current;
-      const todayEl = todayRowRef.current;
-      const offset = todayEl.offsetTop - container.clientHeight / 2 + responsiveConfig.cellHeight / 2;
-      container.scrollTo({ top: offset, behavior: 'smooth' });
-    }
-  }, [responsiveConfig.cellHeight]);
+    // Navigate to current month first, then scroll to today's row
+    const now = new Date();
+    setCurrentDate(new Date(now.getFullYear(), now.getMonth(), 1));
+    // Small delay to allow re-render before scrolling
+    setTimeout(() => {
+      if (todayRowRef.current && gridBodyRef.current) {
+        const c = gridBodyRef.current;
+        const el = todayRowRef.current;
+        c.scrollTo({ top: el.offsetTop - c.clientHeight / 2 + rc.cellH / 2, behavior: 'smooth' });
+      }
+    }, 50);
+  }, [rc.cellH]);
 
-  // Date range for current month
-  const dateRange = useMemo(() => {
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const lastDay = new Date(year, month + 1, 0).getDate();
-    return Array.from({ length: lastDay }, (_, i) => new Date(year, month, i + 1));
+  // Date ranges
+  const monthRange = useMemo(() => {
+    const y = currentDate.getFullYear();
+    const m = currentDate.getMonth();
+    const last = new Date(y, m + 1, 0).getDate();
+    return Array.from({ length: last }, (_, i) => new Date(y, m, i + 1));
   }, [currentDate]);
 
-  // Filtered properties
-  const filteredProperties = useMemo(
-    () =>
-      properties.filter(
-        (p) =>
-          p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.titleAr?.includes(searchQuery) ||
-          p.location.toLowerCase().includes(searchQuery.toLowerCase())
-      ),
-    [properties, searchQuery]
-  );
+  // Week range: Mon–Sun of today's week
+  const weekRange = useMemo(() => {
+    const d = new Date(today);
+    const day = d.getDay(); // 0=Sun
+    const monday = new Date(d);
+    monday.setDate(d.getDate() - ((day + 6) % 7));
+    return Array.from({ length: 7 }, (_, i) => {
+      const dd = new Date(monday);
+      dd.setDate(monday.getDate() + i);
+      return dd;
+    });
+  }, [today]);
+
+  const dateRange = viewMode === 'month' ? monthRange : weekRange;
 
   const isToday = (date: Date) =>
     date.getDate() === today.getDate() &&
@@ -171,26 +186,16 @@ export const AdminCalendarPage: React.FC = () => {
     date.getFullYear() === today.getFullYear();
 
   const getBookingsForCell = useCallback(
-    (date: Date, propertyId: string): Booking[] => {
-      return bookings.filter((booking) => {
-        const propId =
-          typeof booking.propertyId === 'object' && booking.propertyId
-            ? booking.propertyId._id
-            : booking.propertyId;
-        if (propId !== propertyId) return false;
-
-        const start = new Date(booking.startDate);
-        const end = new Date(booking.endDate);
-        start.setHours(0, 0, 0, 0);
-        end.setHours(0, 0, 0, 0);
-        const d = new Date(date);
-        d.setHours(0, 0, 0, 0);
-
-        if (!(d >= start && d < end)) return false;
-        if (filterStatus === 'all') return true;
-        return booking.status === filterStatus;
-      });
-    },
+    (date: Date, propertyId: string): Booking[] =>
+      bookings.filter((b) => {
+        const pId = typeof b.propertyId === 'object' && b.propertyId ? b.propertyId._id : b.propertyId;
+        if (pId !== propertyId) return false;
+        const s = new Date(b.startDate); s.setHours(0, 0, 0, 0);
+        const e = new Date(b.endDate); e.setHours(0, 0, 0, 0);
+        const d = new Date(date); d.setHours(0, 0, 0, 0);
+        if (!(d >= s && d < e)) return false;
+        return filterStatus === 'all' || b.status === filterStatus;
+      }),
     [bookings, filterStatus]
   );
 
@@ -205,114 +210,125 @@ export const AdminCalendarPage: React.FC = () => {
     [getBookingsForCell]
   );
 
-  const getOccupancyPercentage = useCallback(
+  const getOccupancy = useCallback(
     (propertyId: string) => {
-      const propBookings = bookings.filter((b) => {
-        const pId =
-          typeof b.propertyId === 'object' && b.propertyId
-            ? b.propertyId._id
-            : b.propertyId;
+      const pb = bookings.filter((b) => {
+        const pId = typeof b.propertyId === 'object' && b.propertyId ? b.propertyId._id : b.propertyId;
         return pId === propertyId && b.status !== 'cancelled';
       });
-      const totalDays = propBookings.reduce((sum, b) => sum + b.totalDays, 0);
-      return Math.min(Math.round((totalDays / dateRange.length) * 100), 100);
+      return Math.min(Math.round((pb.reduce((s, b) => s + b.totalDays, 0) / monthRange.length) * 100), 100);
     },
-    [bookings, dateRange.length]
+    [bookings, monthRange.length]
   );
 
   const getDayName = (date: Date) =>
     date.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'short' });
 
   const getMonthName = (date: Date) =>
-    date.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', {
-      month: 'long',
-      year: 'numeric',
-    });
+    date.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', { month: 'long', year: 'numeric' });
 
-  const abbreviate = (text: string, max: number) =>
+  const abbr = (text: string, max: number) =>
     text?.length > max ? text.slice(0, max - 1) + '…' : text || '';
 
-  // Styling helpers
-  const getCellStyle = (status: string) => {
-    switch (status) {
-      case 'confirmed': return 'bg-[#EAF3DE] border-[#639922]/40';
-      case 'pending': return 'bg-[#FAEEDA] border-[#EF9F27]/40';
-      case 'cancelled': return 'bg-[#FCEBEB] border-[#E24B4A]/40';
-      default: return 'bg-gray-50 border-gray-200';
-    }
-  };
+  const getCellStyle = (s: string) => ({
+    confirmed: 'bg-[#EAF3DE] border-[#639922]/40',
+    pending: 'bg-[#FAEEDA] border-[#EF9F27]/40',
+    cancelled: 'bg-[#FCEBEB] border-[#E24B4A]/40',
+    available: 'bg-gray-50 border-gray-200',
+  }[s] ?? 'bg-gray-50 border-gray-200');
 
-  const getTextColor = (status: string) => {
-    switch (status) {
-      case 'confirmed': return 'text-[#27500A]';
-      case 'pending': return 'text-[#633806]';
-      case 'cancelled': return 'text-[#791F1F]';
-      default: return 'text-gray-400';
-    }
-  };
+  const getTextColor = (s: string) => ({
+    confirmed: 'text-[#27500A]',
+    pending: 'text-[#633806]',
+    cancelled: 'text-[#791F1F]',
+    available: 'text-gray-400',
+  }[s] ?? 'text-gray-400');
+
+  const statusBg = (s: string) => s === 'confirmed' ? '#639922' : s === 'pending' ? '#EF9F27' : '#E24B4A';
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-white">
+      <div className="flex items-center justify-center h-full bg-white">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500 text-sm">Loading...</p>
+          <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-gray-400 text-sm">Loading...</p>
         </div>
       </div>
     );
   }
 
-  const dm = darkMode;
-  const bg = dm ? 'bg-gray-900' : 'bg-white';
-  const border = dm ? 'border-gray-700' : 'border-gray-200';
-  const textPrimary = dm ? 'text-white' : 'text-gray-900';
-  const textMuted = dm ? 'text-gray-400' : 'text-gray-500';
-
   return (
-    <div className={`flex flex-col h-screen w-full ${bg}`} style={{ maxWidth: 1024, margin: '0 auto' }}>
+    <div className="flex flex-col h-full w-full bg-white">
 
       {/* ── Header ── */}
-      <div className={`${dm ? 'bg-gray-800' : 'bg-white'} ${border} border-b px-4 py-3 sticky top-0 z-40 flex items-center justify-between`}>
-        <div>
-          <h1 className={`text-lg font-bold ${textPrimary}`}>
-            {language === 'ar' ? 'الحجوزات' : 'Reservations'}
-          </h1>
-          <p className={`text-xs ${textMuted} flex items-center gap-0.5 mt-0.5`}>
-            {getMonthName(currentDate)}
-            <ChevronRight size={12} />
-          </p>
+      <div className="bg-white border-b border-gray-200 px-4 py-2.5 sticky top-0 z-40 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div>
+            <h1 className="text-base font-bold text-gray-900">
+              {language === 'ar' ? 'الحجوزات' : 'Reservations'}
+            </h1>
+          </div>
+          {/* Month navigation */}
+          <div className="flex items-center gap-1 mt-0.5">
+            <button
+              onClick={goToPrevMonth}
+              className="p-1 rounded-md hover:bg-gray-100 transition text-gray-500 hover:text-gray-900"
+              aria-label="Previous month"
+            >
+              <ChevronLeft size={15} />
+            </button>
+            <span className="text-xs font-medium text-gray-700 min-w-[90px] text-center">
+              {getMonthName(currentDate)}
+            </span>
+            <button
+              onClick={goToNextMonth}
+              className="p-1 rounded-md hover:bg-gray-100 transition text-gray-500 hover:text-gray-900"
+              aria-label="Next month"
+            >
+              <ChevronRight size={15} />
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          <button className={`relative p-2 rounded-lg hover:bg-gray-100 ${dm ? 'hover:bg-gray-700' : ''} transition`}>
-            <Bell size={19} className={textMuted} />
-            <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full" />
+
+        {/* View toggle: شهر / أسبوع */}
+        <div className="flex items-center bg-gray-100 rounded-lg p-0.5 gap-0.5">
+          <button
+            onClick={() => setViewMode('month')}
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition ${viewMode === 'month'
+                ? 'bg-white text-[#534AB7] shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
+              }`}
+          >
+            <LayoutGrid size={13} />
+            {language === 'ar' ? 'شهر' : 'Month'}
           </button>
-          <button onClick={() => setDarkMode(!dm)} className={`p-2 rounded-lg hover:bg-gray-100 ${dm ? 'hover:bg-gray-700' : ''} transition`}>
-            {dm ? <Sun size={19} className="text-gray-300" /> : <Moon size={19} className="text-gray-600" />}
-          </button>
-          <button className={`p-2 rounded-lg hover:bg-gray-100 ${dm ? 'hover:bg-gray-700' : ''} transition`}>
-            <Settings2 size={19} className={textMuted} />
+          <button
+            onClick={() => setViewMode('week')}
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition ${viewMode === 'week'
+                ? 'bg-white text-[#534AB7] shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
+              }`}
+          >
+            <Rows size={13} />
+            {language === 'ar' ? 'أسبوع' : 'Week'}
           </button>
         </div>
       </div>
 
       {/* ── Filters ── */}
-      <div className={`${dm ? 'bg-gray-800' : 'bg-gray-50'} ${border} border-b px-4 py-3 space-y-2.5`}>
+      <div className="bg-gray-50 border-b border-gray-200 px-3 py-2 space-y-2">
         {/* Pills */}
-        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+        <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
           {(['all', 'confirmed', 'pending', 'cancelled', 'available'] as const).map((status) => {
             const active = filterStatus === status;
-            const dotColors: Record<string, string> = {
-              confirmed: 'bg-[#639922]',
-              pending: 'bg-[#EF9F27]',
-              cancelled: 'bg-[#E24B4A]',
-              available: 'bg-gray-400',
-              all: 'bg-gray-400',
+            const dotColor: Record<string, string> = {
+              confirmed: 'bg-[#639922]', pending: 'bg-[#EF9F27]',
+              cancelled: 'bg-[#E24B4A]', available: 'bg-gray-400', all: 'bg-gray-400',
             };
-            const labels: Record<string, { ar: string; en: string }> = {
+            const label: Record<string, { ar: string; en: string }> = {
               all: { ar: 'الكل', en: 'All' },
               confirmed: { ar: 'مؤكد', en: 'Confirmed' },
-              pending: { ar: 'قيد الانتظار', en: 'Pending' },
+              pending: { ar: 'انتظار', en: 'Pending' },
               cancelled: { ar: 'ملغى', en: 'Cancelled' },
               available: { ar: 'متاح', en: 'Available' },
             };
@@ -320,15 +336,13 @@ export const AdminCalendarPage: React.FC = () => {
               <button
                 key={status}
                 onClick={() => setFilterStatus(status)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition border ${active
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium whitespace-nowrap border transition ${active
                     ? 'bg-[#EEEDFE] text-[#534AB7] border-[#534AB7]'
-                    : dm
-                      ? 'bg-gray-700 text-gray-300 border-gray-600'
-                      : 'bg-white text-gray-600 border-gray-200'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
                   }`}
               >
-                <span className={`w-1.5 h-1.5 rounded-full ${dotColors[status]}`} />
-                {language === 'ar' ? labels[status].ar : labels[status].en}
+                <span className={`w-1.5 h-1.5 rounded-full ${dotColor[status]}`} />
+                {language === 'ar' ? label[status].ar : label[status].en}
               </button>
             );
           })}
@@ -336,27 +350,26 @@ export const AdminCalendarPage: React.FC = () => {
 
         {/* Search + Today */}
         <div className="flex gap-2">
-          <div className={`flex-1 flex items-center gap-2 ${dm ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'} border rounded-lg px-3 py-2`}>
-            <Search size={15} className={textMuted} />
+          <div className="flex-1 flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-2.5 py-1.5">
+            <Search size={13} className="text-gray-400" />
             <input
               type="text"
               placeholder={language === 'ar' ? 'ابحث عن عقار أو ضيف...' : 'Search property or guest...'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className={`flex-1 bg-transparent outline-none text-sm ${textPrimary}`}
+              className="flex-1 bg-transparent outline-none text-xs text-gray-900 placeholder:text-gray-400"
             />
             {searchQuery && (
               <button onClick={() => setSearchQuery('')}>
-                <X size={14} className={textMuted} />
+                <X size={12} className="text-gray-400" />
               </button>
             )}
           </div>
-          {/* Today — scrolls to today's row */}
           <button
             onClick={scrollToToday}
-            className="flex items-center gap-1.5 px-3 py-2 bg-[#534AB7] text-white rounded-lg font-medium text-xs whitespace-nowrap hover:bg-[#6B5AC8] active:scale-95 transition"
+            className="flex items-center gap-1 px-3 py-1.5 bg-[#534AB7] text-white rounded-lg font-medium text-[11px] whitespace-nowrap hover:bg-[#6B5AC8] active:scale-95 transition"
           >
-            <Calendar size={14} />
+            <Calendar size={12} />
             {language === 'ar' ? 'اليوم' : 'Today'}
           </button>
         </div>
@@ -365,20 +378,17 @@ export const AdminCalendarPage: React.FC = () => {
       {/* ── Calendar Grid ── */}
       <div className="flex-1 flex flex-col overflow-hidden">
 
-        {/* Property Header (sticky) */}
+        {/* Property Header Row */}
         <div
           ref={propertyHeaderRef}
-          className={`overflow-x-auto overflow-y-hidden flex-shrink-0 ${dm ? 'bg-gray-800' : 'bg-gray-50'} ${border} border-b`}
+          className="overflow-x-auto overflow-y-hidden flex-shrink-0 bg-gray-50 border-b border-gray-200"
           style={{ scrollbarWidth: 'none' }}
         >
-          <div
-            className="flex"
-            style={{ gap: responsiveConfig.gap, padding: responsiveConfig.gap, minWidth: 'max-content' }}
-          >
-            {/* Date label */}
+          <div className="flex" style={{ gap: rc.gap, padding: rc.gap, minWidth: 'max-content' }}>
+            {/* Date col label */}
             <div
-              className={`flex-shrink-0 flex items-center justify-center font-semibold text-xs ${textMuted}`}
-              style={{ width: responsiveConfig.dateColumnWidth, height: responsiveConfig.headerHeight }}
+              className="flex-shrink-0 flex items-center justify-center text-[10px] font-medium text-gray-400"
+              style={{ width: rc.dateColW, height: rc.headerH }}
             >
               {language === 'ar' ? 'التاريخ' : 'Date'}
             </div>
@@ -387,43 +397,60 @@ export const AdminCalendarPage: React.FC = () => {
             {filteredProperties.map((property) => (
               <div
                 key={property._id}
-                className="flex-shrink-0 rounded-xl overflow-hidden shadow-sm"
-                style={{ width: columnWidth, height: responsiveConfig.headerHeight }}
+                className="flex-shrink-0 rounded-lg overflow-hidden border border-gray-200"
+                style={{ width: columnWidth, height: rc.headerH }}
               >
                 {/* Image */}
-                <div
-                  className="relative w-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white overflow-hidden"
-                  style={{ height: isMobile ? 60 : 76 }}
-                >
-                  {property.images?.[0] ? (
-                    <ProtectedImage
-                      src={property.images[0]}
-                      alt={property.title}
-                      containerClassName="w-full h-full"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="text-center px-1">
-                      <Building2 size={columnWidth > 120 ? 18 : 14} className="mx-auto mb-0.5" />
-                      <span className="text-xs leading-tight line-clamp-2">
-                        {abbreviate(property.title, columnWidth > 120 ? 18 : 10)}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                {!isMobile && (
+                  <div
+                    className="w-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white overflow-hidden"
+                    style={{ height: rc.headerH - 38 }}
+                  >
+                    {property.images?.[0] ? (
+                      <ProtectedImage
+                        src={property.images[0]}
+                        alt={property.title}
+                        containerClassName="w-full h-full"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="text-center px-1">
+                        <Building2 size={14} className="mx-auto mb-0.5" />
+                        <span style={{ fontSize: 9 }} className="leading-tight line-clamp-1">
+                          {abbr(property.title, 14)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* Info */}
-                <div className={`p-1.5 ${dm ? 'bg-gray-800' : 'bg-white'}`}>
-                  <p className={`font-bold truncate ${textPrimary}`} style={{ fontSize: columnWidth > 120 ? 11 : 9 }}>
-                    {abbreviate(property.title, columnWidth > 130 ? 20 : 13)}
-                  </p>
-                  {columnWidth > 110 && (
-                    <p className={`truncate ${textMuted}`} style={{ fontSize: 9 }}>
-                      {formatEGP(property.price)}/ليلة
-                    </p>
+                <div
+                  className="bg-white flex flex-col justify-center text-center"
+                  style={{ padding: isMobile ? '3px 2px' : '4px 4px', height: isMobile ? rc.headerH : 38 }}
+                >
+                  {isMobile && (
+                    <div
+                      className="w-full rounded overflow-hidden flex items-center justify-center mb-1"
+                      style={{ height: 28, background: 'linear-gradient(135deg,#b09de8,#534AB7)' }}
+                    >
+                      {property.images?.[0] ? (
+                        <ProtectedImage
+                          src={property.images[0]}
+                          alt={property.title}
+                          containerClassName="w-full h-full"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <Building2 size={12} className="text-white" />
+                      )}
+                    </div>
                   )}
-                  <p className="font-bold text-[#534AB7]" style={{ fontSize: 9 }}>
-                    {getOccupancyPercentage(property._id as string)}%
+                  <p className="font-semibold truncate text-gray-900" style={{ fontSize: isMobile ? 7 : 10 }}>
+                    {abbr(property.title, isMobile ? 7 : 16)}
+                  </p>
+                  <p className="font-bold text-[#534AB7]" style={{ fontSize: isMobile ? 7 : 9 }}>
+                    {getOccupancy(property._id as string)}%
                   </p>
                 </div>
               </div>
@@ -433,32 +460,31 @@ export const AdminCalendarPage: React.FC = () => {
 
         {/* Grid Body */}
         <div ref={gridBodyRef} className="flex-1 overflow-auto" style={{ scrollbarWidth: 'thin' }}>
-          <div
-            className="flex"
-            style={{ gap: responsiveConfig.gap, padding: responsiveConfig.gap, minWidth: 'max-content' }}
-          >
-            {/* Date column (sticky left) */}
+          <div className="flex" style={{ gap: rc.gap, padding: rc.gap, minWidth: 'max-content' }}>
+
+            {/* Date column — sticky left */}
             <div
-              className={`flex-shrink-0 sticky left-0 z-10 ${dm ? 'bg-gray-900' : 'bg-white'} ${border} border-r`}
-              style={{ width: responsiveConfig.dateColumnWidth }}
+              className="flex-shrink-0 sticky left-0 z-10 bg-white border-r border-gray-200"
+              style={{ width: rc.dateColW }}
             >
               {dateRange.map((date) => {
-                const isTodayDate = isToday(date);
+                const isT = isToday(date);
                 return (
                   <div
                     key={date.toISOString()}
-                    ref={isTodayDate ? todayRowRef : undefined}
-                    className={`flex flex-col items-center justify-center border-b ${border} transition-colors ${isTodayDate ? 'bg-[#EEEDFE]' : dm ? 'bg-gray-900' : 'bg-white'
-                      }`}
-                    style={{ height: responsiveConfig.cellHeight + responsiveConfig.gap }}
+                    ref={isT ? todayRowRef : undefined}
+                    className={`flex flex-col items-center justify-center border-b border-gray-100 ${isT ? 'bg-[#EEEDFE]' : 'bg-white'}`}
+                    style={{ height: rc.cellH + rc.gap }}
                   >
                     <div
-                      className={`w-6 h-6 flex items-center justify-center rounded-full font-bold text-sm ${isTodayDate ? 'bg-[#534AB7] text-white' : textPrimary
-                        }`}
+                      className={`flex items-center justify-center rounded-full font-bold ${isT ? 'bg-[#534AB7] text-white' : 'text-gray-900'}`}
+                      style={{ width: isMobile ? 17 : 20, height: isMobile ? 17 : 20, fontSize: isMobile ? 9 : 11 }}
                     >
                       {date.getDate()}
                     </div>
-                    <span className={`text-[9px] mt-0.5 ${textMuted}`}>{getDayName(date)}</span>
+                    <span className="text-gray-400 mt-0.5" style={{ fontSize: isMobile ? 7 : 8 }}>
+                      {getDayName(date)}
+                    </span>
                   </div>
                 );
               })}
@@ -469,7 +495,7 @@ export const AdminCalendarPage: React.FC = () => {
               <div
                 key={property._id}
                 className="flex-shrink-0 flex flex-col"
-                style={{ width: columnWidth, gap: responsiveConfig.gap }}
+                style={{ width: columnWidth, gap: rc.gap }}
               >
                 {dateRange.map((date) => {
                   const cellBookings = getBookingsForCell(date, property._id as string);
@@ -480,59 +506,51 @@ export const AdminCalendarPage: React.FC = () => {
                     <div
                       key={`${date.toISOString()}-${property._id}`}
                       onClick={() => {
-                        if (hasBooking) {
-                          setSelectedBooking(cellBookings[0]);
-                          setShowDetailSheet(true);
-                        }
+                        if (hasBooking) { setSelectedBooking(cellBookings[0]); setShowDetailSheet(true); }
                       }}
-                      className={`rounded-lg border flex flex-col items-center justify-center transition-all ${hasBooking ? 'cursor-pointer hover:shadow-md active:scale-95' : ''
+                      className={`rounded-md border flex items-center justify-center relative overflow-hidden transition-all ${hasBooking ? 'cursor-pointer hover:shadow-sm active:scale-95' : ''
                         } ${getCellStyle(status)}`}
-                      style={{ height: responsiveConfig.cellHeight }}
+                      style={{ height: rc.cellH }}
                     >
                       {hasBooking ? (
                         <motion.div
-                          initial={{ scale: 0.9, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          className="w-full h-full flex flex-col items-center justify-center px-1 relative"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="w-full h-full flex flex-col items-center justify-center px-0.5 relative"
                         >
                           <span
-                            className={`font-semibold text-center line-clamp-2 ${getTextColor(status)}`}
-                            style={{ fontSize: columnWidth > 120 ? 10 : 8, lineHeight: 1.2 }}
+                            className={`font-semibold text-center leading-tight w-full truncate ${getTextColor(status)}`}
+                            style={{ fontSize: isMobile ? 7 : 9 }}
                           >
                             {typeof cellBookings[0].clientId === 'object'
-                              ? abbreviate(cellBookings[0].clientId?.name || 'Guest', columnWidth > 130 ? 14 : 9)
+                              ? abbr(cellBookings[0].clientId?.name || 'Guest', isMobile ? 5 : 12)
                               : 'Guest'}
                           </span>
-                          {columnWidth > 100 && (
-                            <span className={`flex items-center gap-0.5 mt-0.5 ${getTextColor(status)}`} style={{ fontSize: 8 }}>
-                              <Users size={9} />
+                          {!isMobile && (
+                            <span
+                              className={`flex items-center gap-0.5 mt-0.5 ${getTextColor(status)}`}
+                              style={{ fontSize: 7 }}
+                            >
+                              <Users size={8} />
                               {cellBookings[0].totalDays}d
                             </span>
                           )}
                           <span
-                            className="absolute bottom-1 right-1 text-white rounded-full w-4 h-4 flex items-center justify-center text-[8px]"
+                            className="absolute bottom-0.5 right-0.5 text-white rounded-full flex items-center justify-center"
                             style={{
-                              background:
-                                status === 'confirmed' ? '#639922' :
-                                  status === 'pending' ? '#EF9F27' :
-                                    '#E24B4A',
+                              width: isMobile ? 7 : 12, height: isMobile ? 7 : 12,
+                              fontSize: isMobile ? 4 : 7,
+                              background: statusBg(status),
                             }}
                           >
-                            {status === 'confirmed' ? '✓' : status === 'pending' ? '⏰' : '✗'}
+                            {status === 'confirmed' ? '✓' : status === 'pending' ? '·' : '✗'}
                           </span>
                         </motion.div>
                       ) : (
-                        <div className="flex flex-col items-center gap-0.5">
-                          <div
-                            className="rounded-full border-2 border-gray-300"
-                            style={{ width: columnWidth > 120 ? 16 : 12, height: columnWidth > 120 ? 16 : 12 }}
-                          />
-                          {columnWidth > 110 && (
-                            <span className="text-gray-400 text-[7px]">
-                              {language === 'ar' ? 'متاح' : 'Free'}
-                            </span>
-                          )}
-                        </div>
+                        <div
+                          className="rounded-full border-2 border-gray-300"
+                          style={{ width: isMobile ? 7 : 10, height: isMobile ? 7 : 10 }}
+                        />
                       )}
                     </div>
                   );
@@ -547,9 +565,9 @@ export const AdminCalendarPage: React.FC = () => {
       <motion.button
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.93 }}
-        className="fixed right-4 bottom-6 w-14 h-14 bg-[#534AB7] text-white rounded-full shadow-xl flex items-center justify-center hover:bg-[#6B5AC8] z-50"
+        className="fixed right-4 bottom-6 w-12 h-12 bg-[#534AB7] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#6B5AC8] z-50"
       >
-        <Plus size={26} />
+        <Plus size={22} />
       </motion.button>
 
       {/* ── Booking Detail Sheet ── */}
@@ -568,87 +586,79 @@ export const AdminCalendarPage: React.FC = () => {
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
-              className={`w-full md:max-w-md ${dm ? 'bg-gray-800' : 'bg-white'} rounded-t-3xl md:rounded-2xl max-h-[90vh] overflow-y-auto p-5`}
+              className="w-full md:max-w-md bg-white rounded-t-3xl md:rounded-2xl max-h-[90vh] overflow-y-auto p-5"
             >
               <div className="flex items-center justify-between mb-5">
-                <h2 className={`text-lg font-bold ${textPrimary}`}>
+                <h2 className="text-base font-bold text-gray-900">
                   {language === 'ar' ? 'تفاصيل الحجز' : 'Booking Details'}
                 </h2>
-                <button onClick={() => setShowDetailSheet(false)} className={`p-2 rounded-lg hover:bg-gray-100 ${dm ? 'hover:bg-gray-700' : ''}`}>
-                  <X size={20} />
+                <button onClick={() => setShowDetailSheet(false)} className="p-2 rounded-lg hover:bg-gray-100">
+                  <X size={18} />
                 </button>
               </div>
 
-              {/* Guest */}
-              <Section title={language === 'ar' ? 'الضيف' : 'Guest'} dm={dm} border={border}>
-                <p className={`font-bold text-base ${textPrimary}`}>
+              <Section title={language === 'ar' ? 'الضيف' : 'Guest'}>
+                <p className="font-bold text-sm text-gray-900">
                   {typeof selectedBooking.clientId === 'object' ? selectedBooking.clientId?.name : 'Guest'}
                 </p>
-                <p className={`text-sm ${textMuted}`}>
+                <p className="text-xs text-gray-500">
                   {typeof selectedBooking.clientId === 'object' ? selectedBooking.clientId?.phone : '—'}
                 </p>
               </Section>
 
-              {/* Property */}
-              <Section title={language === 'ar' ? 'العقار' : 'Property'} dm={dm} border={border}>
-                <p className={`font-bold text-base ${textPrimary}`}>
+              <Section title={language === 'ar' ? 'العقار' : 'Property'}>
+                <p className="font-bold text-sm text-gray-900">
                   {typeof selectedBooking.propertyId === 'object' ? selectedBooking.propertyId?.title : 'Property'}
                 </p>
               </Section>
 
-              {/* Dates */}
-              <Section title={language === 'ar' ? 'التواريخ' : 'Dates'} dm={dm} border={border}>
+              <Section title={language === 'ar' ? 'التواريخ' : 'Dates'}>
                 <div className="flex justify-between">
                   <div>
-                    <p className={`text-xs ${textMuted} mb-0.5`}>{language === 'ar' ? 'دخول' : 'Check-in'}</p>
-                    <p className={`font-semibold text-sm ${textPrimary}`}>{formatDate(selectedBooking.startDate, language)}</p>
+                    <p className="text-[10px] text-gray-400 mb-0.5">{language === 'ar' ? 'دخول' : 'Check-in'}</p>
+                    <p className="font-semibold text-xs text-gray-900">{formatDate(selectedBooking.startDate, language)}</p>
                   </div>
                   <div>
-                    <p className={`text-xs ${textMuted} mb-0.5`}>{language === 'ar' ? 'خروج' : 'Check-out'}</p>
-                    <p className={`font-semibold text-sm ${textPrimary}`}>{formatDate(selectedBooking.endDate, language)}</p>
+                    <p className="text-[10px] text-gray-400 mb-0.5">{language === 'ar' ? 'خروج' : 'Check-out'}</p>
+                    <p className="font-semibold text-xs text-gray-900">{formatDate(selectedBooking.endDate, language)}</p>
                   </div>
                 </div>
               </Section>
 
-              {/* Status */}
-              <Section title={language === 'ar' ? 'الحالة' : 'Status'} dm={dm} border={border}>
+              <Section title={language === 'ar' ? 'الحالة' : 'Status'}>
                 <span
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium ${selectedBooking.status === 'confirmed'
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${selectedBooking.status === 'confirmed'
                       ? 'bg-[#EAF3DE] text-[#27500A]'
                       : selectedBooking.status === 'pending'
                         ? 'bg-[#FAEEDA] text-[#633806]'
                         : 'bg-[#FCEBEB] text-[#791F1F]'
                     }`}
                 >
-                  {selectedBooking.status === 'confirmed' && <CheckCircle2 size={14} />}
-                  {selectedBooking.status === 'pending' && <Clock size={14} />}
-                  {selectedBooking.status === 'cancelled' && <XCircle size={14} />}
-                  {selectedBooking.status === 'confirmed'
-                    ? language === 'ar' ? 'مؤكد' : 'Confirmed'
-                    : selectedBooking.status === 'pending'
-                      ? language === 'ar' ? 'قيد الانتظار' : 'Pending'
-                      : language === 'ar' ? 'ملغى' : 'Cancelled'}
+                  {selectedBooking.status === 'confirmed' && <CheckCircle2 size={12} />}
+                  {selectedBooking.status === 'pending' && <Clock size={12} />}
+                  {selectedBooking.status === 'cancelled' && <XCircle size={12} />}
+                  {selectedBooking.status === 'confirmed' ? (language === 'ar' ? 'مؤكد' : 'Confirmed')
+                    : selectedBooking.status === 'pending' ? (language === 'ar' ? 'قيد الانتظار' : 'Pending')
+                      : (language === 'ar' ? 'ملغى' : 'Cancelled')}
                 </span>
               </Section>
 
-              {/* Pricing */}
-              <div className={`p-4 rounded-xl mb-5 ${dm ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                <div className="flex justify-between text-sm mb-2">
-                  <span className={textMuted}>{language === 'ar' ? 'الإجمالي' : 'Total'}</span>
-                  <span className={`font-bold ${textPrimary}`}>{formatEGP(selectedBooking.totalPrice)}</span>
+              <div className="p-3 rounded-xl mb-4 bg-gray-50">
+                <div className="flex justify-between text-xs mb-1.5">
+                  <span className="text-gray-500">{language === 'ar' ? 'الإجمالي' : 'Total'}</span>
+                  <span className="font-bold text-gray-900">{formatEGP(selectedBooking.totalPrice)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className={textMuted}>{language === 'ar' ? 'المتبقي' : 'Remaining'}</span>
+                <div className="flex justify-between text-xs">
+                  <span className="text-gray-500">{language === 'ar' ? 'المتبقي' : 'Remaining'}</span>
                   <span className="font-bold text-red-500">{formatEGP(selectedBooking.remainingAmount)}</span>
                 </div>
               </div>
 
-              {/* Actions */}
               <div className="grid grid-cols-2 gap-3">
-                <button className="py-2.5 bg-[#534AB7] text-white rounded-xl font-medium text-sm hover:bg-[#6B5AC8] active:scale-95 transition-all">
+                <button className="py-2 bg-[#534AB7] text-white rounded-xl font-medium text-sm hover:bg-[#6B5AC8] active:scale-95 transition-all">
                   {language === 'ar' ? 'تعديل' : 'Edit'}
                 </button>
-                <button className="py-2.5 bg-red-50 text-red-600 rounded-xl font-medium text-sm hover:bg-red-100 active:scale-95 transition-all">
+                <button className="py-2 bg-red-50 text-red-600 rounded-xl font-medium text-sm hover:bg-red-100 active:scale-95 transition-all">
                   {language === 'ar' ? 'حذف' : 'Delete'}
                 </button>
               </div>
@@ -660,15 +670,9 @@ export const AdminCalendarPage: React.FC = () => {
   );
 };
 
-// Reusable section divider
-const Section: React.FC<{
-  title: string;
-  dm: boolean;
-  border: string;
-  children: React.ReactNode;
-}> = ({ title, dm, border, children }) => (
-  <div className={`border-b ${border} pb-4 mb-4`}>
-    <p className={`text-xs font-semibold mb-1.5 ${dm ? 'text-gray-400' : 'text-gray-500'}`}>{title}</p>
+const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
+  <div className="border-b border-gray-100 pb-3 mb-3">
+    <p className="text-[10px] font-semibold text-gray-400 mb-1">{title}</p>
     {children}
   </div>
 );
