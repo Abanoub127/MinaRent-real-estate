@@ -183,7 +183,6 @@ export type NotificationsResponse = {
 // ================== Helpers ==================
 
 const handleUnauthorized = () => {
-  localStorage.removeItem('token');
   localStorage.removeItem('user');
   localStorage.removeItem('tenant');
   if (window.location.pathname.startsWith('/admin')) {
@@ -192,15 +191,13 @@ const handleUnauthorized = () => {
 };
 
 const getHeaders = (): Record<string, string> => {
-  const token = localStorage.getItem('token');
-  return {
-    ...(token && { Authorization: `Bearer ${token}` }),
-  };
+  return {};
 };
 
 const apiFetch = async (url: string, options: RequestInit = {}) => {
   const res = await fetch(url, {
     ...options,
+    credentials: 'include',
     headers: {
       ...getHeaders(),
       ...options.headers,
@@ -232,6 +229,10 @@ export const loginUser = async (email: string, password: string) => {
 
 export const getCurrentUser = async () => {
   return apiFetch(`${BASE_URL}/auth/me`);
+};
+
+export const logoutUser = async () => {
+  return apiFetch(`${BASE_URL}/auth/logout`, { method: 'POST' });
 };
 
 export const updateProfile = async (data: { name?: string; email?: string }) => {

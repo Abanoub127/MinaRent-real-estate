@@ -15,13 +15,8 @@ import { Input } from '../../components/ui/input';
 import { BASE_URL as API } from '../../../services/api';
 
 const authHeaders = () => {
-  const token = localStorage.getItem('token');
-
   return {
     'Content-Type': 'application/json',
-    ...(token && {
-      Authorization: `Bearer ${token}`,
-    }),
   };
 };
 
@@ -84,6 +79,7 @@ export const SettingsPage: React.FC = () => {
         {
           method: 'GET',
           headers: authHeaders(),
+          credentials: 'include',
         }
       );
 
@@ -155,6 +151,7 @@ if (theme === 'light') {
         {
           method: 'PUT',
           headers: authHeaders(),
+          credentials: 'include',
           body: JSON.stringify(profileData),
         }
       );
@@ -208,6 +205,7 @@ if (theme === 'light') {
         {
           method: 'PUT',
           headers: authHeaders(),
+          credentials: 'include',
           body: JSON.stringify({
             currentPassword:
               passwordData.current,
@@ -284,6 +282,7 @@ const notificationLabels: Record<
           {
             method: 'PUT',
             headers: authHeaders(),
+            credentials: 'include',
             body: JSON.stringify(
               updatedNotifications
             ),

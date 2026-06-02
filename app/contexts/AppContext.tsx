@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { loginUser as apiLogin, getCurrentUser } from '../../services/api';
+import { loginUser as apiLogin, getCurrentUser, logoutUser as apiLogout } from '../../services/api';
 
 // Types
 export type Theme = 'light' | 'dark';
@@ -216,8 +216,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Validate token on mount
   useEffect(() => {
     const validateAuth = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
+      const storedUser = localStorage.getItem('user');
+      if (!storedUser) {
         setIsAuthLoading(false);
         return;
       }
@@ -238,7 +238,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           name: 'Mina Rent',
         });
       } catch {
-        localStorage.removeItem('token');
         localStorage.removeItem('user');
         localStorage.removeItem('tenant');
         setUser(null);
@@ -281,7 +280,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       const data = await apiLogin(email, password);
-      localStorage.setItem('token', data.token);
 
       const userData: User = {
         id: data.user.id || data.user._id,
@@ -308,10 +306,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    try {
+      if (typeof apiLogout === 'function') await apiLogout();
+    } catch (e) {
+      console.error('Logout error', e);
+    }
     setUser(null);
     setTenant(null);
-    localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('tenant');
   }, []);
