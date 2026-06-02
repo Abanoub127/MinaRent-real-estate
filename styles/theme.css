@@ -577,3 +577,71 @@ html, body {
     min-height: 36px;
   }
 }
+
+/* ── Responsive Calendar Optimizations ── */
+/* GPU acceleration for smooth scrolling */
+.overflow-auto,
+[class*="scroll"] {
+  -webkit-transform: translateZ(0);
+  -webkit-perspective: 1000;
+  will-change: scroll-position;
+}
+
+/* Smooth scrolling behavior */
+.overflow-x-auto,
+.overflow-auto {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Performance optimization for grid containers */
+.grid,
+[class*="grid"] {
+  will-change: contents;
+}
+
+/* Optimize responsive text */
+@supports (font-size-adjust: 0.5) {
+  body {
+    font-size-adjust: 0.5;
+  }
+}
+
+/* Mobile touch optimization */
+@media (max-width: 767px) {
+  /* Increase touch target sizes */
+  [class*="btn"],
+  [class*="button"],
+  [class*="nav"] {
+    min-height: 44px;
+  }
+  
+  /* Prevent layout shift on scroll */
+  html {
+    scrollbar-gutter: stable;
+  }
+  
+  /* Smooth transitions for responsive changes */
+  * {
+    transition-property: width, height, padding, margin;
+    transition-duration: 200ms;
+    transition-timing-function: ease-in-out;
+  }
+}
+
+/* Tablet optimizations (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  /* Slightly larger text for readability */
+  body {
+    font-size: 15px;
+  }
+}
+
+/* Desktop optimizations (1024px+) */
+@media (min-width: 1024px) {
+  /* Enable hardware acceleration for animations */
+  .motion-safe {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+}
