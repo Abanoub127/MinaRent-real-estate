@@ -3,6 +3,7 @@ import { MapPin, Phone, Mail, Send, CheckCircle, Clock, Globe } from "lucide-rea
 import { motion, AnimatePresence } from "framer-motion";
 import { useApp } from "../../contexts/AppContext";
 import { sendContactMessage } from "../../../services/api";
+import { SEO } from "../../components/ui/SEO";
 
 export const ContactPage: React.FC = () => {
   const { language, isRtl, t } = useApp();
@@ -34,8 +35,13 @@ export const ContactPage: React.FC = () => {
   ];
 
   return (
-    <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="mx-auto max-w-7xl px-4 py-8 w-full page-enter">
-      <div className="text-center mb-12">
+    <>
+      <SEO 
+        title={language === 'en' ? 'Contact Us' : 'اتصل بنا'} 
+        description={language === 'en' ? 'Have a question? We\'d love to hear from you.' : 'لديك سؤال؟ يسعدنا سماع رأيك.'} 
+      />
+      <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="mx-auto max-w-7xl px-4 py-8 w-full page-enter">
+        <div className="text-center mb-12">
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--foreground)] tracking-tight">{t('contact.title')}</h1>
         <p className="mt-3 text-[var(--text-secondary)] max-w-lg mx-auto">{language === 'en' ? 'Have a question? We\'d love to hear from you.' : 'لديك سؤال؟ يسعدنا سماع رأيك.'}</p>
       </div>
@@ -100,5 +106,6 @@ export const ContactPage: React.FC = () => {
         </motion.div>
       </div>
     </motion.section>
+    </>
   );
 };

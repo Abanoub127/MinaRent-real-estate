@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useApp } from "../../contexts/AppContext";
 import { getPropertyById, Property, formatEGPShort, getTestimonials, togglePropertyLike } from "../../../services/api";
 import { ProtectedImage } from "../../components/ProtectedImage";
+import { SEO } from "../../components/ui/SEO";
 
 export const PropertyDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -82,9 +83,16 @@ export const PropertyDetailPage: React.FC = () => {
   // Amenities removed
 
   return (
-    <motion.section 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+    <>
+      <SEO 
+        title={title} 
+        description={description} 
+        image={property.images?.[0]} 
+        type="article"
+      />
+      <motion.section 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="mx-auto mt-8 mb-24 max-w-7xl px-4 w-full"
     >
@@ -226,6 +234,7 @@ export const PropertyDetailPage: React.FC = () => {
         </aside>
       </div>
     </motion.section>
+    </>
   );
 };
 

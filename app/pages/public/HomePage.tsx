@@ -6,6 +6,7 @@ import { useApp } from '../../contexts/AppContext';
 import { getProperties, getTestimonials, Property, Testimonial, formatEGPShort, createTestimonial, togglePropertyLike } from '../../../services/api';
 import { MRLogo } from '../../components/ui/MRLogo';
 import { ProtectedImage } from '../../components/ProtectedImage';
+import { SEO } from '../../components/ui/SEO';
 
 export const HomePage: React.FC = () => {
   const { language, isRtl, t } = useApp();
@@ -92,6 +93,7 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <SEO />
       {/* ── Hero Section ── */}
       <section className="relative overflow-hidden">
         <div className="gradient-hero absolute inset-0 opacity-95" />

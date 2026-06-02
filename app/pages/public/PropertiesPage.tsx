@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useApp } from "../../contexts/AppContext";
 import { getProperties, Property, formatEGPShort, PropertiesResponse, togglePropertyLike } from "../../../services/api";
 import { ProtectedImage } from "../../components/ProtectedImage";
+import { SEO } from "../../components/ui/SEO";
 
 const TYPES = [
   { value: "any", keyEn: "Any", keyAr: "الكل" },
@@ -99,8 +100,13 @@ export const PropertiesPage: React.FC = () => {
   const itemVariants = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } } };
 
   return (
-    <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="mx-auto mt-6 mb-24 max-w-7xl px-4 w-full">
-      <div className="flex flex-wrap items-end justify-between gap-4 mb-2">
+    <>
+      <SEO 
+        title={language === 'en' ? 'Properties' : 'العقارات'} 
+        description={language === 'en' ? 'Browse curated listings across the city' : 'تصفح القوائم المنسقة عبر المدينة'} 
+      />
+      <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="mx-auto mt-6 mb-24 max-w-7xl px-4 w-full">
+        <div className="flex flex-wrap items-end justify-between gap-4 mb-2">
         <div>
           <p className="text-sm font-semibold text-[var(--primary)] mb-1">{language === 'en' ? 'Explore' : 'استكشف'}</p>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight md:text-4xl text-[var(--foreground)]">{language === 'en' ? 'Find your next home' : 'ابحث عن منزلك القادم'}</h1>
@@ -281,5 +287,6 @@ export const PropertiesPage: React.FC = () => {
         </div>
       </div>
     </motion.section>
+    </>
   );
 };

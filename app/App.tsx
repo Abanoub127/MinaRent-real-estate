@@ -1,4 +1,5 @@
 import { RouterProvider } from 'react-router';
+import { HelmetProvider } from 'react-helmet-async';
 import { AppProvider } from './contexts/AppContext';
 import { router } from './routes';
 import { GlobalGuards } from './components/GlobalGuards';
@@ -9,9 +10,11 @@ export default function App() {
   useImageProtection();
 
   return (
-    <AppProvider>
-      <GlobalGuards />
-      <RouterProvider router={router} />
-    </AppProvider>
+    <HelmetProvider>
+      <AppProvider>
+        <GlobalGuards />
+        <RouterProvider router={router} />
+      </AppProvider>
+    </HelmetProvider>
   );
 }
