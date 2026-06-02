@@ -4,21 +4,34 @@ import { useEffect } from 'react';
 export function RouteErrorFallback() {
   const error = useRouteError();
 
-  useEffect(() => {
-    // Check if the error is related to dynamic import failure
-    // This happens frequently on Vercel deployments when a chunk hash changes
-    // and the user has an old version of the site loaded.
-    const errorMessage = error instanceof Error ? error.message : '';
-    const isChunkLoadError = 
-      errorMessage.includes('error loading dynamically imported module') ||
-      errorMessage.includes('Failed to fetch dynamically imported module') ||
-      errorMessage.includes('Importing a module script failed');
+  const errorMessage = error instanceof Error ? error.message : '';
+  const isChunkLoadError = 
+    errorMessage.includes('error loading dynamically imported module') ||
+    errorMessage.includes('Failed to fetch dynamically imported module') ||
+    errorMessage.includes('Importing a module script failed');
 
+  useEffect(() => {
     if (isChunkLoadError) {
-      // Force a hard reload to fetch the latest assets
-      window.location.reload();
+      // Prevent infinite reload loops
+      const reloadKey = 'app_chunk_reloaded';
+      const hasReloaded = sessionStorage.getItem(reloadKey);
+      
+      if (!hasReloaded) {
+        sessionStorage.setItem(reloadKey, 'true');
+        // Force a hard reload to fetch the latest assets
+        window.location.reload();
+      } else {
+        // If it still fails after reload, clear the flag so it can try again later
+        // but don't reload right now
+        sessionStorage.removeItem(reloadKey);
+      }
     }
-  }, [error]);
+  }, [isChunkLoadError]);
+
+  // If we're going to reload, don't show the error UI to avoid a flash
+  if (isChunkLoadError && !sessionStorage.getItem('app_chunk_reloaded')) {
+    return null;
+  }
 
   // General error fallback UI
   return (
