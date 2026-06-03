@@ -1,665 +1,474 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
-  Search,
-  Calendar,
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-  X,
-  Users,
-  CheckCircle2,
-  Clock,
-  XCircle,
-  Building2,
-  LayoutGrid,
-  Rows,
+  Search, Calendar, ChevronLeft, ChevronRight,
+  Plus, X, Users, CheckCircle2, Clock, XCircle,
+  Building2, LayoutGrid, Rows,
 } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
-import {
-  getProperties,
-  getBookings,
-  Property,
-  Booking,
-  formatEGP,
-  formatDate,
-} from '../../../services/api';
+import { getProperties, getBookings, Property, Booking, formatEGP, formatDate } from '../../../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ProtectedImage } from '../../components/ProtectedImage';
 
 type FilterStatus = 'all' | 'confirmed' | 'pending' | 'cancelled' | 'available';
 type ViewMode = 'month' | 'week';
 
+// ── Status colors (spec) ──────────────────────────────────────────────────────
+const STATUS_COLORS = {
+  available: { bg: '#dcfce7', border: '#22c55e', text: '#166534', dot: '#22c55e' },
+  confirmed: { bg: '#dbeafe', border: '#3b82f6', text: '#1e40af', dot: '#3b82f6' },
+  pending:   { bg: '#fef3c7', border: '#f59e0b', text: '#92400e', dot: '#f59e0b' },
+  cancelled: { bg: '#fee2e2', border: '#ef4444', text: '#991b1b', dot: '#ef4444' },
+} as const;
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const abbr = (t: string, max: number) => (!t ? '' : t.length <= max ? t : t.slice(0, max - 1) + '…');
+
+// Returns whether a cell's status should be dimmed given the active filter
+const isDimmed = (cellStatus: string, filter: FilterStatus) => {
+  if (filter === 'all') return false;
+  return cellStatus !== filter;
+};
+
 export const AdminCalendarPage: React.FC = () => {
   const { language } = useApp();
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [currentDate, setCurrentDate] = useState<Date>(() => {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), 1);
+  const [properties, setProperties]     = useState<Property[]>([]);
+  const [bookings, setBookings]         = useState<Booking[]>([]);
+  const [loading, setLoading]           = useState(true);
+  const [currentDate, setCurrentDate]   = useState<Date>(() => {
+    const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), 1);
   });
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery]   = useState('');
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
-  const [showDetailSheet, setShowDetailSheet] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>('month');
-  const [viewportWidth, setViewportWidth] = useState<number>(
-    typeof window !== 'undefined' ? window.innerWidth : 1024
-  );
-  const [isMobile, setIsMobile] = useState(false);
+  const [showDetail, setShowDetail]     = useState(false);
+  const [viewMode, setViewMode]         = useState<ViewMode>('month');
+  const [vw, setVw]                     = useState(() => typeof window !== 'undefined' ? window.innerWidth : 1280);
+  const [isMobile, setIsMobile]         = useState(false);
 
-  const gridBodyRef = useRef<HTMLDivElement>(null);
-  const propertyHeaderRef = useRef<HTMLDivElement>(null);
-  const todayRowRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const todayRowRef     = useRef<HTMLDivElement>(null);
 
-  const today = useMemo(() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; }, []);
+  const today = useMemo(() => { const d = new Date(); d.setHours(0,0,0,0); return d; }, []);
 
-  const goToPrevMonth = useCallback(() => {
-    setCurrentDate(d => new Date(d.getFullYear(), d.getMonth() - 1, 1));
-  }, []);
+  // ── Navigation ──────────────────────────────────────────────────────────────
+  const goToPrev = useCallback(() => setCurrentDate(d => new Date(d.getFullYear(), d.getMonth()-1, 1)), []);
+  const goToNext = useCallback(() => setCurrentDate(d => new Date(d.getFullYear(), d.getMonth()+1, 1)), []);
 
-  const goToNextMonth = useCallback(() => {
-    setCurrentDate(d => new Date(d.getFullYear(), d.getMonth() + 1, 1));
-  }, []);
-
-  const goToCurrentMonth = useCallback(() => {
-    const now = new Date();
-    setCurrentDate(new Date(now.getFullYear(), now.getMonth(), 1));
-  }, []);
-
-  // Responsive config
+  // ── Responsive ──────────────────────────────────────────────────────────────
   const rc = useMemo(() => {
-    const mobile = viewportWidth < 768;
-    const tablet = viewportWidth >= 768 && viewportWidth < 1024;
+    const mob = vw < 768;
     return {
-      mobile,
-      tablet,
-      gap: mobile ? 3 : 6,
-      dateColW: mobile ? 32 : 52,
-      cellH: mobile ? 36 : 48,     // desktop also smaller now
-      headerH: mobile ? 72 : 100,  // desktop header smaller
+      mob,
+      dateColW : mob ? 44 : 56,
+      cellH    : mob ? 40 : 34,   // Compact desktop (34px), slightly taller for mobile touch (40px)
+      headerH  : mob ? 76 : 84,   
+      gap      : 2,
+      colW     : mob ? 68 : 100,  // Fixed width columns ensures headers align perfectly with grid
     };
-  }, [viewportWidth]);
-
-  // Filtered properties (declared early so columnWidth can use it)
-  const filteredProperties = useMemo(
-    () =>
-      properties.filter(
-        (p) =>
-          p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.titleAr?.includes(searchQuery) ||
-          p.location.toLowerCase().includes(searchQuery.toLowerCase())
-      ),
-    [properties, searchQuery]
-  );
-
-  // Dynamic column width
-  const columnWidth = useMemo(() => {
-    const count = filteredProperties.length;
-    if (count === 0) return 100;
-    const minW = rc.mobile ? 52 : 90;
-    const available = viewportWidth - rc.dateColW - rc.gap * (count + 1) - 8;
-    return Math.max(available / count, minW);
-  }, [viewportWidth, filteredProperties.length, rc]);
+  }, [vw]);
 
   useEffect(() => {
-    const handleResize = () => {
-      setViewportWidth(window.innerWidth);
-      setIsMobile(window.innerWidth < 768);
-    };
-    window.addEventListener('resize', handleResize);
-    handleResize();
-    return () => window.removeEventListener('resize', handleResize);
+    const fn = () => { setVw(window.innerWidth); setIsMobile(window.innerWidth < 768); };
+    window.addEventListener('resize', fn); fn();
+    return () => window.removeEventListener('resize', fn);
   }, []);
 
+  // ── Data ────────────────────────────────────────────────────────────────────
   useEffect(() => {
-    const fetchData = async () => {
+    (async () => {
       setLoading(true);
       try {
-        const [propsRes, bookingsRes] = await Promise.all([
-          getProperties(1, 100),
-          getBookings(),
-        ]);
-        setProperties(propsRes.properties || []);
-        setBookings(bookingsRes || []);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+        const [pr, br] = await Promise.all([getProperties(1, 100), getBookings()]);
+        setProperties(pr.properties || []);
+        setBookings(br || []);
+      } catch (e) { console.error(e); }
+      finally { setLoading(false); }
+    })();
   }, []);
 
-  // Sync horizontal scroll
-  useEffect(() => {
-    const h = propertyHeaderRef.current;
-    const b = gridBodyRef.current;
-    if (!h || !b) return;
-    const sh = () => { b.scrollLeft = h.scrollLeft; };
-    const sb = () => { h.scrollLeft = b.scrollLeft; };
-    h.addEventListener('scroll', sh);
-    b.addEventListener('scroll', sb);
-    return () => { h.removeEventListener('scroll', sh); b.removeEventListener('scroll', sb); };
-  }, []);
+  // ── Filtered props ───────────────────────────────────────────────────────────
+  const filteredProps = useMemo(() =>
+    properties.filter(p =>
+      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.titleAr?.includes(searchQuery) ||
+      p.location?.toLowerCase().includes(searchQuery.toLowerCase())
+    ), [properties, searchQuery]);
 
-  const scrollToToday = useCallback(() => {
-    // Navigate to current month first, then scroll to today's row
-    const now = new Date();
-    setCurrentDate(new Date(now.getFullYear(), now.getMonth(), 1));
-    // Small delay to allow re-render before scrolling
-    setTimeout(() => {
-      if (todayRowRef.current && gridBodyRef.current) {
-        const c = gridBodyRef.current;
-        const el = todayRowRef.current;
-        c.scrollTo({ top: el.offsetTop - c.clientHeight / 2 + rc.cellH / 2, behavior: 'smooth' });
-      }
-    }, 50);
-  }, [rc.cellH]);
-
-  // Date ranges
+  // ── Date ranges ──────────────────────────────────────────────────────────────
   const monthRange = useMemo(() => {
-    const y = currentDate.getFullYear();
-    const m = currentDate.getMonth();
-    const last = new Date(y, m + 1, 0).getDate();
-    return Array.from({ length: last }, (_, i) => new Date(y, m, i + 1));
+    const y = currentDate.getFullYear(), m = currentDate.getMonth();
+    const last = new Date(y, m+1, 0).getDate();
+    return Array.from({ length: last }, (_, i) => new Date(y, m, i+1));
   }, [currentDate]);
 
-  // Week range: Mon–Sun of today's week
   const weekRange = useMemo(() => {
-    const d = new Date(today);
-    const day = d.getDay(); // 0=Sun
-    const monday = new Date(d);
-    monday.setDate(d.getDate() - ((day + 6) % 7));
-    return Array.from({ length: 7 }, (_, i) => {
-      const dd = new Date(monday);
-      dd.setDate(monday.getDate() + i);
-      return dd;
-    });
+    const d = new Date(today), day = d.getDay();
+    const mon = new Date(d); mon.setDate(d.getDate() - ((day + 6) % 7));
+    return Array.from({ length: 7 }, (_, i) => { const x = new Date(mon); x.setDate(mon.getDate()+i); return x; });
   }, [today]);
 
   const dateRange = viewMode === 'month' ? monthRange : weekRange;
 
-  const isToday = (date: Date) =>
-    date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth() &&
-    date.getFullYear() === today.getFullYear();
+  const isToday = (d: Date) =>
+    d.getDate()===today.getDate() && d.getMonth()===today.getMonth() && d.getFullYear()===today.getFullYear();
 
-  const getBookingsForCell = useCallback(
-    (date: Date, propertyId: string): Booking[] =>
-      bookings.filter((b) => {
-        const pId = typeof b.propertyId === 'object' && b.propertyId ? b.propertyId._id : b.propertyId;
-        if (pId !== propertyId) return false;
-        const s = new Date(b.startDate); s.setHours(0, 0, 0, 0);
-        const e = new Date(b.endDate); e.setHours(0, 0, 0, 0);
-        const d = new Date(date); d.setHours(0, 0, 0, 0);
-        if (!(d >= s && d < e)) return false;
-        return filterStatus === 'all' || b.status === filterStatus;
-      }),
-    [bookings, filterStatus]
-  );
+  // ── Booking lookup (memoised map for performance) ───────────────────────────
+  const bookingMap = useMemo(() => {
+    const map = new Map<string, Booking[]>();
+    bookings.forEach(b => {
+      const pId = typeof b.propertyId === 'object' && b.propertyId ? b.propertyId._id : b.propertyId;
+      if (!pId) return;
+      const s = new Date(b.startDate); s.setHours(0,0,0,0);
+      const e = new Date(b.endDate);   e.setHours(0,0,0,0);
+      const cur = new Date(s);
+      while (cur < e) {
+        const key = `${pId}__${cur.toISOString().slice(0,10)}`;
+        if (!map.has(key)) map.set(key, []);
+        map.get(key)!.push(b);
+        cur.setDate(cur.getDate() + 1);
+      }
+    });
+    return map;
+  }, [bookings]);
 
-  const getCellStatus = useCallback(
-    (date: Date, propertyId: string): 'available' | 'confirmed' | 'pending' | 'cancelled' => {
-      const cells = getBookingsForCell(date, propertyId);
-      if (!cells.length) return 'available';
-      if (cells.some((b) => b.status === 'cancelled')) return 'cancelled';
-      if (cells.some((b) => b.status === 'pending')) return 'pending';
-      return 'confirmed';
-    },
-    [getBookingsForCell]
-  );
+  const getCellBookings = useCallback((date: Date, propId: string): Booking[] => {
+    const key = `${propId}__${date.toISOString().slice(0,10)}`;
+    return bookingMap.get(key) || [];
+  }, [bookingMap]);
 
-  const getOccupancy = useCallback(
-    (propertyId: string) => {
-      const pb = bookings.filter((b) => {
-        const pId = typeof b.propertyId === 'object' && b.propertyId ? b.propertyId._id : b.propertyId;
-        return pId === propertyId && b.status !== 'cancelled';
-      });
-      return Math.min(Math.round((pb.reduce((s, b) => s + b.totalDays, 0) / monthRange.length) * 100), 100);
-    },
-    [bookings, monthRange.length]
-  );
+  const getCellStatus = useCallback((date: Date, propId: string): Exclude<FilterStatus, 'all'> => {
+    const bs = getCellBookings(date, propId);
+    if (!bs.length) return 'available';
+    if (bs.some(b => b.status === 'cancelled')) return 'cancelled';
+    if (bs.some(b => b.status === 'pending'))   return 'pending';
+    return 'confirmed';
+  }, [getCellBookings]);
 
-  const getDayName = (date: Date) =>
-    date.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', { weekday: 'short' });
+  const getOccupancy = useCallback((propId: string) => {
+    const pb = bookings.filter(b => {
+      const pId = typeof b.propertyId === 'object' && b.propertyId ? b.propertyId._id : b.propertyId;
+      return pId === propId && b.status !== 'cancelled';
+    });
+    return Math.min(Math.round((pb.reduce((s,b) => s+b.totalDays, 0) / (monthRange.length||30))*100), 100);
+  }, [bookings, monthRange.length]);
 
-  const getMonthName = (date: Date) =>
-    date.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US', { month: 'long', year: 'numeric' });
+  // ── Today scroll ────────────────────────────────────────────────────────────
+  const scrollToToday = useCallback(() => {
+    const now = new Date();
+    setCurrentDate(new Date(now.getFullYear(), now.getMonth(), 1));
+    setTimeout(() => {
+      if (todayRowRef.current && scrollContainerRef.current) {
+        const c = scrollContainerRef.current;
+        const el = todayRowRef.current;
+        c.scrollTo({ top: el.offsetTop - c.clientHeight/2 + rc.cellH/2, behavior: 'smooth' });
+      }
+    }, 60);
+  }, [rc.cellH]);
 
-  const abbr = (text: string, max: number) =>
-    text?.length > max ? text.slice(0, max - 1) + '…' : text || '';
+  // ── Labels ──────────────────────────────────────────────────────────────────
+  const getMonthName = (d: Date) =>
+    d.toLocaleDateString(language==='ar' ? 'ar-EG' : 'en-US', { month: 'long', year: 'numeric' });
+  const getDayShort = (d: Date) =>
+    d.toLocaleDateString(language==='ar' ? 'ar-EG' : 'en-US', { weekday: 'short' });
 
-  const getCellStyle = (s: string) => ({
-    confirmed: 'bg-[#EAF3DE] border-[#639922]/40',
-    pending: 'bg-[#FAEEDA] border-[#EF9F27]/40',
-    cancelled: 'bg-[#FCEBEB] border-[#E24B4A]/40',
-    available: 'bg-gray-50 border-gray-200',
-  }[s] ?? 'bg-gray-50 border-gray-200');
-
-  const getTextColor = (s: string) => ({
-    confirmed: 'text-[#27500A]',
-    pending: 'text-[#633806]',
-    cancelled: 'text-[#791F1F]',
-    available: 'text-gray-400',
-  }[s] ?? 'text-gray-400');
-
-  const statusBg = (s: string) => s === 'confirmed' ? '#639922' : s === 'pending' ? '#EF9F27' : '#E24B4A';
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full bg-white">
-        <div className="text-center">
-          <div className="w-10 h-10 border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-gray-400 text-sm">Loading...</p>
-        </div>
+  if (loading) return (
+    <div className="flex items-center justify-center h-full bg-white">
+      <div className="text-center">
+        <div className="w-9 h-9 border-4 border-purple-100 border-t-[#534AB7] rounded-full animate-spin mx-auto mb-3"/>
+        <p className="text-gray-400 text-sm">جار التحميل...</p>
       </div>
-    );
-  }
+    </div>
+  );
+
+  // ── Property code ────────────────────────────────────────────────────────────
+  const propCode = (p: Property) => (p as any).code || p.title.slice(0,6);
 
   return (
-    <div className="flex flex-col h-full w-full bg-white">
-
-      {/* ── Header ── */}
-      <div className="bg-white border-b border-gray-200 px-4 py-2.5 sticky top-0 z-40 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div>
-            <h1 className="text-base font-bold text-gray-900">
-              {language === 'ar' ? 'الحجوزات' : 'Reservations'}
+    <div className="flex flex-col h-full w-full bg-white overflow-hidden">
+      
+      {/* ═══════════════════════════════ TOOLBAR ══════════════════════════════ */}
+      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-3 py-2 flex flex-col gap-2 z-40">
+        
+        {/* Row 1: title + month nav + view toggle */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <h1 className="text-sm font-bold text-gray-900 whitespace-nowrap">
+              {language==='ar' ? 'الحجوزات' : 'Reservations'}
             </h1>
+            <div className="flex items-center gap-0.5">
+              <button onClick={goToPrev}
+                className="p-1 rounded hover:bg-gray-100 text-gray-500 transition">
+                <ChevronRight size={14}/>
+              </button>
+              <span className="text-xs font-medium text-gray-700 min-w-[80px] text-center select-none">
+                {getMonthName(currentDate)}
+              </span>
+              <button onClick={goToNext}
+                className="p-1 rounded hover:bg-gray-100 text-gray-500 transition">
+                <ChevronLeft size={14}/>
+              </button>
+            </div>
           </div>
-          {/* Month navigation */}
-          <div className="flex items-center gap-1 mt-0.5">
-            <button
-              onClick={goToPrevMonth}
-              className="p-1 rounded-md hover:bg-gray-100 transition text-gray-500 hover:text-gray-900"
-              aria-label="Previous month"
-            >
-              <ChevronLeft size={15} />
-            </button>
-            <span className="text-xs font-medium text-gray-700 min-w-[90px] text-center">
-              {getMonthName(currentDate)}
-            </span>
-            <button
-              onClick={goToNextMonth}
-              className="p-1 rounded-md hover:bg-gray-100 transition text-gray-500 hover:text-gray-900"
-              aria-label="Next month"
-            >
-              <ChevronRight size={15} />
-            </button>
+          
+          <div className="flex items-center bg-gray-100 rounded-lg p-0.5 gap-0.5 flex-shrink-0">
+            {(['month','week'] as ViewMode[]).map(v => (
+              <button key={v} onClick={() => setViewMode(v)}
+                className={`flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium transition ${
+                  viewMode===v ? 'bg-white text-[#534AB7] shadow-sm' : 'text-gray-500'}`}>
+                {v==='month' ? <LayoutGrid size={11}/> : <Rows size={11}/>}
+                {v==='month' ? (language==='ar'?'شهر':'Month') : (language==='ar'?'أسبوع':'Week')}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* View toggle: شهر / أسبوع */}
-        <div className="flex items-center bg-gray-100 rounded-lg p-0.5 gap-0.5">
-          <button
-            onClick={() => setViewMode('month')}
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition ${viewMode === 'month'
-                ? 'bg-white text-[#534AB7] shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
-              }`}
-          >
-            <LayoutGrid size={13} />
-            {language === 'ar' ? 'شهر' : 'Month'}
-          </button>
-          <button
-            onClick={() => setViewMode('week')}
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition ${viewMode === 'week'
-                ? 'bg-white text-[#534AB7] shadow-sm'
-                : 'text-gray-500 hover:text-gray-700'
-              }`}
-          >
-            <Rows size={13} />
-            {language === 'ar' ? 'أسبوع' : 'Week'}
-          </button>
-        </div>
-      </div>
-
-      {/* ── Filters ── */}
-      <div className="bg-gray-50 border-b border-gray-200 px-3 py-2 space-y-2">
-        {/* Pills */}
+        {/* Row 2: filter pills */}
         <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
-          {(['all', 'confirmed', 'pending', 'cancelled', 'available'] as const).map((status) => {
-            const active = filterStatus === status;
-            const dotColor: Record<string, string> = {
-              confirmed: 'bg-[#639922]', pending: 'bg-[#EF9F27]',
-              cancelled: 'bg-[#E24B4A]', available: 'bg-gray-400', all: 'bg-gray-400',
-            };
-            const label: Record<string, { ar: string; en: string }> = {
-              all: { ar: 'الكل', en: 'All' },
-              confirmed: { ar: 'مؤكد', en: 'Confirmed' },
-              pending: { ar: 'انتظار', en: 'Pending' },
-              cancelled: { ar: 'ملغى', en: 'Cancelled' },
-              available: { ar: 'متاح', en: 'Available' },
+          {(['all','confirmed','pending','cancelled','available'] as FilterStatus[]).map(s => {
+            const active = filterStatus===s;
+            const col = s==='all' ? '#888' : STATUS_COLORS[s as keyof typeof STATUS_COLORS]?.dot || '#888';
+            const labels: Record<string,{ar:string;en:string}> = {
+              all:{ar:'الكل',en:'All'}, confirmed:{ar:'مؤكد',en:'Confirmed'},
+              pending:{ar:'في الانتظار',en:'Pending'}, cancelled:{ar:'ملغى',en:'Cancelled'},
+              available:{ar:'متاح',en:'Available'},
             };
             return (
-              <button
-                key={status}
-                onClick={() => setFilterStatus(status)}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium whitespace-nowrap border transition ${active
-                    ? 'bg-[#EEEDFE] text-[#534AB7] border-[#534AB7]'
-                    : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                  }`}
-              >
-                <span className={`w-1.5 h-1.5 rounded-full ${dotColor[status]}`} />
-                {language === 'ar' ? label[status].ar : label[status].en}
+              <button key={s} onClick={() => setFilterStatus(s)}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium whitespace-nowrap border transition ${
+                  active ? 'text-white border-transparent' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                }`}
+                style={active ? { background: col, borderColor: col } : {}}>
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: active ? '#fff' : col }}/>
+                {language==='ar' ? labels[s].ar : labels[s].en}
               </button>
             );
           })}
         </div>
 
-        {/* Search + Today */}
+        {/* Row 3: search + today */}
         <div className="flex gap-2">
-          <div className="flex-1 flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-2.5 py-1.5">
-            <Search size={13} className="text-gray-400" />
-            <input
-              type="text"
-              placeholder={language === 'ar' ? 'ابحث عن عقار أو ضيف...' : 'Search property or guest...'}
+          <div className="flex-1 flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5">
+            <Search size={12} className="text-gray-400 flex-shrink-0"/>
+            <input type="text"
+              placeholder={language==='ar' ? 'ابحث عن عقار أو ضيف...' : 'Search property or guest...'}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-1 bg-transparent outline-none text-xs text-gray-900 placeholder:text-gray-400"
-            />
-            {searchQuery && (
-              <button onClick={() => setSearchQuery('')}>
-                <X size={12} className="text-gray-400" />
-              </button>
-            )}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="flex-1 bg-transparent outline-none text-xs text-gray-900 placeholder:text-gray-400"/>
+            {searchQuery && <button onClick={() => setSearchQuery('')}><X size={11} className="text-gray-400"/></button>}
           </div>
-          <button
-            onClick={scrollToToday}
-            className="flex items-center gap-1 px-3 py-1.5 bg-[#534AB7] text-white rounded-lg font-medium text-[11px] whitespace-nowrap hover:bg-[#6B5AC8] active:scale-95 transition"
-          >
-            <Calendar size={12} />
-            {language === 'ar' ? 'اليوم' : 'Today'}
+          <button onClick={scrollToToday}
+            className="flex items-center gap-1 px-3 py-1.5 bg-[#534AB7] text-white rounded-lg text-[11px] font-medium whitespace-nowrap hover:bg-[#6B5AC8] active:scale-95 transition">
+            <Calendar size={11}/>
+            {language==='ar' ? 'اليوم' : 'Today'}
           </button>
         </div>
       </div>
 
-      {/* ── Calendar Grid ── */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-
-        {/* Property Header Row */}
-        <div
-          ref={propertyHeaderRef}
-          className="overflow-x-auto overflow-y-hidden flex-shrink-0 bg-gray-50 border-b border-gray-200"
-          style={{ scrollbarWidth: 'none' }}
-        >
-          <div className="flex" style={{ gap: rc.gap, padding: rc.gap, minWidth: 'max-content' }}>
-            {/* Date col label */}
-            <div
-              className="flex-shrink-0 flex items-center justify-center text-[10px] font-medium text-gray-400"
-              style={{ width: rc.dateColW, height: rc.headerH }}
-            >
-              {language === 'ar' ? 'التاريخ' : 'Date'}
+      {/* ═══════════════════════════════ INTEGRATED GRID ════════════════════════════════ */}
+      <div ref={scrollContainerRef} className="flex-1 overflow-auto bg-gray-50 relative" style={{ scrollbarWidth: 'thin' }}>
+        <div className="inline-flex flex-col min-w-max bg-white">
+          
+          {/* ── Property Headers (Sticky Top) ── */}
+          <div className="sticky top-0 z-30 flex bg-white border-b border-gray-200 shadow-sm">
+            {/* Top-Left Corner (Empty for Date Column) */}
+            <div className="sticky left-0 z-40 bg-white border-r border-gray-200 flex-shrink-0 flex items-end p-2 pb-1" style={{ width: rc.dateColW }}>
+              <span className="text-[9px] font-semibold text-gray-500">{language==='ar'?'اليوم':'Day'}</span>
             </div>
-
-            {/* Property cards */}
-            {filteredProperties.map((property) => (
-              <div
-                key={property._id}
-                className="flex-shrink-0 rounded-lg overflow-hidden border border-gray-200"
-                style={{ width: columnWidth, height: rc.headerH }}
-              >
-                {/* Image */}
-                {!isMobile && (
-                  <div
-                    className="w-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center text-white overflow-hidden"
-                    style={{ height: rc.headerH - 38 }}
-                  >
-                    {property.images?.[0] ? (
-                      <ProtectedImage
-                        src={property.images[0]}
-                        alt={property.title}
-                        containerClassName="w-full h-full"
-                        className="w-full h-full object-cover"
-                      />
+            
+            {/* Property Headers */}
+            {filteredProps.map(prop => {
+              const occ = getOccupancy(prop._id as string);
+              return (
+                <div key={prop._id} className="flex-shrink-0 flex flex-col border-r border-gray-200 bg-white"
+                  style={{ width: rc.colW, height: rc.headerH }}>
+                  <div className="relative flex-1 overflow-hidden">
+                    {prop.images?.[0] ? (
+                      <ProtectedImage src={prop.images[0]} alt={prop.title} containerClassName="absolute inset-0" className="w-full h-full object-cover"/>
                     ) : (
-                      <div className="text-center px-1">
-                        <Building2 size={14} className="mx-auto mb-0.5" />
-                        <span style={{ fontSize: 9 }} className="leading-tight line-clamp-1">
-                          {abbr(property.title, 14)}
-                        </span>
+                      <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                        <Building2 size={14} className="text-gray-400"/>
                       </div>
                     )}
                   </div>
-                )}
-
-                {/* Info */}
-                <div
-                  className="bg-white flex flex-col justify-center text-center"
-                  style={{ padding: isMobile ? '3px 2px' : '4px 4px', height: isMobile ? rc.headerH : 38 }}
-                >
-                  {isMobile && (
-                    <div
-                      className="w-full rounded overflow-hidden flex items-center justify-center mb-1"
-                      style={{ height: 28, background: 'linear-gradient(135deg,#b09de8,#534AB7)' }}
-                    >
-                      {property.images?.[0] ? (
-                        <ProtectedImage
-                          src={property.images[0]}
-                          alt={property.title}
-                          containerClassName="w-full h-full"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <Building2 size={12} className="text-white" />
-                      )}
-                    </div>
-                  )}
-                  <p className="font-semibold truncate text-gray-900" style={{ fontSize: isMobile ? 7 : 10 }}>
-                    {abbr(property.title, isMobile ? 7 : 16)}
-                  </p>
-                  <p className="font-bold text-[#534AB7]" style={{ fontSize: isMobile ? 7 : 9 }}>
-                    {getOccupancy(property._id as string)}%
-                  </p>
+                  <div className="flex-shrink-0 p-1 flex flex-col justify-center bg-white border-t border-gray-100" style={{ height: isMobile ? 32 : 38 }}>
+                    <p className="font-bold text-gray-900 truncate leading-tight" style={{ fontSize: isMobile ? 8 : 10 }}>
+                      {abbr(prop.title, isMobile ? 8 : 16)}
+                    </p>
+                    <p className="text-gray-500 truncate leading-tight" style={{ fontSize: isMobile ? 7 : 8 }}>
+                      {propCode(prop)}
+                    </p>
+                    <div className="mt-[1px] border-b-[2px]" style={{ width: '80%', borderColor: occ > 0 ? '#534AB7' : '#e5e7eb' }} />
+                    <span className="font-bold text-[#534AB7] leading-none mt-1" style={{ fontSize: isMobile?8:9 }}>{occ}%</span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
-        </div>
 
-        {/* Grid Body */}
-        <div ref={gridBodyRef} className="flex-1 overflow-auto" style={{ scrollbarWidth: 'thin' }}>
-          <div className="flex" style={{ gap: rc.gap, padding: rc.gap, minWidth: 'max-content' }}>
-
-            {/* Date column — sticky left */}
-            <div
-              className="flex-shrink-0 sticky left-0 z-10 bg-white border-r border-gray-200"
-              style={{ width: rc.dateColW }}
-            >
-              {dateRange.map((date) => {
-                const isT = isToday(date);
-                return (
-                  <div
-                    key={date.toISOString()}
-                    ref={isT ? todayRowRef : undefined}
-                    className={`flex flex-col items-center justify-center border-b border-gray-100 ${isT ? 'bg-[#EEEDFE]' : 'bg-white'}`}
-                    style={{ height: rc.cellH + rc.gap }}
-                  >
-                    <div
-                      className={`flex items-center justify-center rounded-full font-bold ${isT ? 'bg-[#534AB7] text-white' : 'text-gray-900'}`}
-                      style={{ width: isMobile ? 17 : 20, height: isMobile ? 17 : 20, fontSize: isMobile ? 9 : 11 }}
-                    >
+          {/* ── Grid Body ── */}
+          <div className="flex flex-col">
+            {dateRange.map(date => {
+              const isT = isToday(date);
+              return (
+                <div key={date.toISOString()} ref={isT ? todayRowRef : undefined} className="flex group hover:bg-gray-50 transition-colors">
+                  
+                  {/* Date cell (Sticky Left) */}
+                  <div className={`sticky left-0 z-20 flex-shrink-0 border-r border-b border-gray-100 flex flex-col items-center justify-center select-none
+                    ${isT ? 'bg-[#EEEDFE]' : 'bg-white group-hover:bg-gray-50'}`}
+                    style={{ width: rc.dateColW, height: rc.cellH }}>
+                    <div className={`flex items-center justify-center font-bold leading-none
+                      ${isT ? 'bg-[#534AB7] text-white rounded-full w-5 h-5' : 'text-gray-900'}`}
+                      style={{ fontSize: isMobile?11:13 }}>
                       {date.getDate()}
                     </div>
-                    <span className="text-gray-400 mt-0.5" style={{ fontSize: isMobile ? 7 : 8 }}>
-                      {getDayName(date)}
+                    <span className="text-gray-400 mt-0.5" style={{ fontSize: isMobile?8:9 }}>
+                      {getDayShort(date)}
                     </span>
                   </div>
-                );
-              })}
-            </div>
 
-            {/* Property columns */}
-            {filteredProperties.map((property) => (
-              <div
-                key={property._id}
-                className="flex-shrink-0 flex flex-col"
-                style={{ width: columnWidth, gap: rc.gap }}
-              >
-                {dateRange.map((date) => {
-                  const cellBookings = getBookingsForCell(date, property._id as string);
-                  const status = getCellStatus(date, property._id as string);
-                  const hasBooking = cellBookings.length > 0;
+                  {/* Property Cells */}
+                  {filteredProps.map(prop => {
+                    const cellBs  = getCellBookings(date, prop._id as string);
+                    const status  = getCellStatus(date, prop._id as string);
+                    const dimmed  = isDimmed(status, filterStatus);
+                    const colors  = STATUS_COLORS[status];
+                    const hasBook = cellBs.length > 0;
 
-                  return (
-                    <div
-                      key={`${date.toISOString()}-${property._id}`}
-                      onClick={() => {
-                        if (hasBooking) { setSelectedBooking(cellBookings[0]); setShowDetailSheet(true); }
-                      }}
-                      className={`rounded-md border flex items-center justify-center relative overflow-hidden transition-all ${hasBooking ? 'cursor-pointer hover:shadow-sm active:scale-95' : ''
-                        } ${getCellStyle(status)}`}
-                      style={{ height: rc.cellH }}
-                    >
-                      {hasBooking ? (
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          className="w-full h-full flex flex-col items-center justify-center px-0.5 relative"
-                        >
-                          <span
-                            className={`font-semibold text-center leading-tight w-full truncate ${getTextColor(status)}`}
-                            style={{ fontSize: isMobile ? 7 : 9 }}
-                          >
-                            {typeof cellBookings[0].clientId === 'object'
-                              ? abbr(cellBookings[0].clientId?.name || 'Guest', isMobile ? 5 : 12)
-                              : 'Guest'}
-                          </span>
-                          {!isMobile && (
-                            <span
-                              className={`flex items-center gap-0.5 mt-0.5 ${getTextColor(status)}`}
-                              style={{ fontSize: 7 }}
-                            >
-                              <Users size={8} />
-                              {cellBookings[0].totalDays}d
-                            </span>
-                          )}
-                          <span
-                            className="absolute bottom-0.5 right-0.5 text-white rounded-full flex items-center justify-center"
-                            style={{
-                              width: isMobile ? 7 : 12, height: isMobile ? 7 : 12,
-                              fontSize: isMobile ? 4 : 7,
-                              background: statusBg(status),
-                            }}
-                          >
-                            {status === 'confirmed' ? '✓' : status === 'pending' ? '·' : '✗'}
-                          </span>
-                        </motion.div>
-                      ) : (
-                        <div
-                          className="rounded-full border-2 border-gray-300"
-                          style={{ width: isMobile ? 7 : 10, height: isMobile ? 7 : 10 }}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
+                    return (
+                      <div key={`${date.toISOString()}-${prop._id}`}
+                        className="flex-shrink-0 border-r border-b border-gray-100 bg-transparent p-[2px]"
+                        style={{ width: rc.colW, height: rc.cellH }}>
+                        <div onClick={() => { if (hasBook) { setSelectedBooking(cellBs[0]); setShowDetail(true); } }}
+                          className={`w-full h-full rounded-[6px] border flex flex-col justify-center relative overflow-hidden select-none
+                            ${hasBook ? 'cursor-pointer active:scale-95' : ''}`}
+                          style={{
+                            background: hasBook ? colors.bg : 'transparent',
+                            borderColor: hasBook ? colors.border : 'transparent',
+                            opacity: dimmed ? 0.25 : 1,
+                            filter: dimmed ? 'saturate(0.3)' : 'none',
+                            transition: 'all 0.15s',
+                          }}>
+                          {hasBook ? (
+                            <div className="w-full h-full px-1 py-[2px] flex flex-col justify-center relative">
+                              {/* property code */}
+                              <span className="font-bold truncate leading-tight" style={{ fontSize: isMobile?8:9, color: colors.text }}>
+                                {propCode(prop)}
+                              </span>
+                              {/* guest name & count */}
+                              <div className="flex items-center justify-between mt-[1px]">
+                                <span className="truncate leading-tight flex-1" style={{ fontSize: isMobile?8:9, color: colors.text }}>
+                                  {typeof cellBs[0].clientId === 'object'
+                                    ? abbr(cellBs[0].clientId?.name || '—', isMobile?8:12)
+                                    : '—'}
+                                </span>
+                                {!isMobile && (
+                                  <span className="flex items-center gap-[2px] flex-shrink-0 ml-[2px]" style={{ fontSize: 8, color: colors.text, opacity: 0.85 }}>
+                                    {(cellBs[0] as any).guests || cellBs[0].totalDays}
+                                    <Users size={8}/>
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* ── FAB ── */}
-      <motion.button
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.93 }}
-        className="fixed right-4 bottom-6 w-12 h-12 bg-[#534AB7] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#6B5AC8] z-50"
-      >
-        <Plus size={22} />
+      {/* ═══════════════════════════════ FAB ════════════════════════════════ */}
+      <motion.button whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}
+        className="fixed right-4 bottom-6 w-12 h-12 bg-[#534AB7] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#6B5AC8] z-50">
+        <Plus size={22}/>
       </motion.button>
 
-      {/* ── Booking Detail Sheet ── */}
+      {/* ═══════════════════════════════ DETAIL SHEET ══════════════════════ */}
       <AnimatePresence>
-        {showDetailSheet && selectedBooking && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+        {showDetail && selectedBooking && (
+          <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
             className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center"
-            onClick={() => setShowDetailSheet(false)}
-          >
+            onClick={() => setShowDetail(false)}>
             <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full md:max-w-md bg-white rounded-t-3xl md:rounded-2xl max-h-[90vh] overflow-y-auto p-5"
-            >
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-base font-bold text-gray-900">
-                  {language === 'ar' ? 'تفاصيل الحجز' : 'Booking Details'}
+              initial={{ y:'100%' }} animate={{ y:0 }} exit={{ y:'100%' }}
+              transition={{ type:'spring', damping:25, stiffness:300 }}
+              onClick={e => e.stopPropagation()}
+              className="w-full md:max-w-md bg-white rounded-t-3xl md:rounded-2xl max-h-[90vh] overflow-y-auto p-5">
+
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-bold text-gray-900">
+                  {language==='ar' ? 'تفاصيل الحجز' : 'Booking Details'}
                 </h2>
-                <button onClick={() => setShowDetailSheet(false)} className="p-2 rounded-lg hover:bg-gray-100">
-                  <X size={18} />
+                <button onClick={() => setShowDetail(false)} className="p-1.5 rounded-lg hover:bg-gray-100">
+                  <X size={16}/>
                 </button>
               </div>
 
-              <Section title={language === 'ar' ? 'الضيف' : 'Guest'}>
-                <p className="font-bold text-sm text-gray-900">
-                  {typeof selectedBooking.clientId === 'object' ? selectedBooking.clientId?.name : 'Guest'}
+              {/* Status badge */}
+              {(() => {
+                const sc = STATUS_COLORS[selectedBooking.status as keyof typeof STATUS_COLORS] || STATUS_COLORS.confirmed;
+                return (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium inline-flex mb-4"
+                    style={{ background: sc.bg, color: sc.text, border: `1px solid ${sc.border}` }}>
+                    {selectedBooking.status==='confirmed' && <CheckCircle2 size={12}/>}
+                    {selectedBooking.status==='pending'   && <Clock size={12}/>}
+                    {selectedBooking.status==='cancelled' && <XCircle size={12}/>}
+                    {selectedBooking.status==='confirmed' ? (language==='ar'?'مؤكد':'Confirmed')
+                      : selectedBooking.status==='pending' ? (language==='ar'?'في الانتظار':'Pending')
+                      : (language==='ar'?'ملغى':'Cancelled')}
+                  </div>
+                );
+              })()}
+
+              <DS title={language==='ar'?'الضيف':'Guest'}>
+                <p className="font-semibold text-sm text-gray-900">
+                  {typeof selectedBooking.clientId==='object' ? selectedBooking.clientId?.name : 'Guest'}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {typeof selectedBooking.clientId === 'object' ? selectedBooking.clientId?.phone : '—'}
+                  {typeof selectedBooking.clientId==='object' ? selectedBooking.clientId?.phone : '—'}
                 </p>
-              </Section>
+              </DS>
 
-              <Section title={language === 'ar' ? 'العقار' : 'Property'}>
-                <p className="font-bold text-sm text-gray-900">
-                  {typeof selectedBooking.propertyId === 'object' ? selectedBooking.propertyId?.title : 'Property'}
+              <DS title={language==='ar'?'العقار':'Property'}>
+                <p className="font-semibold text-sm text-gray-900">
+                  {typeof selectedBooking.propertyId==='object' ? selectedBooking.propertyId?.title : 'Property'}
                 </p>
-              </Section>
+              </DS>
 
-              <Section title={language === 'ar' ? 'التواريخ' : 'Dates'}>
+              <DS title={language==='ar'?'التواريخ':'Dates'}>
                 <div className="flex justify-between">
                   <div>
-                    <p className="text-[10px] text-gray-400 mb-0.5">{language === 'ar' ? 'دخول' : 'Check-in'}</p>
+                    <p className="text-[10px] text-gray-400">{language==='ar'?'دخول':'In'}</p>
                     <p className="font-semibold text-xs text-gray-900">{formatDate(selectedBooking.startDate, language)}</p>
                   </div>
-                  <div>
-                    <p className="text-[10px] text-gray-400 mb-0.5">{language === 'ar' ? 'خروج' : 'Check-out'}</p>
+                  <div className="text-right">
+                    <p className="text-[10px] text-gray-400">{language==='ar'?'خروج':'Out'}</p>
                     <p className="font-semibold text-xs text-gray-900">{formatDate(selectedBooking.endDate, language)}</p>
                   </div>
                 </div>
-              </Section>
-
-              <Section title={language === 'ar' ? 'الحالة' : 'Status'}>
-                <span
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${selectedBooking.status === 'confirmed'
-                      ? 'bg-[#EAF3DE] text-[#27500A]'
-                      : selectedBooking.status === 'pending'
-                        ? 'bg-[#FAEEDA] text-[#633806]'
-                        : 'bg-[#FCEBEB] text-[#791F1F]'
-                    }`}
-                >
-                  {selectedBooking.status === 'confirmed' && <CheckCircle2 size={12} />}
-                  {selectedBooking.status === 'pending' && <Clock size={12} />}
-                  {selectedBooking.status === 'cancelled' && <XCircle size={12} />}
-                  {selectedBooking.status === 'confirmed' ? (language === 'ar' ? 'مؤكد' : 'Confirmed')
-                    : selectedBooking.status === 'pending' ? (language === 'ar' ? 'قيد الانتظار' : 'Pending')
-                      : (language === 'ar' ? 'ملغى' : 'Cancelled')}
-                </span>
-              </Section>
+              </DS>
 
               <div className="p-3 rounded-xl mb-4 bg-gray-50">
                 <div className="flex justify-between text-xs mb-1.5">
-                  <span className="text-gray-500">{language === 'ar' ? 'الإجمالي' : 'Total'}</span>
+                  <span className="text-gray-500">{language==='ar'?'الإجمالي':'Total'}</span>
                   <span className="font-bold text-gray-900">{formatEGP(selectedBooking.totalPrice)}</span>
                 </div>
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-500">{language === 'ar' ? 'المتبقي' : 'Remaining'}</span>
+                  <span className="text-gray-500">{language==='ar'?'المتبقي':'Remaining'}</span>
                   <span className="font-bold text-red-500">{formatEGP(selectedBooking.remainingAmount)}</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <button className="py-2 bg-[#534AB7] text-white rounded-xl font-medium text-sm hover:bg-[#6B5AC8] active:scale-95 transition-all">
-                  {language === 'ar' ? 'تعديل' : 'Edit'}
+                <button className="py-2 bg-[#534AB7] text-white rounded-xl text-sm font-medium hover:bg-[#6B5AC8] active:scale-95 transition-all">
+                  {language==='ar'?'تعديل':'Edit'}
                 </button>
-                <button className="py-2 bg-red-50 text-red-600 rounded-xl font-medium text-sm hover:bg-red-100 active:scale-95 transition-all">
-                  {language === 'ar' ? 'حذف' : 'Delete'}
+                <button className="py-2 bg-red-50 text-red-600 rounded-xl text-sm font-medium hover:bg-red-100 active:scale-95 transition-all">
+                  {language==='ar'?'حذف':'Delete'}
                 </button>
               </div>
             </motion.div>
@@ -670,7 +479,8 @@ export const AdminCalendarPage: React.FC = () => {
   );
 };
 
-const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
+// Detail section divider
+const DS: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <div className="border-b border-gray-100 pb-3 mb-3">
     <p className="text-[10px] font-semibold text-gray-400 mb-1">{title}</p>
     {children}
