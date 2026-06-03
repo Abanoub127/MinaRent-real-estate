@@ -9,7 +9,7 @@ import { getProperties, getBookings, Property, Booking, formatEGP, formatDate } 
 import { motion, AnimatePresence } from 'framer-motion';
 import { ProtectedImage } from '../../components/ProtectedImage';
 
-type FilterStatus = 'all' | 'confirmed' | 'pending' | 'cancelled' | 'available';
+type FilterStatus = 'all' | 'confirmed' | 'pending' | 'cancelled' | 'available' | 'checkout';
 type ViewMode = 'month' | 'week';
 
 // ── Status colors ─────────────────────────────────────────────────────────────
@@ -18,6 +18,7 @@ const STATUS_COLORS = {
   confirmed: { bg: '#dbeafe', border: '#3b82f6', text: '#1e40af', dot: '#3b82f6' },
   pending: { bg: '#fef3c7', border: '#f59e0b', text: '#92400e', dot: '#f59e0b' },
   cancelled: { bg: '#fee2e2', border: '#ef4444', text: '#991b1b', dot: '#ef4444' },
+  checkout: { bg: '#f3e8ff', border: '#a855f7', text: '#6b21a8', dot: '#a855f7' },
 } as const;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -52,8 +53,14 @@ const DesktopCell = memo(({
     if (!hasBook) return 'available';
     if (cellBs.some(b => b.status === 'cancelled')) return 'cancelled';
     if (cellBs.some(b => b.status === 'pending')) return 'pending';
+    // Checkout: booking ends today (endDate === this cell's date)
+    const cellDateStr = date.toISOString().slice(0, 10);
+    if (cellBs.some(b => {
+      const end = new Date(b.endDate); end.setHours(0, 0, 0, 0);
+      return end.toISOString().slice(0, 10) === cellDateStr;
+    })) return 'checkout';
     return 'confirmed';
-  }, [cellBs, hasBook]);
+  }, [cellBs, hasBook, date]);
 
   const opacity = getCellOpacity(status, filterStatus);
   const colors = STATUS_COLORS[status];
@@ -113,8 +120,14 @@ const MobileCell = memo(({
     if (!hasBook) return 'available';
     if (cellBs.some(b => b.status === 'cancelled')) return 'cancelled';
     if (cellBs.some(b => b.status === 'pending')) return 'pending';
+    // Checkout: booking ends today (endDate === this cell's date)
+    const cellDateStr = date.toISOString().slice(0, 10);
+    if (cellBs.some(b => {
+      const end = new Date(b.endDate); end.setHours(0, 0, 0, 0);
+      return end.toISOString().slice(0, 10) === cellDateStr;
+    })) return 'checkout';
     return 'confirmed';
-  }, [cellBs, hasBook]);
+  }, [cellBs, hasBook, date]);
 
   const opacity = getCellOpacity(status, filterStatus);
   const colors = STATUS_COLORS[status];
@@ -388,6 +401,7 @@ export const AdminCalendarPage: React.FC = () => {
     pending: { ar: 'في الانتظار', en: 'Pending' },
     cancelled: { ar: 'ملغى', en: 'Cancelled' },
     available: { ar: 'متاح', en: 'Available' },
+    checkout: { ar: 'انتهى', en: 'Checked Out' },
   };
   const filterDotColor: Record<FilterStatus, string> = {
     all: '#6b7280',
@@ -395,6 +409,7 @@ export const AdminCalendarPage: React.FC = () => {
     pending: STATUS_COLORS.pending.dot,
     cancelled: STATUS_COLORS.cancelled.dot,
     available: STATUS_COLORS.available.dot,
+    checkout: STATUS_COLORS.checkout.dot,
   };
 
   // ── Mobile Grid ───────────────────────────────────────────────────────────
@@ -572,7 +587,7 @@ export const AdminCalendarPage: React.FC = () => {
         {/* Row 2: filters + search */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
-            {(['all', 'confirmed', 'pending', 'cancelled', 'available'] as FilterStatus[]).map(s => {
+            {(['all', 'confirmed', 'pending', 'cancelled', 'available', 'checkout'] as FilterStatus[]).map(s => {
               const active = filterStatus === s;
               const col = filterDotColor[s];
               return (
@@ -609,13 +624,6 @@ export const AdminCalendarPage: React.FC = () => {
 
       {/* ══════════════════════════ GRID ══════════════════════════════ */}
       {isMobile ? renderMobileGrid() : renderDesktopGrid()}
-
-      {/* ══════════════════════════ FAB ══════════════════════════════ */}
-      <motion.button
-        whileHover={{ scale: 1.08 }} whileTap={{ scale: 0.92 }}
-        className="fixed right-6 bottom-8 w-12 h-12 bg-[#534AB7] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#6B5AC8] z-50">
-        <Plus size={22} />
-      </motion.button>
 
       {/* ══════════════════════════ DETAIL MODAL ══════════════════════ */}
       <AnimatePresence>

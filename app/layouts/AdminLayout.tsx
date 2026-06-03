@@ -109,8 +109,8 @@ export const AdminLayout: React.FC = () => {
     }
   };
 
-  const filteredNotifications = activeTab === 'all' 
-    ? notifications 
+  const filteredNotifications = activeTab === 'all'
+    ? notifications
     : notifications.filter(n => n.type === activeTab || (activeTab === 'system' && ['system', 'transaction', 'user'].includes(n.type)));
 
   return (
@@ -130,15 +130,13 @@ export const AdminLayout: React.FC = () => {
 
       {/* Sidebar — Navy Dark */}
       <aside
-        className={`fixed lg:static inset-y-0 z-50 w-72 transition-all duration-300 ease-in-out lg:transform-none ${
-          isRtl ? 'right-0' : 'left-0'
-        } ${
-          isMobileOpen
+        className={`fixed lg:static inset-y-0 z-50 w-72 transition-all duration-300 ease-in-out lg:transform-none ${isRtl ? 'right-0' : 'left-0'
+          } ${isMobileOpen
             ? 'translate-x-0'
             : isRtl
               ? 'translate-x-full lg:translate-x-0'
               : '-translate-x-full lg:translate-x-0'
-        } ${!isSidebarOpen && 'lg:w-20'}`}
+          } ${!isSidebarOpen && 'lg:w-20'}`}
         style={{ background: 'var(--sidebar)' }}
       >
         <div className="h-full flex flex-col border-r border-[var(--sidebar-border)]" style={isRtl ? { borderRight: 'none', borderLeft: '1px solid var(--sidebar-border)' } : {}}>
@@ -159,11 +157,10 @@ export const AdminLayout: React.FC = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${
-                    isActive
-                      ? 'text-[var(--sidebar-primary-foreground)]'
-                      : 'hover:bg-[var(--sidebar-accent)]'
-                  }`}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${isActive
+                    ? 'text-[var(--sidebar-primary-foreground)]'
+                    : 'hover:bg-[var(--sidebar-accent)]'
+                    }`}
                   style={isActive ? { background: 'var(--sidebar-primary)', color: 'var(--sidebar-primary-foreground)' } : { color: 'var(--sidebar-foreground)' }}
                   title={!isSidebarOpen ? link.name : undefined}
                 >
@@ -269,14 +266,14 @@ export const AdminLayout: React.FC = () => {
                             </span>
                           )}
                         </h3>
-                        <button 
+                        <button
                           onClick={(e) => { e.stopPropagation(); setShowNotifications(false); }}
                           className="p-1 text-[var(--text-secondary)] hover:bg-[var(--secondary)] rounded-md transition-colors"
                         >
                           <X className="w-4 h-4" />
                         </button>
                       </div>
-                      
+
                       {/* Tabs */}
                       <div className="flex px-4 py-3 gap-2 overflow-x-auto scrollbar-hide border-b border-[var(--border)] bg-[var(--card)] relative z-10">
                         {(['all', 'property', 'booking', 'system'] as const).map(tab => {
@@ -285,11 +282,10 @@ export const AdminLayout: React.FC = () => {
                             <button
                               key={tab}
                               onClick={(e) => { e.stopPropagation(); setActiveTab(tab); }}
-                              className={`flex-shrink-0 px-4 py-2 text-xs font-bold rounded-full transition-all duration-200 outline-none ${
-                                isActive 
-                                  ? 'bg-[var(--primary)] text-white shadow-md shadow-[var(--primary)]/30' 
-                                  : 'bg-[var(--secondary)] text-[var(--text-secondary)] hover:bg-[var(--border)] hover:text-[var(--foreground)]'
-                              }`}
+                              className={`flex-shrink-0 px-4 py-2 text-xs font-bold rounded-full transition-all duration-200 outline-none ${isActive
+                                ? 'bg-[var(--primary)] text-white shadow-md shadow-[var(--primary)]/30'
+                                : 'bg-[var(--secondary)] text-[var(--text-secondary)] hover:bg-[var(--border)] hover:text-[var(--foreground)]'
+                                }`}
                             >
                               {tab === 'all' && (language === 'en' ? 'All' : 'الكل')}
                               {tab === 'property' && (language === 'en' ? 'Properties' : 'عقارات')}
@@ -301,60 +297,60 @@ export const AdminLayout: React.FC = () => {
                       </div>
                     </div>
 
-                      <div className="max-h-[480px] overflow-y-auto custom-scrollbar bg-[var(--card)]">
-                        {filteredNotifications.length === 0 ? (
-                          <div className="p-10 text-center flex flex-col items-center justify-center gap-3">
-                            <div className="w-12 h-12 rounded-full bg-[var(--secondary)] flex items-center justify-center">
-                              <CheckCheck className="w-6 h-6 text-[var(--text-secondary)] opacity-50" />
-                            </div>
-                            <p className="text-[var(--text-secondary)] text-sm font-medium">
-                              {language === 'en' ? 'You are all caught up!' : 'لا توجد إشعارات حالياً'}
-                            </p>
+                    <div className="max-h-[480px] overflow-y-auto custom-scrollbar bg-[var(--card)]">
+                      {filteredNotifications.length === 0 ? (
+                        <div className="p-10 text-center flex flex-col items-center justify-center gap-3">
+                          <div className="w-12 h-12 rounded-full bg-[var(--secondary)] flex items-center justify-center">
+                            <CheckCheck className="w-6 h-6 text-[var(--text-secondary)] opacity-50" />
                           </div>
-                        ) : (
-                          filteredNotifications.map(n => (
-                            <button
-                              key={n.id}
-                              onClick={() => handleNotificationClick(n)}
-                              className={`w-full text-left p-4 hover:bg-[var(--secondary)] transition-all border-b border-[var(--border)] last:border-0 relative group flex items-start gap-4 ${!n.isRead ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
-                            >
-                              {!n.isRead && (
-                                <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-r-full" />
-                              )}
-                              
-                              {/* Icon Box */}
-                              <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center border border-[var(--border)] ${!n.isRead ? 'bg-white dark:bg-gray-800 shadow-sm' : 'bg-[var(--secondary)]'}`}>
-                                 {getNotificationIcon(n.type)}
-                              </div>
+                          <p className="text-[var(--text-secondary)] text-sm font-medium">
+                            {language === 'en' ? 'You are all caught up!' : 'لا توجد إشعارات حالياً'}
+                          </p>
+                        </div>
+                      ) : (
+                        filteredNotifications.map(n => (
+                          <button
+                            key={n.id}
+                            onClick={() => handleNotificationClick(n)}
+                            className={`w-full text-left p-4 hover:bg-[var(--secondary)] transition-all border-b border-[var(--border)] last:border-0 relative group flex items-start gap-4 ${!n.isRead ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
+                          >
+                            {!n.isRead && (
+                              <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-r-full" />
+                            )}
 
-                              <div className="flex-1 min-w-0 flex flex-col">
-                                <div className="flex items-center justify-between gap-2 mb-1">
-                                  <p className={`text-sm truncate ${!n.isRead ? 'font-bold text-[var(--foreground)]' : 'font-semibold text-[var(--text-secondary)]'}`}>
-                                    {n.title}
-                                  </p>
-                                  <p className="text-[10px] font-medium text-[var(--text-secondary)] whitespace-nowrap opacity-80 flex items-center gap-1 shrink-0">
-                                    <Clock className="w-3 h-3" />
-                                    <span className="ltr-content">
-                                      {formatDistanceToNow(new Date(n.createdAt), { 
-                                        addSuffix: true,
-                                        locale: language === 'ar' ? ar : enUS
-                                      })}
-                                    </span>
-                                  </p>
-                                </div>
-                                <p className={`text-xs leading-relaxed line-clamp-2 mb-1 ${!n.isRead ? 'text-[var(--text-secondary)] font-medium' : 'text-[var(--text-secondary)]/80'}`}>
-                                  {n.body}
+                            {/* Icon Box */}
+                            <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center border border-[var(--border)] ${!n.isRead ? 'bg-white dark:bg-gray-800 shadow-sm' : 'bg-[var(--secondary)]'}`}>
+                              {getNotificationIcon(n.type)}
+                            </div>
+
+                            <div className="flex-1 min-w-0 flex flex-col">
+                              <div className="flex items-center justify-between gap-2 mb-1">
+                                <p className={`text-sm truncate ${!n.isRead ? 'font-bold text-[var(--foreground)]' : 'font-semibold text-[var(--text-secondary)]'}`}>
+                                  {n.title}
                                 </p>
-                                {n.description && (
-                                  <p className="text-[11px] text-[var(--text-secondary)]/70 italic line-clamp-1 truncate">
-                                    {n.description}
-                                  </p>
-                                )}
+                                <p className="text-[10px] font-medium text-[var(--text-secondary)] whitespace-nowrap opacity-80 flex items-center gap-1 shrink-0">
+                                  <Clock className="w-3 h-3" />
+                                  <span className="ltr-content">
+                                    {formatDistanceToNow(new Date(n.createdAt), {
+                                      addSuffix: true,
+                                      locale: language === 'ar' ? ar : enUS
+                                    })}
+                                  </span>
+                                </p>
                               </div>
-                            </button>
-                          ))
-                        )}
-                      </div>
+                              <p className={`text-xs leading-relaxed line-clamp-2 mb-1 ${!n.isRead ? 'text-[var(--text-secondary)] font-medium' : 'text-[var(--text-secondary)]/80'}`}>
+                                {n.body}
+                              </p>
+                              {n.description && (
+                                <p className="text-[11px] text-[var(--text-secondary)]/70 italic line-clamp-1 truncate">
+                                  {n.description}
+                                </p>
+                              )}
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -377,10 +373,8 @@ export const AdminLayout: React.FC = () => {
         )}
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-3 sm:p-5 lg:p-8">
-          <div className="max-w-7xl mx-auto">
-            <Outlet />
-          </div>
+        <main className="flex-1 overflow-hidden min-h-0">
+          <Outlet />
         </main>
       </div>
 
