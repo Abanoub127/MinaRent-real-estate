@@ -177,7 +177,7 @@ export const HomePage: React.FC = () => {
       {/* ── Features ── */}
       <section className="bg-[var(--card)] py-20 border-y border-[var(--border)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-6.25rem" }} className="grid grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] md:grid-cols-3 gap-8">
+          <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="grid grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] md:grid-cols-3 gap-8">
             {[
               { icon: Home, titleEn: 'Vast Selection', titleAr: 'تشكيلة واسعة', descEn: 'Browse thousands of verified properties in prime locations.', descAr: 'تصفح آلاف العقارات الموثقة في مواقع متميزة.' },
               { icon: Shield, titleEn: 'Secure Transactions', titleAr: 'معاملات آمنة', descEn: 'Your investments are protected with our transparent process.', descAr: 'استثماراتك محمية بفضل إجراءاتنا الشفافة.' },
