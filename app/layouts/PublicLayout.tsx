@@ -98,7 +98,7 @@ export const PublicLayout: React.FC = () => {
                     {isActive && (
                       <motion.div
                         layoutId="nav-indicator"
-                        className="absolute bottom-0 left-3 right-3 h-0.5 bg-[var(--primary)] rounded-full"
+                        className="absolute bottom-0 left-3 right-3 h-0.5 bg-gradient-to-r from-[#C9A84C] to-[#D4B96A] rounded-full"
                         transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                       />
                     )}
@@ -237,14 +237,14 @@ export const PublicLayout: React.FC = () => {
       </AnimatePresence>
 
       {/* Footer */}
-      <footer className="bg-[var(--card)] border-t border-[var(--border)] mt-auto">
+      <footer className="bg-gradient-to-b from-[#1B2B4B] to-[#0D1B2A] text-white border-t border-white/10 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
             <div className="md:col-span-2">
               <Link to="/" className="inline-block mb-4">
-                <MRLogo size="md" showText={true} animated={false} />
+                <MRLogo size="md" showText={true} animated={false} dark={true} />
               </Link>
-              <p className="text-[var(--text-secondary)] text-sm max-w-sm leading-relaxed mb-6">
+              <p className="text-white/70 text-sm max-w-sm leading-relaxed mb-6">
                 {isRtl
                   ? 'شريكك الموثوق في العثور على العقار المثالي. نقدم مجموعة منسقة من أفضل العقارات بأسلوب احترافي وعصري.'
                   : 'Your trusted partner in finding the perfect property. We offer a curated selection of premium real estate with a professional and modern approach.'}
@@ -252,7 +252,7 @@ export const PublicLayout: React.FC = () => {
             </div>
 
             <div>
-              <h3 className="font-semibold text-[var(--foreground)] mb-4 uppercase text-xs tracking-widest">
+              <h3 className="font-semibold text-white mb-4 uppercase text-xs tracking-widest">
                 {isRtl ? 'روابط سريعة' : 'Quick Links'}
               </h3>
               <ul className="space-y-3">
@@ -260,7 +260,7 @@ export const PublicLayout: React.FC = () => {
                   <li key={link.path}>
                     <Link
                       to={link.path}
-                      className="text-[var(--text-secondary)] hover:text-[var(--primary)] text-sm transition-colors"
+                      className="text-white/70 hover:text-[#C9A84C] text-sm transition-colors"
                     >
                       {link.name}
                     </Link>
@@ -270,27 +270,27 @@ export const PublicLayout: React.FC = () => {
             </div>
 
             <div>
-              <h3 className="font-semibold text-[var(--foreground)] mb-4 uppercase text-xs tracking-widest">
+              <h3 className="font-semibold text-white mb-4 uppercase text-xs tracking-widest">
                 {isRtl ? 'تواصل معنا' : 'Contact Us'}
               </h3>
               <ul className="space-y-3">
-                <li className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
+                <li className="flex items-center gap-3 text-sm text-white/70">
                   <Phone className="w-4 h-4 text-[var(--accent)] shrink-0" />
                   <span className="ltr-content">01279229000</span>
                 </li>
-                <li className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
-                  <Phone className="w-4 h-4 text-[var(--accent)] shrink-0" />
+                <li className="flex items-center gap-3 text-sm text-white/70">
+                  <Phone className="w-4 h-4 text-[#C9A84C] shrink-0" />
                   <span className="ltr-content">+20 10 65655100</span>
                 </li>
-                <li className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
-                  <Mail className="w-4 h-4 text-[var(--accent)] shrink-0" />
+                <li className="flex items-center gap-3 text-sm text-white/70">
+                  <Mail className="w-4 h-4 text-[#C9A84C] shrink-0" />
                   <span className="ltr-content break-all">minarent23@gmail.com</span>
                 </li>
               </ul>
             </div>
           </div>
-          <div className="mt-12 pt-8 border-t border-[var(--border)] text-center">
-            <p className="text-[var(--text-secondary)] text-sm">
+          <div className="mt-12 pt-8 border-t border-white/10 text-center">
+            <p className="text-white/70 text-sm">
               © {new Date().getFullYear()} Mina Rent. {isRtl ? 'جميع الحقوق محفوظة.' : 'All rights reserved.'}
             </p>
           </div>

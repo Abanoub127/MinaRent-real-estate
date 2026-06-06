@@ -321,8 +321,15 @@
 .gradient-gold {
   background: linear-gradient(135deg, #A17B2F 0%, #C9A84C 50%, #D4B96A 100%);
 }
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 .gradient-hero {
-  background: linear-gradient(135deg, #0B1437 0%, #111C44 40%, #1B2B5B 100%);
+  background: linear-gradient(-45deg, #1B2B4B, #0D1B2A, #1B2B4B);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
 }
 
 /* ── Logo Floating Animation ── */
@@ -429,8 +436,8 @@
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
 }
 .premium-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.12);
+  transform: translateY(-0.25rem) scale(1.02);
+  box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.2);
 }
 .dark .premium-card:hover {
   box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.4);
@@ -464,7 +471,8 @@
   position: relative;
   border: none !important;
 }
-.gradient-border::before {
+.gradient-border::before,
+.hover-gradient-border:hover::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -475,6 +483,10 @@
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
+}
+.hover-gradient-border:hover {
+  position: relative;
+  border-color: transparent !important;
 }
 
 /* Custom scrollbar for specific containers */

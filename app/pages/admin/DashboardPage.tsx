@@ -23,10 +23,10 @@ export const DashboardPage: React.FC = () => {
   if (!stats) return null;
 
   const statCards = [
-    { title: language==='en'?'Total Revenue':'إجمالي الإيرادات', value: formatEGPShort(stats.totalRevenue), trend: stats.revenueGrowth||0, icon: DollarSign, isFirst: true },
-    { title: t('dashboard.totalProperties'), value: stats.totalProperties, trend: stats.propertyGrowth||0, icon: Building2, color: 'text-[var(--primary)]' },
-    { title: t('dashboard.totalBookings'), value: stats.totalBookings, trend: stats.bookingsGrowth||0, icon: CalendarCheck, color: 'text-[var(--accent)]' },
-    { title: t('dashboard.activeClients'), value: stats.totalClients, trend: stats.clientsGrowth||0, icon: Users, color: 'text-blue-500' },
+    { title: language==='en'?'Total Revenue':'إجمالي الإيرادات', value: formatEGPShort(stats.totalRevenue), trend: stats.revenueGrowth||0, icon: DollarSign, isFirst: true, color: 'text-white' },
+    { title: t('dashboard.totalProperties'), value: stats.totalProperties, trend: stats.propertyGrowth||0, icon: Building2, color: 'text-[#C9A84C]' },
+    { title: t('dashboard.totalBookings'), value: stats.totalBookings, trend: stats.bookingsGrowth||0, icon: CalendarCheck, color: 'text-[#3B82F6]' },
+    { title: t('dashboard.activeClients'), value: stats.totalClients, trend: stats.clientsGrowth||0, icon: Users, color: 'text-[#1B2B4B] dark:text-blue-300' },
   ];
 
   const cV = { hidden:{opacity:0}, visible:{opacity:1,transition:{staggerChildren:0.08}} };
@@ -40,10 +40,10 @@ export const DashboardPage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {statCards.map((s,i)=>(<motion.div key={i} variants={iV} className={`p-5 rounded-2xl border border-[var(--border)] shadow-sm relative overflow-hidden ${i===0?'bg-gradient-to-br from-[var(--primary)] to-[#2D4A8C] text-white':'bg-[var(--card)]'}`}>
-          {i===0&&<div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none"/>}
+        {statCards.map((s,i)=>(<motion.div key={i} variants={iV} className={`group p-5 rounded-2xl border border-[var(--border)] shadow-sm relative overflow-hidden transition-all duration-300 hover:-translate-y-[2px] hover:shadow-md ${i===0?'bg-gradient-to-br from-[#1B2B4B] to-[#0D1B2A] text-white':'bg-gradient-to-br from-[var(--card)] to-[var(--secondary)]'}`}>
+          {i===0&&<div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none group-hover:scale-110 transition-transform duration-500"/>}
           <div className="flex justify-between items-start mb-3 relative z-10">
-            <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${i===0?'bg-white/20':'bg-[var(--secondary)]'}`}><s.icon className={`w-5 h-5 ${i===0?'text-white':s.color}`}/></div>
+            <div className={`w-11 h-11 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110 ${i===0?'bg-white/20':'bg-black/5 dark:bg-white/5'}`}><s.icon className={`w-5 h-5 ${s.color}`}/></div>
             <div className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full ${s.trend>=0?(i===0?'bg-white/20 text-white':'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'):(i===0?'bg-white/20 text-white':'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400')}`}>
               {s.trend>=0?<TrendingUp className="w-3 h-3"/>:<TrendingDown className="w-3 h-3"/>}<span>{Math.abs(s.trend)}%</span>
             </div>
@@ -56,12 +56,12 @@ export const DashboardPage: React.FC = () => {
         <motion.div variants={iV} className="lg:col-span-2 bg-[var(--card)] p-4 sm:p-6 rounded-2xl border border-[var(--border)] shadow-sm">
           <h3 className="text-lg font-bold text-[var(--foreground)] mb-4">{t('dashboard.revenueChart')}</h3>
           <div className="h-[12.5rem] sm:h-[17.5rem] w-full"><ResponsiveContainer width="100%" height="100%"><AreaChart data={stats.monthlyRevenueData||[]} margin={{top:10,right:10,left:0,bottom:0}}>
-            <defs><linearGradient id="cr" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/><stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/></linearGradient></defs>
+            <defs><linearGradient id="cr" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#C9A84C" stopOpacity={0.4}/><stop offset="95%" stopColor="#C9A84C" stopOpacity={0}/></linearGradient></defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)"/>
             <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill:'var(--text-secondary)',fontSize:'0.75rem'}} dy={10}/>
             <YAxis axisLine={false} tickLine={false} tick={{fill:'var(--text-secondary)',fontSize:'0.75rem'}} dx={-10} tickFormatter={v=>`${v/1000}k`}/>
-            <Tooltip contentStyle={{backgroundColor:'var(--card)',borderRadius:'0.75rem',border:'1px solid var(--border)'}} formatter={(v:number)=>[formatEGPShort(v),language==='en'?'Revenue':'الإيرادات']}/>
-            <Area type="monotone" dataKey="revenue" stroke="var(--primary)" strokeWidth={2.5} fillOpacity={1} fill="url(#cr)"/>
+            <Tooltip cursor={{stroke: '#1B2B4B', strokeWidth: 1, strokeDasharray: '4 4'}} contentStyle={{backgroundColor:'var(--card)',borderRadius:'1rem',border:'1px solid var(--border)',boxShadow:'0 10px 25px -5px rgba(0,0,0,0.1)'}} formatter={(v:number)=>[formatEGPShort(v),language==='en'?'Revenue':'الإيرادات']}/>
+            <Area type="monotone" dataKey="revenue" stroke="#C9A84C" strokeWidth={3} fillOpacity={1} fill="url(#cr)" animationDuration={1500}/>
           </AreaChart></ResponsiveContainer></div>
         </motion.div>
         <motion.div variants={iV} className="bg-[var(--card)] p-4 sm:p-6 rounded-2xl border border-[var(--border)] shadow-sm flex flex-col">
@@ -81,7 +81,7 @@ export const DashboardPage: React.FC = () => {
         </motion.div>
         <motion.div variants={iV} className="bg-[var(--card)] p-4 sm:p-6 rounded-2xl border border-[var(--border)] shadow-sm">
           <h3 className="text-lg font-bold text-[var(--foreground)] mb-5">{language==='en'?'Recent Bookings':'أحدث الحجوزات'}</h3>
-          <div className="space-y-3">{recentBookings.map(b=>(<div key={b.id} className="flex items-center gap-4 p-3 hover:bg-[var(--secondary)] rounded-xl transition-colors"><div className="w-10 h-10 rounded-full bg-[var(--primary)]/10 flex items-center justify-center shrink-0"><Users className="w-5 h-5 text-[var(--primary)]"/></div><div className="flex-1 min-w-0"><h4 className="font-bold text-[var(--foreground)] text-sm truncate">{typeof b.clientId==='object'&&b.clientId!==null?b.clientId.name:'Client'}</h4><p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">{typeof b.propertyId==='object'&&b.propertyId!==null?(language==='en'?b.propertyId.title:b.propertyId.titleAr):'Property'}</p></div><span className={`px-2 py-0.5 rounded text-[0.625rem] font-bold uppercase ${b.status==='confirmed'?'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':b.status==='pending'?'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400':'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>{language==='en'?b.status:(b.status==='confirmed'?'مؤكد':b.status==='pending'?'قيد الانتظار':'ملغى')}</span></div>))}{recentBookings.length===0&&<div className="text-center py-8 text-[var(--text-secondary)] text-sm">{language==='en'?'No recent bookings.':'لا توجد حجوزات.'}</div>}</div>
+          <div className="space-y-3">{recentBookings.map(b=>(<div key={b.id} className="group flex items-center gap-4 p-3 hover:bg-gradient-to-r hover:from-[#C9A84C]/5 hover:to-transparent rounded-xl transition-colors"><div className="w-10 h-10 rounded-full bg-[#1B2B4B]/10 flex items-center justify-center shrink-0"><Users className="w-5 h-5 text-[#1B2B4B] dark:text-blue-300"/></div><div className="flex-1 min-w-0"><h4 className="font-bold text-[var(--foreground)] text-sm truncate">{typeof b.clientId==='object'&&b.clientId!==null?b.clientId.name:'Client'}</h4><p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">{typeof b.propertyId==='object'&&b.propertyId!==null?(language==='en'?b.propertyId.title:b.propertyId.titleAr):'Property'}</p></div><span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.625rem] font-bold uppercase ${b.status==='confirmed'?'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':b.status==='pending'?'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400':'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}><span className={`w-1.5 h-1.5 rounded-full ${b.status==='confirmed'?'bg-green-500':b.status==='pending'?'bg-orange-500':'bg-red-500'}`} />{language==='en'?b.status:(b.status==='confirmed'?'مؤكد':b.status==='pending'?'قيد الانتظار':'ملغى')}</span></div>))}{recentBookings.length===0&&<div className="text-center py-10 flex flex-col items-center justify-center"><CalendarCheck className="w-10 h-10 text-[var(--text-secondary)] opacity-30 mb-3"/><p className="text-[var(--text-secondary)] text-sm font-medium">{language==='en'?'No recent bookings.':'لا توجد حجوزات.'}</p></div>}</div>
         </motion.div>
       </div>
     </motion.div>

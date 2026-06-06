@@ -476,38 +476,38 @@ const fetchProperties = async () => {
         <Card>
           <div className="overflow-x-auto w-full pb-4">
             <table className="w-full min-w-[600px]">
-              <thead className="bg-gray-50 dark:bg-gray-700">
+              <thead className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md sticky top-0 z-20 shadow-sm">
                 <tr>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap sticky ltr:left-0 rtl:right-0 bg-gray-50 dark:bg-gray-700 z-10 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap sticky ltr:left-0 rtl:right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md z-30 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none sm:bg-transparent">
                     {language === 'en' ? 'Image' : 'الصورة'}
                   </th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
                     {t('propertiesMgmt.title')}
                   </th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
                     {t('propertiesMgmt.price')}
                   </th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
                     {language === 'en' ? 'Location' : 'الموقع'}
                   </th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
                     {t('propertiesMgmt.status')}
                   </th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
                     {language === 'en' ? 'Views' : 'المشاهدات'}
                   </th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
                     {language === 'en' ? 'Likes' : 'الإعجابات'}
                   </th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
                     {t('propertiesMgmt.actions')}
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {filteredProperties.map((property) => (
-                  <tr key={property.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap sticky ltr:left-0 rtl:right-0 bg-white dark:bg-gray-800 z-10 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none">
+                  <tr key={property.id} className="group hover:bg-gradient-to-r hover:from-[#C9A84C]/5 hover:to-transparent transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap sticky ltr:left-0 rtl:right-0 bg-white dark:bg-gray-800 z-10 group-hover:bg-[#C9A84C]/5 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none sm:group-hover:bg-transparent">
                       <ProtectedImage
                         src={property.images[0]}
                         alt={language === 'en' ? property.title : property.titleAr}
@@ -538,21 +538,24 @@ const fetchProperties = async () => {
                     handleStatusChange(property.id, value as PropertyStatus)
                   }
                 >
-                  <SelectTrigger className="w-[8.75rem]">
-                    <SelectValue />
+                  <SelectTrigger className={`w-[8.75rem] h-8 text-xs font-bold border-0 bg-transparent`}>
+                    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full w-full ${property.status==='available'?'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':property.status==='rented'?'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400':'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
+                      <span className={`w-1.5 h-1.5 shrink-0 rounded-full ${property.status==='available'?'bg-green-500':property.status==='rented'?'bg-blue-500':'bg-red-500'}`} />
+                      <SelectValue />
+                    </div>
                   </SelectTrigger>
 
                   <SelectContent>
                     <SelectItem value="available">
-                      {t('property.available')}
+                      <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-green-500"/>{t('property.available')}</div>
                     </SelectItem>
 
                     <SelectItem value="sold">
-                      {t('property.sold')}
+                      <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-500"/>{t('property.sold')}</div>
                     </SelectItem>
 
                     <SelectItem value="rented">
-                      {t('property.rented')}
+                      <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-blue-500"/>{t('property.rented')}</div>
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -605,7 +608,10 @@ const fetchProperties = async () => {
                   className="object-cover"
                 />
                 <div className="absolute top-4 right-4">
-                  <Badge variant={getStatusBadgeVariant(property.status)}>{t(`property.${property.status}`)}</Badge>
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.625rem] font-bold uppercase backdrop-blur-md border ${property.status==='available'?'bg-green-100/90 text-green-700 border-green-200 dark:bg-green-900/60 dark:text-green-400':property.status==='rented'?'bg-blue-100/90 text-blue-700 border-blue-200 dark:bg-blue-900/60 dark:text-blue-400':'bg-red-100/90 text-red-700 border-red-200 dark:bg-red-900/60 dark:text-red-400'}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${property.status==='available'?'bg-green-500':property.status==='rented'?'bg-blue-500':'bg-red-500'}`} />
+                    {t(`property.${property.status}`)}
+                  </span>
                 </div>
               </div>
               <div className="p-4">

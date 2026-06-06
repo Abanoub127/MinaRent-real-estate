@@ -238,9 +238,9 @@ if (editingBooking) {
       <Card>
         <div className="overflow-x-auto w-full pb-4">
           <table className="w-full min-w-[600px]">
-            <thead className="bg-gray-50 dark:bg-gray-700">
+            <thead className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md sticky top-0 z-20 shadow-sm">
               <tr>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase whitespace-nowrap sticky ltr:left-0 rtl:right-0 bg-gray-50 dark:bg-gray-700 z-10 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase whitespace-nowrap sticky ltr:left-0 rtl:right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md z-30 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none sm:bg-transparent">
                   {language === 'en' ? 'Property' : 'العقار'}
                 </th>
                 {[
@@ -251,7 +251,7 @@ if (editingBooking) {
                   language === 'en' ? 'Status' : 'الحالة',
                   language === 'en' ? 'Actions' : 'الإجراءات',
                 ].map((h) => (
-                  <th key={h} className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase whitespace-nowrap">
+                  <th key={h} className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase whitespace-nowrap">
                     {h}
                   </th>
                 ))}
@@ -262,8 +262,8 @@ if (editingBooking) {
     const id = booking._id;
 
     return (
-      <tr key={id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-        <td className="px-3 sm:px-6 py-3 sm:py-4 sticky ltr:left-0 rtl:right-0 bg-white dark:bg-gray-800 z-10 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none">
+      <tr key={id} className="group hover:bg-gradient-to-r hover:from-[#C9A84C]/5 hover:to-transparent transition-colors">
+        <td className="px-3 sm:px-6 py-3 sm:py-4 sticky ltr:left-0 rtl:right-0 bg-white dark:bg-gray-800 z-10 group-hover:bg-[#C9A84C]/5 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none sm:group-hover:bg-transparent">
           <div className="text-sm font-medium text-gray-900 dark:text-white">
             {language === 'en'
               ? booking.propertyId?.title || '—'
@@ -300,13 +300,16 @@ if (editingBooking) {
                         value={booking.status}
                         onValueChange={(val) => handleStatusChange(id, val as BookingStatus)}
                       >
-                        <SelectTrigger className="w-36">
-                          <SelectValue />
+                        <SelectTrigger className={`w-36 h-8 text-xs font-bold border-0 bg-transparent`}>
+                          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full w-full ${booking.status==='confirmed'?'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':booking.status==='pending'?'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400':'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
+                            <span className={`w-1.5 h-1.5 shrink-0 rounded-full ${booking.status==='confirmed'?'bg-green-500':booking.status==='pending'?'bg-orange-500':'bg-red-500'}`} />
+                            <SelectValue />
+                          </div>
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="pending">{language === 'en' ? 'Pending' : 'قيد الانتظار'}</SelectItem>
-                          <SelectItem value="confirmed">{language === 'en' ? 'Confirmed' : 'مؤكد'}</SelectItem>
-                          <SelectItem value="cancelled">{language === 'en' ? 'Cancelled' : 'ملغي'}</SelectItem>
+                          <SelectItem value="pending"><div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-orange-500"/>{language === 'en' ? 'Pending' : 'قيد الانتظار'}</div></SelectItem>
+                          <SelectItem value="confirmed"><div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-green-500"/>{language === 'en' ? 'Confirmed' : 'مؤكد'}</div></SelectItem>
+                          <SelectItem value="cancelled"><div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-500"/>{language === 'en' ? 'Cancelled' : 'ملغي'}</div></SelectItem>
                         </SelectContent>
                       </Select>
                     </td>

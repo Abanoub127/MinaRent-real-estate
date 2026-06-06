@@ -183,8 +183,8 @@ export const HomePage: React.FC = () => {
               { icon: Shield, titleEn: 'Secure Transactions', titleAr: 'معاملات آمنة', descEn: 'Your investments are protected with our transparent process.', descAr: 'استثماراتك محمية بفضل إجراءاتنا الشفافة.' },
               { icon: Users, titleEn: 'Expert Agents', titleAr: 'وكلاء خبراء', descEn: 'Our local experts guide you every step of the way.', descAr: 'خبراؤنا المحليون يرافقونك في كل خطوة.' }
             ].map((feature, idx) => (
-              <motion.div key={idx} variants={itemVariants} className="premium-card flex flex-col items-center text-center p-8 rounded-2xl hover:bg-[var(--secondary)] transition-all duration-300 group cursor-default">
-                <div className="w-16 h-16 bg-[var(--primary)]/10 text-[var(--primary)] rounded-2xl flex items-center justify-center mb-5 group-hover:bg-[var(--primary)] group-hover:text-white transition-all duration-300">
+              <motion.div key={idx} variants={itemVariants} className="premium-card flex flex-col items-center text-center p-8 rounded-2xl hover:bg-[var(--secondary)] transition-all duration-300 group cursor-default hover-gradient-border glass">
+                <div className="w-16 h-16 bg-[var(--primary)]/10 text-[var(--primary)] rounded-2xl flex items-center justify-center mb-5 group-hover:bg-[var(--primary)] group-hover:text-white transition-all duration-300 group-hover:scale-110">
                   <feature.icon className="w-7 h-7" />
                 </div>
                 <h3 className="text-lg font-bold text-[var(--foreground)] mb-2">{language === 'en' ? feature.titleEn : feature.titleAr}</h3>

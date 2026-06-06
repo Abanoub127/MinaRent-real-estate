@@ -192,10 +192,10 @@ export const AdminLayout: React.FC = () => {
       */}
       <aside
         ref={sidebarRef}
-        style={{ background: 'var(--sidebar)' }}
         className={[
           // ─ Base ─
           'inset-y-0 z-50 flex-shrink-0',
+          'bg-gradient-to-b from-[#1B2B4B] to-[#0D1B2A] border-[var(--sidebar-border)]',
           // Mobile & Tablet: fixed drawer; Desktop: static in-flow
           'fixed lg:static',
           // Mobile & Tablet always full drawer width
@@ -253,21 +253,16 @@ export const AdminLayout: React.FC = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+                  className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 ${
                     showText ? '' : 'justify-center'
                   } ${isActive
-                    ? 'text-[var(--sidebar-primary-foreground)]'
-                    : 'hover:bg-[var(--sidebar-accent)]'
+                    ? 'text-[#0D1B2A] font-bold shadow-[0_0_15px_rgba(201,168,76,0.4)] bg-gradient-to-r from-[#C9A84C] to-[#D4B96A]'
+                    : 'text-white/70 hover:bg-white/10 hover:text-white'
                   }`}
-                  style={
-                    isActive
-                      ? { background: 'var(--sidebar-primary)', color: 'var(--sidebar-primary-foreground)' }
-                      : { color: 'var(--sidebar-foreground)' }
-                  }
                   title={!showText ? link.name : undefined}
                   onClick={() => setIsMobileOpen(false)}
                 >
-                  <Icon className="w-5 h-5 shrink-0" style={isActive ? {} : { opacity: 0.7 }} />
+                  <Icon className={`w-5 h-5 shrink-0 transition-transform duration-300 group-hover:scale-110 ${!isActive && 'opacity-70 group-hover:opacity-100'}`} />
                   {showText && <span className="font-medium text-sm truncate">{link.name}</span>}
                 </Link>
               );
@@ -277,23 +272,21 @@ export const AdminLayout: React.FC = () => {
           {/* User */}
           <div className="p-3 border-t border-[var(--sidebar-border)]">
             <div
-              className={`flex items-center gap-3 px-3 py-3 rounded-xl ${
+              className={`flex items-center gap-3 px-3 py-3 rounded-xl bg-white/5 border border-white/10 ${
                 (isMobileOpen || isSidebarOpen) ? '' : 'justify-center'
               }`}
-              style={{ background: 'var(--sidebar-accent)' }}
             >
               <div
-                className="w-10 h-10 rounded-full flex items-center justify-center font-bold shrink-0 text-sm"
-                style={{ background: 'var(--sidebar-primary)', color: 'var(--sidebar-primary-foreground)' }}
+                className="w-10 h-10 rounded-full flex items-center justify-center font-bold shrink-0 text-sm bg-gradient-to-r from-[#C9A84C] to-[#D4B96A] text-[#0D1B2A] shadow-lg"
               >
                 {user?.name?.charAt(0).toUpperCase() || 'A'}
               </div>
               {(isMobileOpen || isSidebarOpen) && (
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold truncate" style={{ color: 'var(--sidebar-foreground)' }}>
+                <div className="flex-1 min-w-0 text-white">
+                  <p className="text-sm font-bold truncate">
                     {user?.name}
                   </p>
-                  <p className="text-xs truncate" style={{ color: 'var(--sidebar-foreground)', opacity: 0.6 }}>
+                  <p className="text-xs truncate text-white/60">
                     {user?.email}
                   </p>
                 </div>
@@ -319,7 +312,7 @@ export const AdminLayout: React.FC = () => {
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Header */}
-        <header className="h-16 bg-[var(--card)] border-b border-[var(--border)] flex items-center justify-between px-4 sm:px-6 z-40 relative" style={{ boxShadow: 'var(--shadow-sm)' }}>
+        <header className="h-16 bg-[var(--card)]/80 backdrop-blur-md border-b border-[var(--border)] flex items-center justify-between px-4 sm:px-6 z-40 relative" style={{ boxShadow: 'var(--shadow-sm)' }}>
           <div className="flex items-center gap-3">
 
             {/* Mobile/Tablet (<lg): opens drawer */}
@@ -363,7 +356,7 @@ export const AdminLayout: React.FC = () => {
                 className="p-2.5 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--secondary)] hover:text-[var(--primary)] transition-all relative"
                 aria-label={language === 'en' ? 'Notifications' : 'الإشعارات'}
               >
-                <Bell className="w-5 h-5" />
+                <Bell className={`w-5 h-5 ${unreadCount > 0 ? 'animate-pulse text-[#C9A84C]' : ''}`} />
                 {unreadCount > 0 && (
                   <motion.span
                     initial={{ scale: 0 }}
