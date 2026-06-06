@@ -235,7 +235,7 @@ export const AdminLayout: React.FC = () => {
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-[var(--card)]"
+                    className="absolute -top-0.5 -right-0.5 min-w-[1.125rem] h-[1.125rem] bg-red-500 text-white text-[0.625rem] font-bold rounded-full flex items-center justify-center px-1 border-2 border-[var(--card)]"
                   >
                     {unreadCount > 99 ? '99+' : unreadCount}
                   </motion.span>
@@ -252,7 +252,7 @@ export const AdminLayout: React.FC = () => {
                     transition={{ duration: 0.15 }}
                     className={`
                       fixed left-4 right-4 top-20 w-auto
-                      sm:absolute sm:top-12 ${isRtl ? 'sm:left-0 sm:right-auto' : 'sm:right-0 sm:left-auto'} sm:w-[400px] 
+                      sm:absolute sm:top-12 ${isRtl ? 'sm:left-0 sm:right-auto' : 'sm:right-0 sm:left-auto'} sm:w-[25rem] 
                       bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-xl overflow-hidden z-50
                     `}
                   >
@@ -261,7 +261,7 @@ export const AdminLayout: React.FC = () => {
                         <h3 className="font-bold text-[var(--foreground)] flex items-center gap-2">
                           {language === 'en' ? 'Notifications' : 'الإشعارات'}
                           {unreadCount > 0 && (
-                            <span className="bg-[var(--primary)] text-white text-[10px] px-2 py-0.5 rounded-full">
+                            <span className="bg-[var(--primary)] text-white text-[0.625rem] px-2 py-0.5 rounded-full">
                               {unreadCount} {language === 'en' ? 'New' : 'جديد'}
                             </span>
                           )}
@@ -297,7 +297,7 @@ export const AdminLayout: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="max-h-[480px] overflow-y-auto custom-scrollbar bg-[var(--card)]">
+                    <div className="max-h-[30rem] overflow-y-auto custom-scrollbar bg-[var(--card)]">
                       {filteredNotifications.length === 0 ? (
                         <div className="p-10 text-center flex flex-col items-center justify-center gap-3">
                           <div className="w-12 h-12 rounded-full bg-[var(--secondary)] flex items-center justify-center">
@@ -328,7 +328,7 @@ export const AdminLayout: React.FC = () => {
                                 <p className={`text-sm truncate ${!n.isRead ? 'font-bold text-[var(--foreground)]' : 'font-semibold text-[var(--text-secondary)]'}`}>
                                   {n.title}
                                 </p>
-                                <p className="text-[10px] font-medium text-[var(--text-secondary)] whitespace-nowrap opacity-80 flex items-center gap-1 shrink-0">
+                                <p className="text-[0.625rem] font-medium text-[var(--text-secondary)] whitespace-nowrap opacity-80 flex items-center gap-1 shrink-0">
                                   <Clock className="w-3 h-3" />
                                   <span className="ltr-content">
                                     {formatDistanceToNow(new Date(n.createdAt), {
@@ -342,7 +342,7 @@ export const AdminLayout: React.FC = () => {
                                 {n.body}
                               </p>
                               {n.description && (
-                                <p className="text-[11px] text-[var(--text-secondary)]/70 italic line-clamp-1 truncate">
+                                <p className="text-[0.6875rem] text-[var(--text-secondary)]/70 italic line-clamp-1 truncate">
                                   {n.description}
                                 </p>
                               )}

@@ -127,7 +127,7 @@ export const PropertiesPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[280px_1fr]">
+      <div className="mt-8 grid gap-6 lg:grid-cols-[17.5rem_1fr]">
         {/* Filters — always visible on lg+, toggleable on mobile */}
         <motion.aside
           initial={{ x: isRtl ? 30 : -30, opacity: 0 }}
@@ -178,7 +178,7 @@ export const PropertiesPage: React.FC = () => {
               <label className="text-xs font-semibold text-[var(--text-secondary)] mb-1.5 block">{language === 'en' ? 'Rooms' : 'الغرف'}</label>
               <div className="mt-2 flex flex-wrap gap-2">
                 {(["any", 1, 2, 3, 4, 5] as const).map((r) => (
-                  <button key={r} onClick={() => setRooms(r)} className={`min-w-[40px] rounded-xl border px-3 py-2 text-xs font-medium transition-all ${rooms === r ? "border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--primary)]" : "border-[var(--border)] bg-[var(--card)] text-[var(--text-secondary)] hover:text-[var(--foreground)]"}`}>
+                  <button key={r} onClick={() => setRooms(r)} className={`min-w-[2.5rem] rounded-xl border px-3 py-2 text-xs font-medium transition-all ${rooms === r ? "border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--primary)]" : "border-[var(--border)] bg-[var(--card)] text-[var(--text-secondary)] hover:text-[var(--foreground)]"}`}>
                     {r === "any" ? (language === 'en' ? 'Any' : 'الكل') : `${r}+`}
                   </button>
                 ))}
@@ -223,7 +223,7 @@ export const PropertiesPage: React.FC = () => {
                   <div className="relative overflow-hidden">
                     <ProtectedImage src={p.images?.[0] || 'https://via.placeholder.com/600x400?text=No+Image'} alt={p.title} containerClassName="h-48 w-full" className="transition duration-500 group-hover:scale-110" />
                     {p.featured && (
-                      <span className="absolute start-3 top-3 rounded-lg bg-[var(--accent)] text-[var(--accent-foreground)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide shadow-sm">{language === 'en' ? 'HOT DEAL' : 'عرض مميز'}</span>
+                      <span className="absolute start-3 top-3 rounded-lg bg-[var(--accent)] text-[var(--accent-foreground)] px-2.5 py-1 text-[0.625rem] font-bold uppercase tracking-wide shadow-sm">{language === 'en' ? 'HOT DEAL' : 'عرض مميز'}</span>
                     )}
                     <button
                       onClick={(e) => toggleSaveProperty(p.id || p._id || '', e)}
@@ -237,13 +237,13 @@ export const PropertiesPage: React.FC = () => {
                             : ""
                         }`}
                       />
-                      <span className="text-xs font-bold leading-none mt-[1px]">{p.likes || 0}</span>
+                      <span className="text-xs font-bold leading-none mt-[0.0625rem]">{p.likes || 0}</span>
                     </button>
                     <Link to={`/properties/${p.id || p._id}`} className="absolute inset-x-3 bottom-3 flex items-center justify-center gap-1.5 rounded-xl bg-[var(--primary)]/90 px-3 py-2.5 text-xs font-semibold text-white opacity-0 backdrop-blur transition group-hover:opacity-100">
                       <Eye className="h-3.5 w-3.5" /> {language === 'en' ? 'View Details' : 'عرض التفاصيل'}
                     </Link>
                   </div>
-                  <div className="p-4 flex flex-col h-[160px]">
+                  <div className="p-4 flex flex-col h-[10rem]">
                     <div className="flex items-baseline gap-1">
                       <span className="text-lg font-bold text-[var(--primary)]">{formatEGPShort(p.price)}</span>
                       {p.status === 'rented' && <span className="text-xs text-[var(--text-secondary)]">/ {language === 'en' ? 'Month' : 'شهر'}</span>}

@@ -84,9 +84,9 @@ export const MessagesPage: React.FC = () => {
                   <div className="flex items-start gap-3">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-sm font-bold ${m.status === 'unread' ? 'bg-[var(--primary)]/10 text-[var(--primary)]' : 'bg-[var(--secondary)] text-[var(--text-secondary)]'}`}>{m.senderName[0].toUpperCase()}</div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2"><span className={`text-sm truncate ${m.status === 'unread' ? 'font-bold text-[var(--foreground)]' : 'font-medium text-[var(--foreground)]'}`}>{m.senderName}</span><span className="text-[10px] text-[var(--text-secondary)] shrink-0">{formatDateShort(m.createdAt, language)}</span></div>
+                      <div className="flex items-center justify-between gap-2"><span className={`text-sm truncate ${m.status === 'unread' ? 'font-bold text-[var(--foreground)]' : 'font-medium text-[var(--foreground)]'}`}>{m.senderName}</span><span className="text-[0.625rem] text-[var(--text-secondary)] shrink-0">{formatDateShort(m.createdAt, language)}</span></div>
                       <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">{m.message}</p>
-                      <span className={`inline-block mt-1.5 px-2 py-0.5 rounded text-[9px] font-bold uppercase ${statusColors[m.status] || ''}`}>{m.status}</span>
+                      <span className={`inline-block mt-1.5 px-2 py-0.5 rounded text-[0.5625rem] font-bold uppercase ${statusColors[m.status] || ''}`}>{m.status}</span>
                     </div>
                   </div>
                 </button>

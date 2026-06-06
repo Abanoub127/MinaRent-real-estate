@@ -1,7 +1,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --font-size: 16px;
+  --font-size: clamp(14px, 0.875rem + 0.25vw, 18px);
 
   /* ── Navy Blue + Gold Enterprise Palette ── */
   --navy-900: #0B1437;
@@ -71,11 +71,11 @@
 
   /* Border Radii */
   --radius: 0.625rem;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --radius-2xl: 24px;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
 
   /* Sidebar */
   --sidebar: #0B1437;
@@ -277,15 +277,15 @@
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 0.375rem;
+  height: 0.375rem;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--border);
-  border-radius: 3px;
+  border-radius: 0.1875rem;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
@@ -305,13 +305,13 @@
 /* ── Glassmorphism ── */
 .glass {
   background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(0.75rem);
+  -webkit-backdrop-filter: blur(0.75rem);
+  border: 0.0625rem solid rgba(255, 255, 255, 0.2);
 }
 .dark .glass {
   background: rgba(11, 20, 55, 0.7);
-  border: 1px solid rgba(90, 127, 204, 0.15);
+  border: 0.0625rem solid rgba(90, 127, 204, 0.15);
 }
 
 /* ── Premium Gradient Backgrounds ── */
@@ -455,8 +455,8 @@
   transition: width 0.5s ease, height 0.5s ease;
 }
 .btn-premium:hover::after {
-  width: 300px;
-  height: 300px;
+  width: 18.75rem;
+  height: 18.75rem;
 }
 
 /* ── Gradient Border ── */
@@ -469,7 +469,7 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  padding: 1px;
+  padding: 0.0625rem;
   background: linear-gradient(135deg, var(--gold-500), var(--navy-500), var(--gold-500));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -478,9 +478,9 @@
 }
 
 /* Custom scrollbar for specific containers */
-.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar { width: 0.25rem; }
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 0.125rem; }
 
 /* Hide scrollbar utility */
 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
@@ -572,9 +572,9 @@ html, body {
 
 /* ── Consistent Interactive Element Sizing ── */
 @media (max-width: 639px) {
-  /* Ensure touch targets are at least 44px */
+  /* Ensure touch targets are at least 2.75rem (44px) */
   button, [role="button"], a {
-    min-height: 36px;
+    min-height: 2.25rem;
   }
 }
 
@@ -613,7 +613,7 @@ html, body {
   [class*="btn"],
   [class*="button"],
   [class*="nav"] {
-    min-height: 44px;
+    min-height: 2.75rem;
   }
   
   /* Prevent layout shift on scroll */
@@ -633,7 +633,7 @@ html, body {
 @media (min-width: 768px) and (max-width: 1023px) {
   /* Slightly larger text for readability */
   body {
-    font-size: 15px;
+    font-size: 0.9375rem;
   }
 }
 

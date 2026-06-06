@@ -87,7 +87,7 @@ export const PublicLayout: React.FC = () => {
                 className="p-2.5 rounded-xl hover:bg-[var(--secondary)] text-[var(--text-secondary)] hover:text-[var(--foreground)] transition-all"
                 aria-label="Toggle theme"
               >
-                {theme === 'light' ? <Moon className="w-[18px] h-[18px]" /> : <Sun className="w-[18px] h-[18px]" />}
+                {theme === 'light' ? <Moon className="w-[1.125rem] h-[1.125rem]" /> : <Sun className="w-[1.125rem] h-[1.125rem]" />}
               </button>
               <button
                 onClick={toggleLanguage}
@@ -123,7 +123,7 @@ export const PublicLayout: React.FC = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.98 }}
               transition={{ duration: 0.2 }}
-              className="md:hidden absolute top-[76px] left-3 right-3 bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-xl p-4 overflow-hidden"
+              className="md:hidden absolute top-[4.75rem] left-3 right-3 bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-xl p-4 overflow-hidden"
             >
               <nav className="flex flex-col gap-1">
                 {navLinks.map((link) => (

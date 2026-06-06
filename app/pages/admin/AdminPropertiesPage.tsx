@@ -538,7 +538,7 @@ const fetchProperties = async () => {
                     handleStatusChange(property.id, value as PropertyStatus)
                   }
                 >
-                  <SelectTrigger className="w-[140px]">
+                  <SelectTrigger className="w-[8.75rem]">
                     <SelectValue />
                   </SelectTrigger>
 

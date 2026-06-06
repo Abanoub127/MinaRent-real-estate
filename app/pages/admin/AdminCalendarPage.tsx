@@ -67,12 +67,12 @@ const DesktopCell = memo(({
 
   return (
     <div
-      className={`flex-shrink-0 border-r border-gray-100 p-[2px] ${isToday ? 'bg-[#F5F3FF]/40' : ''}`}
+      className={`flex-shrink-0 border-r border-gray-100 p-[0.125rem] ${isToday ? 'bg-[#F5F3FF]/40' : ''}`}
       style={{ width: dayColW, height: rowH }}
     >
       <div
         onClick={() => { if (hasBook) onClickBooking(cellBs[0]); }}
-        className={`w-full h-full rounded-[4px] border flex flex-col justify-center relative overflow-hidden select-none transition-opacity duration-150 ${hasBook ? 'cursor-pointer hover:brightness-95 active:scale-95' : ''
+        className={`w-full h-full rounded-[0.25rem] border flex flex-col justify-center relative overflow-hidden select-none transition-opacity duration-150 ${hasBook ? 'cursor-pointer hover:brightness-95 active:scale-95' : ''
           }`}
         style={{
           background: hasBook ? colors.bg : 'transparent',
@@ -81,15 +81,15 @@ const DesktopCell = memo(({
         }}
       >
         {hasBook && (
-          <div className="w-full h-full px-[3px] flex flex-col items-center justify-center relative">
-            <span className="truncate font-bold w-full text-center leading-tight" style={{ fontSize: 9, color: colors.text }}>
+          <div className="w-full h-full px-[0.1875rem] flex flex-col items-center justify-center relative">
+            <span className="truncate font-bold w-full text-center leading-tight" style={{ fontSize: '0.5625rem', color: colors.text }}>
               {typeof cellBs[0].clientId === 'object' ? abbr(cellBs[0].clientId?.name || '—', 9) : '—'}
             </span>
-            <div className="flex items-center justify-center gap-[2px] mt-[1px]" style={{ fontSize: 8, color: colors.text, opacity: 0.8 }}>
+            <div className="flex items-center justify-center gap-[0.125rem] mt-[0.0625rem]" style={{ fontSize: '0.5rem', color: colors.text, opacity: 0.8 }}>
               <Users size={8} />
               <span>{(cellBs[0] as any).guests ?? cellBs[0].totalDays}</span>
             </div>
-            <span className="absolute top-1 right-1 rounded-full" style={{ width: 3, height: 3, background: colors.dot }} />
+            <span className="absolute top-1 right-1 rounded-full" style={{ width: '0.1875rem', height: '0.1875rem', background: colors.dot }} />
           </div>
         )}
       </div>
@@ -134,12 +134,12 @@ const MobileCell = memo(({
 
   return (
     <div
-      className="border-r border-b border-gray-100 p-[2px]"
+      className="border-r border-b border-gray-100 p-[0.125rem]"
       style={{ minWidth: colMinW, flex: 1, height: cellH }}
     >
       <div
         onClick={() => { if (hasBook) onClickBooking(cellBs[0]); }}
-        className={`w-full h-full rounded-[4px] border flex flex-col justify-center relative overflow-hidden select-none transition-opacity duration-150 ${hasBook ? 'cursor-pointer active:scale-95' : ''
+        className={`w-full h-full rounded-[0.25rem] border flex flex-col justify-center relative overflow-hidden select-none transition-opacity duration-150 ${hasBook ? 'cursor-pointer active:scale-95' : ''
           }`}
         style={{
           background: hasBook ? colors.bg : 'transparent',
@@ -148,15 +148,15 @@ const MobileCell = memo(({
         }}
       >
         {hasBook && (
-          <div className="w-full h-full px-[3px] py-[2px] flex flex-col justify-center relative">
+          <div className="w-full h-full px-[0.1875rem] py-[0.125rem] flex flex-col justify-center relative">
             <div className="flex items-center justify-between">
-              <span className="font-bold truncate" style={{ fontSize: 8, color: colors.text }}>{propCode}</span>
-              <div className="flex items-center gap-[1px]" style={{ fontSize: 8, color: colors.text, opacity: 0.85 }}>
+              <span className="font-bold truncate" style={{ fontSize: '0.5rem', color: colors.text }}>{propCode}</span>
+              <div className="flex items-center gap-[0.0625rem]" style={{ fontSize: '0.5rem', color: colors.text, opacity: 0.85 }}>
                 {(cellBs[0] as any).guests || cellBs[0].totalDays}
                 <Users size={8} />
               </div>
             </div>
-            <span className="truncate leading-tight font-medium mt-[1px]" style={{ fontSize: 9, color: colors.text }}>
+            <span className="truncate leading-tight font-medium mt-[0.0625rem]" style={{ fontSize: '0.5625rem', color: colors.text }}>
               {typeof cellBs[0].clientId === 'object' ? abbr(cellBs[0].clientId?.name || '—', 12) : '—'}
             </span>
           </div>
@@ -193,7 +193,7 @@ const DesktopRow = memo(({
       style={{ width: propColW, height: rowH }}
     >
       {/* Property image — 40×40 */}
-      <div className="w-10 h-10 rounded-[8px] overflow-hidden flex-shrink-0 bg-gray-100 border border-gray-200 shadow-sm relative">
+      <div className="w-10 h-10 rounded-[0.5rem] overflow-hidden flex-shrink-0 bg-gray-100 border border-gray-200 shadow-sm relative">
         {prop.images?.[0] ? (
           <ProtectedImage src={prop.images[0]} alt={prop.title} containerClassName="absolute inset-0" className="w-full h-full object-cover" />
         ) : (
@@ -202,16 +202,16 @@ const DesktopRow = memo(({
       </div>
       {/* Property details */}
       <div className="flex flex-col flex-1 min-w-0 justify-center">
-        <p className="font-bold text-gray-900 truncate" style={{ fontSize: 12 }}>
+        <p className="font-bold text-gray-900 truncate" style={{ fontSize: '0.75rem' }}>
           {isAr && (prop as any).titleAr ? (prop as any).titleAr : prop.title}
         </p>
-        <p className="text-gray-400 truncate" style={{ fontSize: 9 }}>{propCodeFn(prop)}</p>
+        <p className="text-gray-400 truncate" style={{ fontSize: '0.5625rem' }}>{propCodeFn(prop)}</p>
         <div className="flex items-center gap-1.5 mt-1">
           {/* Thinner occupancy bar */}
-          <div className="flex-1 bg-gray-200 rounded-full overflow-hidden" style={{ height: 3 }}>
+          <div className="flex-1 bg-gray-200 rounded-full overflow-hidden" style={{ height: '0.1875rem' }}>
             <div className="bg-[#534AB7] h-full transition-all duration-500" style={{ width: `${occupancy}%` }} />
           </div>
-          <span className="text-[#534AB7] font-bold leading-none" style={{ fontSize: 9 }}>{occupancy}%</span>
+          <span className="text-[#534AB7] font-bold leading-none" style={{ fontSize: '0.5625rem' }}>{occupancy}%</span>
         </div>
       </div>
     </div>
@@ -422,22 +422,22 @@ export const AdminCalendarPage: React.FC = () => {
           {/* Corner */}
           <div className="sticky left-0 z-40 bg-white border-r border-gray-100 flex-shrink-0 flex items-center justify-center"
             style={{ width: DATE_COL_W, height: MOB_HEADER_H }}>
-            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wide">{isAr ? 'يوم' : 'Day'}</span>
+            <span className="text-[0.5625rem] font-bold text-gray-400 uppercase tracking-wide">{isAr ? 'يوم' : 'Day'}</span>
           </div>
 
           {filteredProps.map(prop => (
             <div key={prop._id} className="flex flex-col border-r border-gray-100 bg-white items-center justify-center p-1"
               style={{ minWidth: COL_MIN_W, flex: 1, height: MOB_HEADER_H }}>
-              {/* Property image — 28px tall */}
-              <div className="w-full overflow-hidden rounded-[5px] bg-gray-100 border border-gray-200 relative flex-shrink-0"
-                style={{ height: 28, maxWidth: 52 }}>
+              {/* Property image */}
+              <div className="w-full overflow-hidden rounded-[0.3125rem] bg-gray-100 border border-gray-200 relative flex-shrink-0"
+                style={{ height: '1.75rem', maxWidth: '3.25rem' }}>
                 {prop.images?.[0] ? (
                   <ProtectedImage src={prop.images[0]} alt={prop.title} containerClassName="absolute inset-0" className="w-full h-full object-cover" />
                 ) : (
                   <Building2 size={13} className="text-gray-400 m-auto h-full" />
                 )}
               </div>
-              <p className="font-bold text-gray-800 mt-[3px] truncate w-full text-center" style={{ fontSize: 9 }}>
+              <p className="font-bold text-gray-800 mt-[0.1875rem] truncate w-full text-center" style={{ fontSize: '0.5625rem' }}>
                 {propCodeFn(prop)}
               </p>
             </div>
@@ -454,10 +454,10 @@ export const AdminCalendarPage: React.FC = () => {
               <div className={`sticky left-0 z-20 flex-shrink-0 border-r border-b border-gray-100 flex flex-col items-center justify-center select-none ${isT ? 'bg-[#F5F3FF]' : 'bg-white'}`}
                 style={{ width: DATE_COL_W, height: CELL_H }}>
                 <div className={`flex items-center justify-center font-bold leading-none ${isT ? 'bg-[#534AB7] text-white rounded-full' : 'text-gray-800'
-                  }`} style={{ fontSize: 11, width: isT ? 20 : 'auto', height: isT ? 20 : 'auto' }}>
+                  }`} style={{ fontSize: '0.6875rem', width: isT ? '1.25rem' : 'auto', height: isT ? '1.25rem' : 'auto' }}>
                   {date.getDate()}
                 </div>
-                <span className="text-gray-400 mt-[1px]" style={{ fontSize: 8 }}>{getDayShort(date)}</span>
+                <span className="text-gray-400 mt-[0.0625rem]" style={{ fontSize: '0.5rem' }}>{getDayShort(date)}</span>
               </div>
 
               {/* Cells */}
@@ -491,7 +491,7 @@ export const AdminCalendarPage: React.FC = () => {
           {/* Corner */}
           <div className="sticky left-0 z-40 bg-white border-r border-gray-100 flex-shrink-0 flex items-center px-3"
             style={{ width: PROP_COL_W, height: HEADER_H }}>
-            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+            <span className="text-[0.625rem] font-bold text-gray-400 uppercase tracking-wider">
               {isAr ? 'العقارات' : 'Properties'}
             </span>
           </div>
@@ -506,10 +506,10 @@ export const AdminCalendarPage: React.FC = () => {
                 style={{ width: DAY_COL_W, height: HEADER_H }}
               >
                 <div className={`flex items-center justify-center font-bold leading-none ${isT ? 'bg-[#534AB7] text-white rounded-full' : 'text-gray-800'
-                  }`} style={{ fontSize: 12, width: isT ? 24 : 'auto', height: isT ? 24 : 'auto' }}>
+                  }`} style={{ fontSize: '0.75rem', width: isT ? '1.5rem' : 'auto', height: isT ? '1.5rem' : 'auto' }}>
                   {date.getDate()}
                 </div>
-                <span className="text-gray-400 mt-[2px]" style={{ fontSize: 9 }}>{getDayShort(date)}</span>
+                <span className="text-gray-400 mt-[0.125rem]" style={{ fontSize: '0.5625rem' }}>{getDayShort(date)}</span>
               </div>
             );
           })}
@@ -550,11 +550,11 @@ export const AdminCalendarPage: React.FC = () => {
             <h1 className="text-sm font-bold text-gray-900 whitespace-nowrap">
               {isAr ? 'التقويم' : 'Calendar'}
             </h1>
-            <div className="flex items-center gap-1 bg-gray-50 rounded-lg p-[3px] border border-gray-100">
+            <div className="flex items-center gap-1 bg-gray-50 rounded-lg p-[0.1875rem] border border-gray-100">
               <button onClick={goToPrev} className="p-1 rounded hover:bg-gray-200 text-gray-500 transition" title="Previous">
                 <ChevronLeft size={14} />
               </button>
-              <span className="text-xs font-semibold text-gray-800 min-w-[100px] text-center select-none">
+              <span className="text-xs font-semibold text-gray-800 min-w-[6.25rem] text-center select-none">
                 {getMonthName(currentDate)}
               </span>
               <button onClick={goToNext} className="p-1 rounded hover:bg-gray-200 text-gray-500 transition" title="Next">
@@ -564,7 +564,7 @@ export const AdminCalendarPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="flex items-center bg-gray-100 rounded-lg p-[3px] gap-[2px]">
+            <div className="flex items-center bg-gray-100 rounded-lg p-[0.1875rem] gap-[0.125rem]">
               {(['month', 'week'] as ViewMode[]).map(v => (
                 <button key={v} onClick={() => setViewMode(v)}
                   className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-semibold transition ${viewMode === v
@@ -592,7 +592,7 @@ export const AdminCalendarPage: React.FC = () => {
               const col = filterDotColor[s];
               return (
                 <button key={s} onClick={() => setFilterStatus(s)}
-                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap border transition-all ${active
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.6875rem] font-semibold whitespace-nowrap border transition-all ${active
                       ? 'text-white border-transparent shadow-sm'
                       : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
                     }`}
@@ -691,12 +691,12 @@ export const AdminCalendarPage: React.FC = () => {
               <DS title={isAr ? 'التواريخ' : 'Dates'}>
                 <div className="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100 mt-1">
                   <div>
-                    <p className="text-[10px] font-semibold text-gray-400 mb-1">{isAr ? 'دخول' : 'Check In'}</p>
+                    <p className="text-[0.625rem] font-semibold text-gray-400 mb-1">{isAr ? 'دخول' : 'Check In'}</p>
                     <p className="font-bold text-sm text-[#534AB7]">{formatDate(selectedBooking.startDate, language)}</p>
                   </div>
                   <div className="w-8 h-px bg-gray-200" />
                   <div className={isAr ? 'text-right' : 'text-left'}>
-                    <p className="text-[10px] font-semibold text-gray-400 mb-1">{isAr ? 'خروج' : 'Check Out'}</p>
+                    <p className="text-[0.625rem] font-semibold text-gray-400 mb-1">{isAr ? 'خروج' : 'Check Out'}</p>
                     <p className="font-bold text-sm text-gray-900">{formatDate(selectedBooking.endDate, language)}</p>
                   </div>
                 </div>
@@ -732,7 +732,7 @@ export const AdminCalendarPage: React.FC = () => {
 // ── Detail section helper ─────────────────────────────────────────────────────
 const DS: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <div className="border-b border-gray-100 pb-3.5 mb-3.5">
-    <p className="text-[10px] font-bold text-gray-400 mb-1.5 uppercase tracking-wider">{title}</p>
+    <p className="text-[0.625rem] font-bold text-gray-400 mb-1.5 uppercase tracking-wider">{title}</p>
     {children}
   </div>
 );

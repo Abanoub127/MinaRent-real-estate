@@ -107,7 +107,7 @@ export const PropertyDetailPage: React.FC = () => {
       <div className="mt-4 grid gap-3 lg:grid-cols-[2fr_1fr]">
         <motion.div
           layoutId={`gallery-main-${property.id}`}
-          className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--card)] shadow-sm relative"
+          className="overflow-hidden rounded-[1.25rem] border border-[var(--border)] bg-[var(--card)] shadow-sm relative"
         >
           <AnimatePresence mode="wait">
             <motion.div
@@ -122,31 +122,31 @@ export const PropertyDetailPage: React.FC = () => {
                 src={property.images?.[active] || 'https://via.placeholder.com/1200x800'}
                 alt={title}
                 containerClassName="w-full h-full"
-                className="h-[240px] sm:h-[320px] md:h-[400px] lg:h-[480px] w-full"
+                className="h-[15rem] sm:h-[20rem] md:h-[25rem] lg:h-[30rem] w-full"
               />
             </motion.div>
           </AnimatePresence>
           {/* placeholder for height */}
-          <div className="h-[240px] sm:h-[320px] md:h-[400px] lg:h-[480px] w-full" />
+          <div className="h-[15rem] sm:h-[20rem] md:h-[25rem] lg:h-[30rem] w-full" />
         </motion.div>
 
         {/* Thumbnails: horizontal scroll on mobile, vertical grid on desktop */}
-        <div className="flex flex-row lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto lg:overflow-x-hidden lg:h-[480px] pb-1 lg:pb-2 lg:pr-2 custom-scrollbar">
+        <div className="flex flex-row lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto lg:overflow-x-hidden lg:h-[30rem] pb-1 lg:pb-2 lg:pr-2 custom-scrollbar">
           {property.images?.map((g: string, i: number) => (
             <button
               key={i}
               onClick={() => setActive(i)}
-              className={`flex-shrink-0 overflow-hidden rounded-[12px] border transition-all ${
+              className={`flex-shrink-0 overflow-hidden rounded-[0.75rem] border transition-all ${
                 active === i ? "border-[var(--primary)] ring-2 ring-[var(--primary)]/30 opacity-100" : "border-[var(--border)] opacity-70 hover:opacity-100"
               }`}
             >
-              <ProtectedImage src={g} alt="" containerClassName="h-20 w-28 sm:h-24 sm:w-36 lg:h-[148px] lg:w-full" className="w-full h-full" />
+              <ProtectedImage src={g} alt="" containerClassName="h-20 w-28 sm:h-24 sm:w-36 lg:h-[9.25rem] lg:w-full" className="w-full h-full" />
             </button>
           ))}
         </div>
       </div>
 
-      <div className="mt-6 sm:mt-8 grid gap-6 sm:gap-8 lg:grid-cols-[1fr_360px]">
+      <div className="mt-6 sm:mt-8 grid gap-6 sm:gap-8 lg:grid-cols-[1fr_22.5rem]">
         {/* Main */}
         <div>
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
@@ -169,7 +169,7 @@ export const PropertyDetailPage: React.FC = () => {
             <Spec icon={Calendar} label={language === 'en' ? "Status" : "الحالة"} value={language === 'en' ? property.status : (property.status === 'available' ? 'متاح' : property.status === 'sold' ? 'مباع' : 'مؤجر')} />
           </div>
 
-          <div className="mt-8 rounded-[20px] border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm">
+          <div className="mt-8 rounded-[1.25rem] border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm">
             <h2 className="text-lg font-bold text-[var(--foreground)]">{language === 'en' ? 'Description' : 'الوصف'}</h2>
             <p className="mt-3 text-sm leading-relaxed text-[var(--text-secondary)] whitespace-pre-wrap">{description}</p>
           </div>
@@ -183,7 +183,7 @@ export const PropertyDetailPage: React.FC = () => {
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="rounded-[20px] border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm"
+            className="rounded-[1.25rem] border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm"
           >
             <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-4">
               {language === 'en' ? 'Listed by Agency' : 'معروض بواسطة الوكالة'}

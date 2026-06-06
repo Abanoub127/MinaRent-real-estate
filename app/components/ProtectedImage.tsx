@@ -59,11 +59,11 @@ export const ProtectedImage: React.FC<ProtectedImageProps> = ({
 
       {/* Dynamic Watermark System */}
       <div className="absolute bottom-2 right-2 z-20 pointer-events-none flex flex-col items-end opacity-70">
-        <span className="text-[10px] sm:text-xs font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] tracking-wide">
+        <span className="text-[0.625rem] sm:text-xs font-bold text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)] tracking-wide">
           {watermarkText}
         </span>
         {showDate && (
-          <span className="text-[8px] sm:text-[9px] font-semibold text-white/80 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+          <span className="text-[0.5rem] sm:text-[0.5625rem] font-semibold text-white/80 drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
             {currentDate}
           </span>
         )}

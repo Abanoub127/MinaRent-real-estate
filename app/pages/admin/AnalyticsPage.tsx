@@ -372,7 +372,7 @@ const conversionData = [
                       border:
                         '1px solid #e5e7eb',
 
-                      borderRadius: '8px',
+                      borderRadius: '0.5rem',
                     }}
                   />
 
@@ -448,7 +448,7 @@ const conversionData = [
                       border:
                         '1px solid #e5e7eb',
 
-                      borderRadius: '8px',
+                      borderRadius: '0.5rem',
                     }}
                   />
 
