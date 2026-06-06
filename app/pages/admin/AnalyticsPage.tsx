@@ -8,7 +8,7 @@ import {
 
 import { useApp } from '../../contexts/AppContext';
 
-import { Card } from '../../components/ui/card';
+import { Card } from '../../components/ui/Card';
 
 import {
   BarChart,
@@ -21,7 +21,7 @@ import {
   Legend,
 } from 'recharts';
 
-import { BASE_URL as API } from '../../../services/api';
+const API = 'http://localhost:5000/api';
 
 const authHeaders = () => {
   const token = localStorage.getItem('token');
@@ -90,7 +90,7 @@ export const AnalyticsPage: React.FC = () => {
   const fetchAnalytics = async () => {
     try {
       const [propertiesRes, statsRes] = await Promise.all([
-        fetch(`${API}/properties?limit=1000`, {
+        fetch(`${API}/properties`, {
           headers: authHeaders(),
         }),
 
@@ -107,7 +107,7 @@ export const AnalyticsPage: React.FC = () => {
       setProperties(
         Array.isArray(propertiesData)
           ? propertiesData
-          : propertiesData.properties || []
+          : []
       );
 
       setStats(statsData);
@@ -247,15 +247,15 @@ const conversionData = [
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6 lg:p-8">
+    <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
         {language === 'en'
           ? 'Analytics'
           : 'التحليلات'}
       </h1>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-        <Card className="group p-6 hover:-translate-y-[2px] transition-all duration-300 shadow-sm hover:shadow-md border border-[var(--border)] bg-gradient-to-br from-[var(--card)] to-[var(--secondary)]">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card className="p-6">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
@@ -264,18 +264,18 @@ const conversionData = [
                   : 'إجمالي العقارات'}
               </p>
 
-              <h3 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+              <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
                 {stats?.totalProperties || 0}
               </h3>
             </div>
 
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
               <Eye className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
         </Card>
 
-        <Card className="group p-6 hover:-translate-y-[2px] transition-all duration-300 shadow-sm hover:shadow-md border border-[var(--border)] bg-gradient-to-br from-[var(--card)] to-[var(--secondary)]">
+        <Card className="p-6">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
@@ -284,18 +284,18 @@ const conversionData = [
                   : 'إجمالي الحجوزات'}
               </p>
 
-              <h3 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+              <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
                 {stats?.totalBookings || 0}
               </h3>
             </div>
 
-            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
               <MousePointerClick className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
           </div>
         </Card>
 
-        <Card className="group p-6 hover:-translate-y-[2px] transition-all duration-300 shadow-sm hover:shadow-md border border-[var(--border)] bg-gradient-to-br from-[var(--card)] to-[var(--secondary)]">
+        <Card className="p-6">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
@@ -304,18 +304,18 @@ const conversionData = [
                   : 'الحجوزات المؤكدة'}
               </p>
 
-              <h3 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+              <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
                 {stats?.confirmedBookings || 0}
               </h3>
             </div>
 
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+            <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
               <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
         </Card>
 
-        <Card className="group p-6 hover:-translate-y-[2px] transition-all duration-300 shadow-sm hover:shadow-md border border-[var(--border)] bg-gradient-to-br from-[var(--card)] to-[var(--secondary)]">
+        <Card className="p-6">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
@@ -324,12 +324,12 @@ const conversionData = [
                   : 'العملاء'}
               </p>
 
-              <h3 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+              <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
                 {stats?.totalClients || 0}
               </h3>
             </div>
 
-            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
               <MapPin className="w-6 h-6 text-orange-600 dark:text-orange-400" />
             </div>
           </div>
@@ -337,7 +337,7 @@ const conversionData = [
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border border-[var(--border)] shadow-sm bg-[var(--card)]">
+        <Card>
           <div className="p-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               {language === 'en'
@@ -345,75 +345,73 @@ const conversionData = [
                 : 'تحليلات الحجوزات'}
             </h3>
 
-            <div dir="ltr" className="h-[12.5rem] sm:h-[17.5rem] w-full">
-              <ResponsiveContainer
-                width="100%"
-                height="100%"
-              >
-                <BarChart data={conversionData}>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="#374151"
-                    opacity={0.1}
-                  />
+            <ResponsiveContainer
+              width="100%"
+              height={300}
+            >
+              <BarChart data={conversionData}>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#374151"
+                  opacity={0.1}
+                />
 
-                  <XAxis
-                    dataKey="month"
-                    stroke="#6B7280"
-                  />
+                <XAxis
+                  dataKey="month"
+                  stroke="#6B7280"
+                />
 
-                  <YAxis stroke="#6B7280" />
+                <YAxis stroke="#6B7280" />
 
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor:
-                        'var(--tooltip-bg, #fff)',
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor:
+                      'var(--tooltip-bg, #fff)',
 
-                      border:
-                        '1px solid #e5e7eb',
+                    border:
+                      '1px solid #e5e7eb',
 
-                      borderRadius: '0.5rem',
-                    }}
-                  />
+                    borderRadius: '8px',
+                  }}
+                />
 
-                  <Legend />
+                <Legend />
 
-                  <Bar
-                    dataKey="views"
-                    fill="#3B82F6"
-                    name={
-                      language === 'en'
-                        ? 'Views'
-                        : 'المشاهدات'
-                    }
-                  />
+                <Bar
+                  dataKey="views"
+                  fill="#3B82F6"
+                  name={
+                    language === 'en'
+                      ? 'Views'
+                      : 'المشاهدات'
+                  }
+                />
 
-                  <Bar
-                    dataKey="bookings"
-                    fill="#10B981"
-                    name={
-                      language === 'en'
-                        ? 'Bookings'
-                        : 'الحجوزات'
-                    }
-                  />
+                <Bar
+                  dataKey="bookings"
+                  fill="#10B981"
+                  name={
+                    language === 'en'
+                      ? 'Bookings'
+                      : 'الحجوزات'
+                  }
+                />
 
-                  <Bar
-                    dataKey="sales"
-                    fill="#F59E0B"
-                    name={
-                      language === 'en'
-                        ? 'Confirmed'
-                        : 'المؤكد'
-                    }
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+                <Bar
+                  dataKey="sales"
+                  fill="#F59E0B"
+                  name={
+                    language === 'en'
+                      ? 'Confirmed'
+                      : 'المؤكد'
+                  }
+                />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </Card>
 
-        <Card className="border border-[var(--border)] shadow-sm bg-[var(--card)]">
+        <Card>
           <div className="p-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               {language === 'en'
@@ -421,54 +419,52 @@ const conversionData = [
                 : 'العقارات حسب النوع'}
             </h3>
 
-            <div dir="ltr" className="h-[12.5rem] sm:h-[17.5rem] w-full">
-              <ResponsiveContainer
-                width="100%"
-                height="100%"
-              >
-                <BarChart data={propertyTypeData}>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="#374151"
-                    opacity={0.1}
-                  />
+            <ResponsiveContainer
+              width="100%"
+              height={300}
+            >
+              <BarChart data={propertyTypeData}>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#374151"
+                  opacity={0.1}
+                />
 
-                  <XAxis
-                    dataKey="type"
-                    stroke="#6B7280"
-                  />
+                <XAxis
+                  dataKey="type"
+                  stroke="#6B7280"
+                />
 
-                  <YAxis stroke="#6B7280" />
+                <YAxis stroke="#6B7280" />
 
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor:
-                        'var(--tooltip-bg, #fff)',
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor:
+                      'var(--tooltip-bg, #fff)',
 
-                      border:
-                        '1px solid #e5e7eb',
+                    border:
+                      '1px solid #e5e7eb',
 
-                      borderRadius: '0.5rem',
-                    }}
-                  />
+                    borderRadius: '8px',
+                  }}
+                />
 
-                  <Bar
-                    dataKey="count"
-                    fill="#8B5CF6"
-                    name={
-                      language === 'en'
-                        ? 'Count'
-                        : 'العدد'
-                    }
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+                <Bar
+                  dataKey="count"
+                  fill="#8B5CF6"
+                  name={
+                    language === 'en'
+                      ? 'Count'
+                      : 'العدد'
+                  }
+                />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </Card>
       </div>
 
-      <Card className="border border-[var(--border)] shadow-sm bg-[var(--card)]">
+      <Card>
         <div className="p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             {language === 'en'

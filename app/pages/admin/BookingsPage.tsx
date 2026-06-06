@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
-import { Card } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Input, TextArea } from '../../components/ui/input';
+import { Card } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { Input, TextArea } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
 import {
   Select,
@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from '../../components/ui/Select';
 
-import { BASE_URL as API, formatDate } from '../../../services/api';
+const API = 'http://localhost:5000/api';
 
 const authHeaders = () => ({
   'Content-Type': 'application/json',
@@ -191,22 +191,22 @@ if (editingBooking) {
   if (loading) return <div className="text-center py-10">Loading...</div>;
 
   return (
-    <div className="space-y-6 p-4 md:p-6 lg:p-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{t('admin.bookings')}</h1>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('admin.bookings')}</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
             {language === 'en' ? 'Manage property viewings and appointments' : 'إدارة معاينات وحجوزات العقارات'}
           </p>
         </div>
-        <Button onClick={() => handleOpenModal()} className="flex items-center justify-center gap-2 w-full sm:w-auto">
+        <Button onClick={() => handleOpenModal()} className="flex items-center gap-2">
           <Plus className="w-5 h-5" />
           {language === 'en' ? 'Add Booking' : 'إضافة حجز'}
         </Button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {(['pending', 'confirmed', 'cancelled'] as BookingStatus[]).map((s) => {
           const colors = {
             pending: 'yellow',
@@ -217,7 +217,7 @@ if (editingBooking) {
           const Icon = icons[s];
           const color = colors[s];
           return (
-            <Card key={s} className="p-4 sm:p-6">
+            <Card key={s} className="p-6">
               <div className="flex items-center gap-4">
                 <div className={`w-12 h-12 bg-${color}-100 dark:bg-${color}-900 rounded-lg flex items-center justify-center`}>
                   <Icon className={`w-6 h-6 text-${color}-600 dark:text-${color}-400`} />
@@ -236,14 +236,12 @@ if (editingBooking) {
 
       {/* Table */}
       <Card>
-        <div className="overflow-x-auto w-full pb-4">
-          <table className="w-full min-w-[600px]">
-            <thead className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md sticky top-0 z-20 shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th className="p-3 sm:px-4 sm:py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase whitespace-nowrap sticky ltr:left-0 rtl:right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md z-30 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none sm:bg-transparent">
-                  {language === 'en' ? 'Property' : 'العقار'}
-                </th>
                 {[
+                  language === 'en' ? 'Property' : 'العقار',
                   language === 'en' ? 'Client' : 'العميل',
                   language === 'en' ? 'Start Date' : 'تاريخ البداية',
                   language === 'en' ? 'End Date' : 'تاريخ النهاية',
@@ -251,7 +249,7 @@ if (editingBooking) {
                   language === 'en' ? 'Status' : 'الحالة',
                   language === 'en' ? 'Actions' : 'الإجراءات',
                 ].map((h) => (
-                  <th key={h} className="p-3 sm:px-4 sm:py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase whitespace-nowrap">
+                  <th key={h} className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
                     {h}
                   </th>
                 ))}
@@ -262,8 +260,8 @@ if (editingBooking) {
     const id = booking._id;
 
     return (
-      <tr key={id} className="group hover:bg-gradient-to-r hover:from-[#C9A84C]/5 hover:to-transparent transition-colors">
-        <td className="p-3 sm:px-4 sm:py-3 sticky ltr:left-0 rtl:right-0 bg-white dark:bg-gray-800 z-10 group-hover:bg-[#C9A84C]/5 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none sm:group-hover:bg-transparent">
+      <tr key={id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+        <td className="px-6 py-4">
           <div className="text-sm font-medium text-gray-900 dark:text-white">
             {language === 'en'
               ? booking.propertyId?.title || '—'
@@ -277,7 +275,7 @@ if (editingBooking) {
           </div>
         </td>
 
-        <td className="p-3 sm:px-4 sm:py-3">
+        <td className="px-6 py-4">
           <div className="text-sm text-gray-900 dark:text-white">
             {booking.clientId?.name || '—'}
           </div>
@@ -286,48 +284,43 @@ if (editingBooking) {
             {booking.clientId?.phone || ''}
           </div>
         </td>
-                    <td className="p-3 sm:px-4 sm:py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {booking.startDate ? formatDate(booking.startDate, language) : '—'}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                      {booking.startDate ? new Date(booking.startDate).toLocaleDateString() : '—'}
                     </td>
-                    <td className="p-3 sm:px-4 sm:py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {booking.endDate ? formatDate(booking.endDate, language) : '—'}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                      {booking.endDate ? new Date(booking.endDate).toLocaleDateString() : '—'}
                     </td>
-                    <td className="p-3 sm:px-4 sm:py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                      {booking.paidAmount ? `${booking.paidAmount.toLocaleString()} EGP` : '—'}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                      {booking.paidAmount ? `AED ${booking.paidAmount.toLocaleString()}` : '—'}
                     </td>
-                    <td className="p-3 sm:px-4 sm:py-3 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <Select
                         value={booking.status}
                         onValueChange={(val) => handleStatusChange(id, val as BookingStatus)}
                       >
-                        <SelectTrigger className={`w-36 h-8 text-xs font-bold border-0 bg-transparent`}>
-                          <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full w-full ${booking.status==='confirmed'?'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':booking.status==='pending'?'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400':'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
-                            <span className={`w-1.5 h-1.5 shrink-0 rounded-full ${booking.status==='confirmed'?'bg-green-500':booking.status==='pending'?'bg-orange-500':'bg-red-500'}`} />
-                            <SelectValue />
-                          </div>
+                        <SelectTrigger className="w-36">
+                          <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="pending"><div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-orange-500"/>{language === 'en' ? 'Pending' : 'قيد الانتظار'}</div></SelectItem>
-                          <SelectItem value="confirmed"><div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-green-500"/>{language === 'en' ? 'Confirmed' : 'مؤكد'}</div></SelectItem>
-                          <SelectItem value="cancelled"><div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-500"/>{language === 'en' ? 'Cancelled' : 'ملغي'}</div></SelectItem>
+                          <SelectItem value="pending">{language === 'en' ? 'Pending' : 'قيد الانتظار'}</SelectItem>
+                          <SelectItem value="confirmed">{language === 'en' ? 'Confirmed' : 'مؤكد'}</SelectItem>
+                          <SelectItem value="cancelled">{language === 'en' ? 'Cancelled' : 'ملغي'}</SelectItem>
                         </SelectContent>
                       </Select>
                     </td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleOpenModal(booking)}
-                          className="flex items-center gap-2 px-3 py-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg"
+                          className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg"
                         >
                           <Edit className="w-4 h-4" />
-                          <span className="hidden sm:inline">{language === 'en' ? 'Edit' : 'تعديل'}</span>
                         </button>
                         <button
                           onClick={() => handleDelete(id)}
-                          className="flex items-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+                          className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
                         >
                           <Trash2 className="w-4 h-4" />
-                          <span className="hidden sm:inline">{language === 'en' ? 'Delete' : 'حذف'}</span>
                         </button>
                       </div>
                     </td>
@@ -380,11 +373,13 @@ if (editingBooking) {
               label={language === 'en' ? 'Client Name' : 'اسم العميل'}
               value={formData.clientName}
               onChange={(e) => setFormData({ ...formData, clientName: e.target.value })}
+              required
             />
             <Input
               label={language === 'en' ? 'Client Phone' : 'رقم الهاتف للعميل'}
               value={formData.clientPhone}
               onChange={(e) => setFormData({ ...formData, clientPhone: e.target.value })}
+              required
             />
           </div>
 
@@ -394,12 +389,14 @@ if (editingBooking) {
               type="date"
               value={formData.startDate}
               onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+              required
             />
             <Input
               label={language === 'en' ? 'End Date' : 'تاريخ النهاية'}
               type="date"
               value={formData.endDate}
               onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+              required
             />
           </div>
 

@@ -1,11 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router";
-import { Heart, Bed, Bath, Maximize, MapPin, Search as SearchIcon, SlidersHorizontal, Eye, ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
+import { Heart, Bed, Bath, Maximize, MapPin, Search as SearchIcon, SlidersHorizontal, Eye, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useApp } from "../../contexts/AppContext";
-import { getProperties, Property, formatEGPShort, PropertiesResponse, togglePropertyLike } from "../../../services/api";
-import { ProtectedImage } from "../../components/ProtectedImage";
-import { SEO } from "../../components/ui/SEO";
+import { getProperties, Property, formatEGPShort, PropertiesResponse } from "../../../services/api";
 
 const TYPES = [
   { value: "any", keyEn: "Any", keyAr: "الكل" },
@@ -32,33 +30,24 @@ export const PropertiesPage: React.FC = () => {
   const [location, setLocation] = useState("");
   const [query, setQuery] = useState("");
   const [savedProperties, setSavedProperties] = useState<string[]>([]);
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("savedProperties") || "[]");
     setSavedProperties(saved);
   }, []);
 
-  const toggleSaveProperty = async (propId: string, e: React.MouseEvent) => {
+  const toggleSaveProperty = (propId: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     const saved = JSON.parse(localStorage.getItem("savedProperties") || "[]");
-    const isSaved = saved.includes(propId);
     let newSaved;
-    if (isSaved) {
+    if (saved.includes(propId)) {
       newSaved = saved.filter((id: string) => id !== propId);
     } else {
       newSaved = [...saved, propId];
     }
     localStorage.setItem("savedProperties", JSON.stringify(newSaved));
     setSavedProperties(newSaved);
-    
-    // Call backend to update likes count
-    try {
-      await togglePropertyLike(propId, isSaved ? 'remove' : 'add');
-    } catch (error) {
-      console.error('Failed to toggle like on backend:', error);
-    }
   };
 
   const fetchProperties = async (page: number) => {
@@ -97,56 +86,27 @@ export const PropertiesPage: React.FC = () => {
   const locations = Array.from(new Set(properties.map((p) => language === 'en' ? p.location : p.locationAr).filter(Boolean)));
 
   const containerVariants = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };
-  const itemVariants = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } } };
+  const itemVariants = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } } };
 
   return (
-    <>
-      <SEO 
-        title={language === 'en' ? 'Properties' : 'العقارات'} 
-        description={language === 'en' ? 'Browse curated listings across the city' : 'تصفح القوائم المنسقة عبر المدينة'} 
-      />
-      <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="mx-auto mt-6 mb-24 max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
-        <div className="flex flex-wrap items-end justify-between gap-4 mb-2">
+    <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="mx-auto mt-6 mb-24 max-w-7xl px-4 w-full">
+      <div className="flex flex-wrap items-end justify-between gap-4 mb-2">
         <div>
           <p className="text-sm font-semibold text-[var(--primary)] mb-1">{language === 'en' ? 'Explore' : 'استكشف'}</p>
-          <h1 className="text-[clamp(1.5rem,4vw,2.5rem)] font-bold tracking-tight text-[var(--foreground)]">{language === 'en' ? 'Find your next home' : 'ابحث عن منزلك القادم'}</h1>
+          <h1 className="text-3xl font-bold tracking-tight md:text-4xl text-[var(--foreground)]">{language === 'en' ? 'Find your next home' : 'ابحث عن منزلك القادم'}</h1>
           <p className="mt-1.5 text-sm text-[var(--text-secondary)]">{language === 'en' ? 'Browse curated listings across the city' : 'تصفح القوائم المنسقة عبر المدينة'}</p>
         </div>
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <button
-            onClick={() => setShowMobileFilters(!showMobileFilters)}
-            className="flex lg:hidden items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--card)] text-sm font-semibold text-[var(--foreground)] shadow-sm shrink-0"
-          >
-            <SlidersHorizontal className="h-4 w-4" />
-            {language === 'en' ? 'Filters' : 'تصفية'}
-          </button>
-          <div className="flex flex-1 items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-[var(--primary)] transition-all">
-            <SearchIcon className="h-4 w-4 text-[var(--text-secondary)] shrink-0" />
-            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={language === 'en' ? "Search location, city or area..." : "البحث عن موقع، مدينة أو منطقة..."} className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--text-secondary)] text-[var(--foreground)]" />
-          </div>
+        <div className="flex w-full max-w-md items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--card)] px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-[var(--primary)] transition-all">
+          <SearchIcon className="h-4 w-4 text-[var(--text-secondary)]" />
+          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={language === 'en' ? "Search location, city or area..." : "البحث عن موقع، مدينة أو منطقة..."} className="w-full bg-transparent text-sm outline-none placeholder:text-[var(--text-secondary)] text-[var(--foreground)]" />
         </div>
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[17.5rem_1fr]">
-        {/* Filters — always visible on lg+, toggleable on mobile */}
-        <motion.aside
-          initial={{ x: isRtl ? 30 : -30, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className={`${
-            showMobileFilters ? 'block' : 'hidden'
-          } lg:block h-fit rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-sm`}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm font-bold text-[var(--foreground)]">
-              <SlidersHorizontal className="h-4 w-4" /> {language === 'en' ? 'Filters' : 'عوامل التصفية'}
-            </div>
-            <button
-              onClick={() => setShowMobileFilters(false)}
-              className="lg:hidden p-1.5 rounded-lg text-[var(--text-secondary)] hover:bg-[var(--secondary)]"
-            >
-              <X className="h-4 w-4" />
-            </button>
+      <div className="mt-8 grid gap-6 lg:grid-cols-[280px_1fr]">
+        {/* Filters */}
+        <motion.aside initial={{ x: isRtl ? 30 : -30, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.5, delay: 0.2 }} className="h-fit rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-sm">
+          <div className="flex items-center gap-2 text-sm font-bold text-[var(--foreground)]">
+            <SlidersHorizontal className="h-4 w-4" /> {language === 'en' ? 'Filters' : 'عوامل التصفية'}
           </div>
           <div className="mt-5 space-y-5">
             <div>
@@ -178,7 +138,7 @@ export const PropertiesPage: React.FC = () => {
               <label className="text-xs font-semibold text-[var(--text-secondary)] mb-1.5 block">{language === 'en' ? 'Rooms' : 'الغرف'}</label>
               <div className="mt-2 flex flex-wrap gap-2">
                 {(["any", 1, 2, 3, 4, 5] as const).map((r) => (
-                  <button key={r} onClick={() => setRooms(r)} className={`min-w-[2.5rem] rounded-xl border px-3 py-2 text-xs font-medium transition-all ${rooms === r ? "border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--primary)]" : "border-[var(--border)] bg-[var(--card)] text-[var(--text-secondary)] hover:text-[var(--foreground)]"}`}>
+                  <button key={r} onClick={() => setRooms(r)} className={`min-w-[40px] rounded-xl border px-3 py-2 text-xs font-medium transition-all ${rooms === r ? "border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--primary)]" : "border-[var(--border)] bg-[var(--card)] text-[var(--text-secondary)] hover:text-[var(--foreground)]"}`}>
                     {r === "any" ? (language === 'en' ? 'Any' : 'الكل') : `${r}+`}
                   </button>
                 ))}
@@ -195,7 +155,7 @@ export const PropertiesPage: React.FC = () => {
           <p className="mb-4 text-sm text-[var(--text-secondary)] font-medium">{loading ? '...' : `${totalProperties} ${language === 'en' ? 'properties found' : 'عقار'}`}</p>
 
           {loading ? (
-            <div className="grid gap-5 grid-cols-[repeat(auto-fill,minmax(18rem,1fr))]">
+            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
               {[1, 2, 3, 4, 5, 6].map(i => (
                 <div key={i} className="rounded-2xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
                   <div className="h-48 skeleton" />
@@ -217,17 +177,17 @@ export const PropertiesPage: React.FC = () => {
               <button onClick={reset} className="mt-4 px-5 py-2.5 bg-[var(--primary)] text-white rounded-xl text-sm font-semibold">{language === 'en' ? 'Reset Filters' : 'إعادة تعيين'}</button>
             </div>
           ) : (
-            <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid gap-5 grid-cols-[repeat(auto-fill,minmax(18rem,1fr))]">
+            <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
               {results.map((p) => (
                 <motion.article variants={itemVariants} whileHover={{ y: -4 }} key={p.id || p._id} className="group overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-sm transition-shadow hover:shadow-xl">
                   <div className="relative overflow-hidden">
-                    <ProtectedImage src={p.images?.[0] || 'https://via.placeholder.com/600x400?text=No+Image'} alt={p.title} containerClassName="h-48 w-full" className="transition duration-500 group-hover:scale-110" />
+                    <img src={p.images?.[0] || 'https://via.placeholder.com/600x400?text=No+Image'} alt={p.title} className="h-48 w-full object-cover transition duration-500 group-hover:scale-110" loading="lazy" />
                     {p.featured && (
-                      <span className="absolute start-3 top-3 rounded-lg bg-[var(--accent)] text-[var(--accent-foreground)] px-2.5 py-1 text-[0.625rem] font-bold uppercase tracking-wide shadow-sm">{language === 'en' ? 'HOT DEAL' : 'عرض مميز'}</span>
+                      <span className="absolute start-3 top-3 rounded-lg bg-[var(--accent)] text-[var(--accent-foreground)] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide shadow-sm">{language === 'en' ? 'HOT DEAL' : 'عرض مميز'}</span>
                     )}
                     <button
                       onClick={(e) => toggleSaveProperty(p.id || p._id || '', e)}
-                      className="absolute end-3 top-3 z-10 px-2.5 py-1.5 flex items-center gap-1.5 rounded-full bg-[var(--card)]/80 hover:bg-[var(--card)] text-[var(--text-secondary)] hover:text-red-500 backdrop-blur shadow-md transition-all active:scale-95"
+                      className="absolute end-3 top-3 z-10 p-2 rounded-full bg-[var(--card)]/80 hover:bg-[var(--card)] text-[var(--text-secondary)] hover:text-red-500 backdrop-blur shadow-md transition-all active:scale-95"
                       aria-label="Save Property"
                     >
                       <Heart
@@ -237,13 +197,12 @@ export const PropertiesPage: React.FC = () => {
                             : ""
                         }`}
                       />
-                      <span className="text-xs font-bold leading-none mt-[0.0625rem]">{p.likes || 0}</span>
                     </button>
                     <Link to={`/properties/${p.id || p._id}`} className="absolute inset-x-3 bottom-3 flex items-center justify-center gap-1.5 rounded-xl bg-[var(--primary)]/90 px-3 py-2.5 text-xs font-semibold text-white opacity-0 backdrop-blur transition group-hover:opacity-100">
                       <Eye className="h-3.5 w-3.5" /> {language === 'en' ? 'View Details' : 'عرض التفاصيل'}
                     </Link>
                   </div>
-                  <div className="p-4 flex flex-col h-[10rem]">
+                  <div className="p-4 flex flex-col h-[160px]">
                     <div className="flex items-baseline gap-1">
                       <span className="text-lg font-bold text-[var(--primary)]">{formatEGPShort(p.price)}</span>
                       {p.status === 'rented' && <span className="text-xs text-[var(--text-secondary)]">/ {language === 'en' ? 'Month' : 'شهر'}</span>}
@@ -287,6 +246,5 @@ export const PropertiesPage: React.FC = () => {
         </div>
       </div>
     </motion.section>
-    </>
   );
 };

@@ -8,9 +8,9 @@ import {
 
 import { useApp } from '../../contexts/AppContext';
 
-import { Card } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Input, TextArea } from '../../components/ui/input';
+import { Card } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { Input, TextArea } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
 
 import {
@@ -30,7 +30,7 @@ import {
   Tooltip,
 } from 'recharts';
 
-import { BASE_URL as API, formatDate } from '../../../services/api';
+const API = 'http://localhost:5000/api';
 
 const authHeaders = () => {
   const token = localStorage.getItem('token');
@@ -244,15 +244,15 @@ export const FinancialPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6 lg:p-8">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           {t('admin.financial')}
         </h1>
 
         <Button
           onClick={() => setShowModal(true)}
-          className="flex items-center justify-center gap-2 w-full sm:w-auto"
+          className="flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
 
@@ -263,8 +263,8 @@ export const FinancialPage: React.FC = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
-        <Card className="p-4 sm:p-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="p-6">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
@@ -273,7 +273,7 @@ export const FinancialPage: React.FC = () => {
                   : 'إجمالي الإيرادات'}
               </p>
 
-              <h3 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 EGP{' '}
                 {(
                   stats.totalRevenue / 1000000
@@ -288,7 +288,7 @@ export const FinancialPage: React.FC = () => {
           </div>
         </Card>
 
-        <Card className="p-4 sm:p-6">
+        <Card className="p-6">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
@@ -297,7 +297,7 @@ export const FinancialPage: React.FC = () => {
                   : 'إجمالي المصروفات'}
               </p>
 
-              <h3 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 EGP{' '}
                 {(
                   stats.totalExpenses / 1000
@@ -312,7 +312,7 @@ export const FinancialPage: React.FC = () => {
           </div>
         </Card>
 
-        <Card className="p-4 sm:p-6">
+        <Card className="p-6">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
@@ -321,7 +321,7 @@ export const FinancialPage: React.FC = () => {
                   : 'صافي الربح'}
               </p>
 
-              <h3 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 EGP{' '}
                 {(
                   stats.profit / 1000000
@@ -347,41 +347,39 @@ export const FinancialPage: React.FC = () => {
                 : 'الإيرادات حسب الفئة'}
             </h3>
 
-            <div dir="ltr" className="h-[200px] sm:h-[280px]">
-              <ResponsiveContainer
-                width="100%"
-                height="100%"
-              >
-                <PieChart>
-                  <Pie
-                    data={revenueChartData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    dataKey="value"
-                    label
-                  >
-                    {revenueChartData.map(
-                      (_, index) => (
-                        <Cell
-                          key={`revenue-${index}`}
-                          fill={
-                            COLORS[
-                              index % COLORS.length
-                            ]
-                          }
-                        />
-                      ),
-                    )}
-                  </Pie>
+            <ResponsiveContainer
+              width="100%"
+              height={300}
+            >
+              <PieChart>
+                <Pie
+                  data={revenueChartData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={100}
+                  dataKey="value"
+                  label
+                >
+                  {revenueChartData.map(
+                    (_, index) => (
+                      <Cell
+                        key={`revenue-${index}`}
+                        fill={
+                          COLORS[
+                            index % COLORS.length
+                          ]
+                        }
+                      />
+                    ),
+                  )}
+                </Pie>
 
-                  <Tooltip />
+                <Tooltip />
 
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         </Card>
 
@@ -393,41 +391,39 @@ export const FinancialPage: React.FC = () => {
                 : 'المصروفات حسب الفئة'}
             </h3>
 
-            <div dir="ltr" className="h-[200px] sm:h-[280px]">
-              <ResponsiveContainer
-                width="100%"
-                height="100%"
-              >
-                <PieChart>
-                  <Pie
-                    data={expenseChartData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    dataKey="value"
-                    label
-                  >
-                    {expenseChartData.map(
-                      (_, index) => (
-                        <Cell
-                          key={`expense-${index}`}
-                          fill={
-                            COLORS[
-                              index % COLORS.length
-                            ]
-                          }
-                        />
-                      ),
-                    )}
-                  </Pie>
+            <ResponsiveContainer
+              width="100%"
+              height={300}
+            >
+              <PieChart>
+                <Pie
+                  data={expenseChartData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={100}
+                  dataKey="value"
+                  label
+                >
+                  {expenseChartData.map(
+                    (_, index) => (
+                      <Cell
+                        key={`expense-${index}`}
+                        fill={
+                          COLORS[
+                            index % COLORS.length
+                          ]
+                        }
+                      />
+                    ),
+                  )}
+                </Pie>
 
-                  <Tooltip />
+                <Tooltip />
 
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         </Card>
       </div>
@@ -478,7 +474,9 @@ export const FinancialPage: React.FC = () => {
                           {transaction.category}{' '}
                           •{' '}
                           {transaction.date
-                            ? formatDate(transaction.date, language)
+                            ? new Date(
+                                transaction.date,
+                              ).toLocaleDateString()
                             : '—'}
                         </p>
                       </div>

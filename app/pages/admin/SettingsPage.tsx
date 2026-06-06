@@ -8,15 +8,20 @@ import {
 } from 'lucide-react';
 
 import { useApp } from '../../contexts/AppContext';
-import { Card } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
+import { Card } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
 
-import { BASE_URL as API } from '../../../services/api';
+const API = 'http://localhost:5000/api';
 
 const authHeaders = () => {
+  const token = localStorage.getItem('token');
+
   return {
     'Content-Type': 'application/json',
+    ...(token && {
+      Authorization: `Bearer ${token}`,
+    }),
   };
 };
 
@@ -79,7 +84,6 @@ export const SettingsPage: React.FC = () => {
         {
           method: 'GET',
           headers: authHeaders(),
-          credentials: 'include',
         }
       );
 
@@ -151,7 +155,6 @@ if (theme === 'light') {
         {
           method: 'PUT',
           headers: authHeaders(),
-          credentials: 'include',
           body: JSON.stringify(profileData),
         }
       );
@@ -205,7 +208,6 @@ if (theme === 'light') {
         {
           method: 'PUT',
           headers: authHeaders(),
-          credentials: 'include',
           body: JSON.stringify({
             currentPassword:
               passwordData.current,
@@ -282,7 +284,6 @@ const notificationLabels: Record<
           {
             method: 'PUT',
             headers: authHeaders(),
-            credentials: 'include',
             body: JSON.stringify(
               updatedNotifications
             ),
@@ -320,8 +321,8 @@ const notificationLabels: Record<
   }
 
   return (
-    <div className="space-y-6 p-4 md:p-6 lg:p-8 max-w-4xl">
-      <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+    <div className="space-y-6 max-w-4xl">
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
         {language === 'en'
           ? 'Settings'
           : 'الإعدادات'}
@@ -329,7 +330,7 @@ const notificationLabels: Record<
 
       {/* Profile Settings */}
       <Card>
-        <div className="p-4 sm:p-6">
+        <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
               <User className="w-6 h-6 text-blue-600 dark:text-blue-400" />
@@ -354,7 +355,7 @@ const notificationLabels: Record<
             onSubmit={handleProfileSubmit}
             className="space-y-4"
           >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
                 name="name"
                 label={
@@ -420,7 +421,7 @@ const notificationLabels: Record<
 
       {/* Password Settings */}
       <Card>
-        <div className="p-4 sm:p-6">
+        <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
               <Lock className="w-6 h-6 text-purple-600 dark:text-purple-400" />
@@ -444,7 +445,6 @@ const notificationLabels: Record<
           <form
             onSubmit={handlePasswordSubmit}
             className="space-y-4"
-            autoComplete="off"
           >
             <Input
               name="currentPassword"
@@ -454,7 +454,6 @@ const notificationLabels: Record<
                   : 'كلمة المرور الحالية'
               }
               type="password"
-              autoComplete="new-password"
               value={passwordData.current}
               onChange={(e) =>
                 setPasswordData({
@@ -465,7 +464,7 @@ const notificationLabels: Record<
               required
             />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
                 name="newPassword"
                 label={
@@ -474,7 +473,6 @@ const notificationLabels: Record<
                     : 'كلمة المرور الجديدة'
                 }
                 type="password"
-                autoComplete="new-password"
                 value={passwordData.new}
                 onChange={(e) =>
                   setPasswordData({
@@ -493,7 +491,6 @@ const notificationLabels: Record<
                     : 'تأكيد كلمة المرور'
                 }
                 type="password"
-                autoComplete="new-password"
                 value={passwordData.confirm}
                 onChange={(e) =>
                   setPasswordData({
@@ -516,7 +513,7 @@ const notificationLabels: Record<
 
       {/* Appearance */}
       <Card>
-        <div className="p-4 sm:p-6">
+        <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
               {theme === 'light' ? (
@@ -542,7 +539,7 @@ const notificationLabels: Record<
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-[var(--secondary)]/50 border border-[var(--border)] rounded-xl">
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <div>
                 <p className="font-medium text-gray-900 dark:text-white">
                   {language === 'en'
@@ -566,7 +563,7 @@ const notificationLabels: Record<
               </Button>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-[var(--secondary)]/50 border border-[var(--border)] rounded-xl">
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
               <div>
                 <p className="font-medium text-gray-900 dark:text-white">
                   {language === 'en'
@@ -597,7 +594,7 @@ const notificationLabels: Record<
 
       {/* Notifications */}
       <Card>
-        <div className="p-4 sm:p-6">
+        <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
               <Bell className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -624,7 +621,7 @@ const notificationLabels: Record<
             ).map(([key, value]) => (
               <div
                 key={key}
-                className="flex items-center justify-between p-4 bg-[var(--secondary)]/50 border border-[var(--border)] rounded-xl"
+                className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
               >
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">
@@ -645,8 +642,8 @@ const notificationLabels: Record<
                   }
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                     value
-                      ? 'bg-[var(--primary)]'
-                      : 'bg-[var(--border)]'
+                      ? 'bg-blue-600'
+                      : 'bg-gray-300 dark:bg-gray-600'
                   }`}
                 >
                   <span

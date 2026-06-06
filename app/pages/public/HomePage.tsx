@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router';
-import { Search, MapPin, Home, Building2, Star, Users, Shield, ArrowRight, Send, TrendingUp, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
+import { Search, MapPin, Home, Building2, Star, Users, Shield, ArrowRight, Send, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../../contexts/AppContext';
-import { getProperties, getTestimonials, Property, Testimonial, formatEGPShort, createTestimonial, togglePropertyLike } from '../../../services/api';
+import { getProperties, getTestimonials, Property, Testimonial, formatEGPShort, createTestimonial } from '../../../services/api';
 import { MRLogo } from '../../components/ui/MRLogo';
-import { ProtectedImage } from '../../components/ProtectedImage';
-import { SEO } from '../../components/ui/SEO';
 
 export const HomePage: React.FC = () => {
   const { language, isRtl, t } = useApp();
@@ -26,35 +24,7 @@ export const HomePage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const testimonialsPerPage = 6;
 
-  // Saved Properties
-  const [savedProperties, setSavedProperties] = useState<string[]>([]);
-
-  useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("savedProperties") || "[]");
-    setSavedProperties(saved);
-    fetchData(); 
-  }, []);
-
-  const toggleSaveProperty = async (propId: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    const saved = JSON.parse(localStorage.getItem("savedProperties") || "[]");
-    const isSaved = saved.includes(propId);
-    let newSaved;
-    if (isSaved) {
-      newSaved = saved.filter((id: string) => id !== propId);
-    } else {
-      newSaved = [...saved, propId];
-    }
-    localStorage.setItem("savedProperties", JSON.stringify(newSaved));
-    setSavedProperties(newSaved);
-    
-    try {
-      await togglePropertyLike(propId, isSaved ? 'remove' : 'add');
-    } catch (error) {
-      console.error('Failed to toggle like on backend:', error);
-    }
-  };
+  useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {
     try {
@@ -82,7 +52,7 @@ export const HomePage: React.FC = () => {
   };
 
   const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
-  const itemVariants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } } };
+  const itemVariants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } } };
 
   // Pagination logic
   const totalPages = Math.ceil(testimonials.length / testimonialsPerPage);
@@ -93,26 +63,25 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <SEO />
       {/* ── Hero Section ── */}
-      <section className="relative overflow-hidden min-h-[100svh] flex flex-col items-center justify-center pt-16 pb-8">
+      <section className="relative overflow-hidden">
         <div className="gradient-hero absolute inset-0 opacity-95" />
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.15\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
 
-        {/* Floating decorative elements — hidden on mobile to prevent layout issues */}
-        <div className="hidden sm:block absolute top-20 right-10 w-32 h-32 rounded-full bg-[var(--gold-500)]/5 blur-2xl float-slow" />
-        <div className="hidden sm:block absolute bottom-20 left-10 w-40 h-40 rounded-full bg-[var(--navy-400)]/10 blur-3xl float-medium" />
-        <div className="hidden sm:block absolute top-1/2 right-1/4 w-20 h-20 rounded-full bg-[var(--gold-400)]/8 blur-xl float-fast" />
-        <div className="hidden sm:block absolute bottom-10 right-1/3 w-2 h-2 rounded-full bg-[var(--gold-400)]/40 float-slow" />
-        <div className="hidden sm:block absolute top-1/3 left-1/4 w-3 h-3 rounded-full bg-white/10 float-medium" />
+        {/* Floating decorative elements */}
+        <div className="absolute top-20 right-10 w-32 h-32 rounded-full bg-[var(--gold-500)]/5 blur-2xl float-slow" />
+        <div className="absolute bottom-20 left-10 w-40 h-40 rounded-full bg-[var(--navy-400)]/10 blur-3xl float-medium" />
+        <div className="absolute top-1/2 right-1/4 w-20 h-20 rounded-full bg-[var(--gold-400)]/8 blur-xl float-fast" />
+        <div className="absolute bottom-10 right-1/3 w-2 h-2 rounded-full bg-[var(--gold-400)]/40 float-slow" />
+        <div className="absolute top-1/3 left-1/4 w-3 h-3 rounded-full bg-white/10 float-medium" />
 
-        <div className="relative max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row items-center justify-between gap-12 w-full">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: "easeOut" }}
-              className="flex flex-col gap-5 w-full"
+              className="flex flex-col gap-6"
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-white/90 font-medium text-sm w-fit border border-white/10">
                 <span className="relative flex h-2 w-2">
@@ -122,7 +91,7 @@ export const HomePage: React.FC = () => {
                 {language === 'en' ? 'Premium Properties in Egypt' : 'عقارات فاخرة في مصر'}
               </div>
 
-              <h1 className="text-[clamp(2rem,5vw,4rem)] font-bold text-white leading-[1.15] tracking-tight">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-[1.1] tracking-tight">
                 {language === 'en' ? (
                   <>Find Your Perfect <span className="text-shimmer-gold">Space</span> With Us</>
                 ) : (
@@ -130,40 +99,40 @@ export const HomePage: React.FC = () => {
                 )}
               </h1>
 
-              <p className="text-[clamp(1rem,2vw,1.125rem)] text-white/70 leading-relaxed max-w-lg">
+              <p className="text-lg text-white/70 leading-relaxed max-w-lg">
                 {language === 'en'
                   ? 'Discover curated properties that match your lifestyle. From modern apartments to luxury villas, your next chapter starts here.'
                   : 'اكتشف عقارات منتقاة بعناية تناسب أسلوب حياتك. من الشقق الحديثة إلى الفيلات الفاخرة، فصلك القادم يبدأ هنا.'}
               </p>
 
               {/* Search Bar */}
-              <div className="mt-1 flex items-center p-1.5 bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl w-full max-w-lg">
-                <div className="flex-1 flex items-center gap-2 px-3 min-w-0">
-                  <MapPin className="w-4 h-4 text-white/50 shrink-0" />
+              <div className="mt-2 flex items-center p-1.5 bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl max-w-lg w-full">
+                <div className="flex-1 flex items-center gap-2 px-4">
+                  <MapPin className="w-5 h-5 text-white/50" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={language === 'en' ? 'Search by location...' : 'ابحث بالموقع...'}
-                    className="w-full min-w-0 bg-transparent border-none outline-none text-sm text-white placeholder:text-white/40 py-2"
+                    className="w-full bg-transparent border-none outline-none text-sm text-white placeholder:text-white/40 py-2"
                   />
                 </div>
                 <Link
                   to={searchQuery ? `/properties?q=${encodeURIComponent(searchQuery)}` : '/properties'}
-                  className="bg-[var(--accent)] text-[var(--accent-foreground)] px-4 sm:px-6 py-3 rounded-xl font-semibold text-sm hover:brightness-110 transition-all flex items-center gap-1.5 shrink-0 btn-premium"
+                  className="bg-[var(--accent)] text-[var(--accent-foreground)] px-6 py-3 rounded-xl font-semibold text-sm hover:brightness-110 transition-all flex items-center gap-2 shrink-0 btn-premium"
                 >
                   <Search className="w-4 h-4" />
-                  <span className="hidden xs:inline">{language === 'en' ? 'Search' : 'بحث'}</span>
+                  {language === 'en' ? 'Search' : 'بحث'}
                 </Link>
               </div>
             </motion.div>
 
-            {/* Hero Logo — only visible on large screens */}
+            {/* Hero Logo */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="relative hidden lg:flex items-center justify-center"
+              className="relative flex items-center justify-center"
             >
               <div className="absolute w-80 h-80 bg-[var(--accent)]/10 rounded-full blur-3xl" />
               <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-10 sm:p-14 pulse-glow">
@@ -177,14 +146,14 @@ export const HomePage: React.FC = () => {
       {/* ── Features ── */}
       <section className="bg-[var(--card)] py-20 border-y border-[var(--border)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="grid grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] md:grid-cols-3 gap-8">
+          <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="grid md:grid-cols-3 gap-8">
             {[
               { icon: Home, titleEn: 'Vast Selection', titleAr: 'تشكيلة واسعة', descEn: 'Browse thousands of verified properties in prime locations.', descAr: 'تصفح آلاف العقارات الموثقة في مواقع متميزة.' },
               { icon: Shield, titleEn: 'Secure Transactions', titleAr: 'معاملات آمنة', descEn: 'Your investments are protected with our transparent process.', descAr: 'استثماراتك محمية بفضل إجراءاتنا الشفافة.' },
               { icon: Users, titleEn: 'Expert Agents', titleAr: 'وكلاء خبراء', descEn: 'Our local experts guide you every step of the way.', descAr: 'خبراؤنا المحليون يرافقونك في كل خطوة.' }
             ].map((feature, idx) => (
-              <motion.div key={idx} variants={itemVariants} className="premium-card flex flex-col items-center text-center p-8 rounded-2xl hover:bg-[var(--secondary)] transition-all duration-300 group cursor-default hover-gradient-border glass">
-                <div className="w-16 h-16 bg-[var(--primary)]/10 text-[var(--primary)] rounded-2xl flex items-center justify-center mb-5 group-hover:bg-[var(--primary)] group-hover:text-white transition-all duration-300 group-hover:scale-110">
+              <motion.div key={idx} variants={itemVariants} className="premium-card flex flex-col items-center text-center p-8 rounded-2xl hover:bg-[var(--secondary)] transition-all duration-300 group cursor-default">
+                <div className="w-16 h-16 bg-[var(--primary)]/10 text-[var(--primary)] rounded-2xl flex items-center justify-center mb-5 group-hover:bg-[var(--primary)] group-hover:text-white transition-all duration-300">
                   <feature.icon className="w-7 h-7" />
                 </div>
                 <h3 className="text-lg font-bold text-[var(--foreground)] mb-2">{language === 'en' ? feature.titleEn : feature.titleAr}</h3>
@@ -211,7 +180,7 @@ export const HomePage: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map(i => (
               <div key={i} className="bg-[var(--card)] rounded-2xl border border-[var(--border)] overflow-hidden">
                 <div className="h-48 skeleton" />
@@ -224,31 +193,17 @@ export const HomePage: React.FC = () => {
             ))}
           </div>
         ) : (
-          <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] gap-6">
+          <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {properties.map(property => (
               <motion.div key={property.id} variants={itemVariants}>
                 <Link to={`/properties/${property.id}`} className="group flex flex-col bg-[var(--card)] rounded-2xl border border-[var(--border)] overflow-hidden shadow-sm premium-card">
                   <div className="relative aspect-[4/3] overflow-hidden">
-                    <ProtectedImage src={property.images[0] || 'https://via.placeholder.com/600x400?text=No+Image'} alt={property.title} containerClassName="w-full h-full" className="transform transition-transform duration-700 group-hover:scale-110" />
+                    <img src={property.images[0] || 'https://via.placeholder.com/600x400?text=No+Image'} alt={property.title} className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" loading="lazy" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="absolute top-3 start-3 z-10 flex gap-2">
-                      <span className="px-3 py-1 bg-white/90 backdrop-blur text-[var(--foreground)] text-xs font-bold rounded-lg capitalize shadow-sm">{language === 'en' ? property.type : (property.type === 'villa' ? 'فيلا' : property.type === 'apartment' ? 'شقة' : property.type)}</span>
+                    <div className="absolute top-3 left-3">
+                      <span className="px-3 py-1 bg-white/90 backdrop-blur text-[var(--foreground)] text-xs font-bold rounded-lg capitalize">{language === 'en' ? property.type : (property.type === 'villa' ? 'فيلا' : property.type === 'apartment' ? 'شقة' : property.type)}</span>
                     </div>
-                    <button
-                      onClick={(e) => toggleSaveProperty(property.id || property._id || '', e)}
-                      className="absolute end-3 top-3 z-10 px-2.5 py-1.5 flex items-center gap-1.5 rounded-full bg-[var(--card)]/80 hover:bg-[var(--card)] text-[var(--text-secondary)] hover:text-red-500 backdrop-blur shadow-md transition-all active:scale-95"
-                      aria-label="Save Property"
-                    >
-                      <Heart
-                        className={`h-4 w-4 transition-colors ${
-                          savedProperties.includes(property.id || property._id || '')
-                            ? "fill-red-500 text-red-500"
-                            : ""
-                        }`}
-                      />
-                      <span className="text-xs font-bold leading-none mt-[0.0625rem]">{property.likes || 0}</span>
-                    </button>
-                    <div className="absolute bottom-3 end-3 z-10">
+                    <div className="absolute bottom-3 right-3">
                       <span className="px-3 py-1.5 bg-[var(--accent)] text-[var(--accent-foreground)] text-sm font-bold rounded-lg shadow-lg">{formatEGPShort(property.price)}</span>
                     </div>
                   </div>
@@ -325,7 +280,7 @@ export const HomePage: React.FC = () => {
                 </div>
               ) : (
                 <>
-                  <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-5">
+                  <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid sm:grid-cols-2 gap-5">
                     {paginatedTestimonials.map(testimonial => (
                       <motion.div key={testimonial.id} variants={itemVariants} className="bg-[var(--card)] p-5 rounded-2xl border border-[var(--border)] hover:shadow-md transition-all premium-card">
                         <div className="flex gap-1 mb-3">

@@ -1,14 +1,13 @@
 import React, { useEffect,useState } from 'react';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
-import { Card } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Badge } from '../../components/ui/badge';
-import { Input,  TextArea } from '../../components/ui/input';
+import { Card } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { Badge } from '../../components/ui/Badge';
+import { Input,  TextArea } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
 import { Select, SelectContent,SelectItem, SelectTrigger, SelectValue,} from "../../components/ui/Select";
 import { getProperties, createProperty, updateProperty, deleteProperty, Property, PropertyStatus, PropertyType, PropertiesResponse, formatEGPShort} from "../../../services/api";
-import { ProtectedImage } from "../../components/ProtectedImage";
 export const AdminPropertiesPage: React.FC = () => {
   const { t, language } = useApp();
 const [properties, setProperties] =
@@ -42,8 +41,7 @@ const itemsPerPage = 6;
     bedrooms: '',
     bathrooms: '',
     size: '',
-    images: [] as File[],
-    color: '#C9A84C',
+  images: [] as File[],
   });
 let modalTitle = t('propertiesMgmt.add');
 
@@ -127,8 +125,7 @@ const locations = [
         bedrooms: property.bedrooms.toString(),
         bathrooms: property.bathrooms.toString(),
         size: property.size.toString(),
-        images: [],
-        color: (property as any).color || '#C9A84C',
+       images: [],
       });
     } else {
       setEditingProperty(null);
@@ -145,8 +142,7 @@ const locations = [
         bedrooms: '',
         bathrooms: '',
         size: '',
-        images: [],
-        color: '#C9A84C',
+       images: [],
       });
     }
     setShowModal(true);
@@ -157,61 +153,49 @@ const locations = [
     setEditingProperty(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    // Validation
-    if (!formData.title.trim() || !formData.titleAr.trim()) {
-      alert(language === 'en' ? 'Please fill in all title fields' : 'الرجاء ملء جميع حقول العنوان');
-      return;
+  try {
+    const form = new FormData();
+
+    form.append("title", formData.title);
+    form.append("titleAr", formData.titleAr);
+
+    form.append("description", formData.description);
+    form.append("descriptionAr", formData.descriptionAr);
+
+    form.append("price", formData.price);
+
+    form.append("location", formData.location);
+    form.append("locationAr", formData.locationAr);
+
+    form.append("type", formData.type);
+    form.append("status", formData.status);
+
+    form.append("bedrooms", formData.bedrooms);
+    form.append("bathrooms", formData.bathrooms);
+
+    form.append("size", formData.size);
+
+   formData.images.forEach((image) => {
+  form.append("images", image);
+});
+
+    if (editingProperty) {
+      await updateProperty(editingProperty.id, form);
+    } else {
+      await createProperty(form);
     }
-    if (!formData.price || Number(formData.price) <= 0) {
-      alert(language === 'en' ? 'Please enter a valid price' : 'الرجاء إدخال سعر صحيح');
-      return;
-    }
-    if (!formData.location.trim() || !formData.locationAr.trim()) {
-      alert(language === 'en' ? 'Please fill in all location fields' : 'الرجاء ملء جميع حقول الموقع');
-      return;
-    }
-    if (!editingProperty && formData.images.length === 0) {
-      alert(language === 'en' ? 'Please add at least one image' : 'الرجاء إضافة صورة واحدة على الأقل');
-      return;
-    }
 
-    try {
-      const form = new FormData();
+    await fetchProperties();
 
-      form.append("title", formData.title.trim());
-      form.append("titleAr", formData.titleAr.trim());
-      form.append("description", formData.description.trim());
-      form.append("descriptionAr", formData.descriptionAr.trim());
-      form.append("price", formData.price);
-      form.append("location", formData.location.trim());
-      form.append("locationAr", formData.locationAr.trim());
-      form.append("type", formData.type);
-      form.append("status", formData.status);
-      form.append("bedrooms", formData.bedrooms || "0");
-      form.append("bathrooms", formData.bathrooms || "0");
-      form.append("size", formData.size || "0");
-      form.append("color", formData.color);
+    handleCloseModal();
 
-      formData.images.forEach((image) => {
-        form.append("images", image);
-      });
-
-      if (editingProperty) {
-        await updateProperty(editingProperty.id, form);
-      } else {
-        await createProperty(form);
-      }
-
-      await fetchProperties();
-      handleCloseModal();
-    } catch (err) {
-      console.error(err);
-      alert(language === 'en' ? 'Error saving property' : 'حدث خطأ في حفظ العقار');
-    }
-  };
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   const handleDelete = async (id: string) => {
   const confirmed = confirm(
@@ -287,23 +271,23 @@ const fetchProperties = async () => {
   }
 };
   return (
-    <div className="space-y-6 p-4 md:p-6 lg:p-8">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{t('admin.properties')}</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('admin.properties')}</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             {language === 'en' ? 'Manage your property listings' : 'إدارة قوائم العقارات'}
           </p>
         </div>
-        <Button onClick={() => handleOpenModal()} className="flex items-center justify-center gap-2 w-full sm:w-auto">
+        <Button onClick={() => handleOpenModal()} className="flex items-center gap-2">
           <Plus className="w-5 h-5" />
           {t('propertiesMgmt.add')}
         </Button>
       </div>
 
       {/* Search and Filters */}
-      <div className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
   <Input
     icon={<Search className="w-5 h-5" />}
@@ -474,119 +458,97 @@ const fetchProperties = async () => {
       {/* Properties Table/Grid */}
       {viewMode === 'table' ? (
         <Card>
-          <div className="overflow-x-auto w-full pb-4">
-            <table className="w-full min-w-[600px]">
-              <thead className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md sticky top-0 z-20 shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th className="p-3 sm:px-4 sm:py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap sticky ltr:left-0 rtl:right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md z-30 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none sm:bg-transparent">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     {language === 'en' ? 'Image' : 'الصورة'}
                   </th>
-                  <th className="p-3 sm:px-4 sm:py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     {t('propertiesMgmt.title')}
                   </th>
-                  <th className="p-3 sm:px-4 sm:py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     {t('propertiesMgmt.price')}
                   </th>
-                  <th className="p-3 sm:px-4 sm:py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     {language === 'en' ? 'Location' : 'الموقع'}
                   </th>
-                  <th className="p-3 sm:px-4 sm:py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     {t('propertiesMgmt.status')}
                   </th>
-                  <th className="p-3 sm:px-4 sm:py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
-                    {language === 'en' ? 'Views' : 'المشاهدات'}
-                  </th>
-                  <th className="p-3 sm:px-4 sm:py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
-                    {language === 'en' ? 'Likes' : 'الإعجابات'}
-                  </th>
-                  <th className="p-3 sm:px-4 sm:py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     {t('propertiesMgmt.actions')}
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {filteredProperties.map((property) => (
-                  <tr key={property.id} className="group hover:bg-gradient-to-r hover:from-[#C9A84C]/5 hover:to-transparent transition-colors">
-                    <td className="p-3 sm:px-4 sm:py-3 whitespace-nowrap sticky ltr:left-0 rtl:right-0 bg-white dark:bg-gray-800 z-10 group-hover:bg-[#C9A84C]/5 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none sm:group-hover:bg-transparent">
-                      <ProtectedImage
+                  <tr key={property.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <img
                         src={property.images[0]}
                         alt={language === 'en' ? property.title : property.titleAr}
-                        containerClassName="w-10 h-10 sm:w-12 sm:h-12 rounded-lg"
-                        className="object-cover"
+                        className="w-16 h-16 object-cover rounded-lg"
                       />
                     </td>
-                    <td className="p-3 sm:px-4 sm:py-3">
+                    <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
                         {language === 'en' ? property.title : property.titleAr}
                       </div>
                       <div className="text-sm text-gray-500 dark:text-gray-400 capitalize">{property.type}</div>
                     </td>
-                    <td className="p-3 sm:px-4 sm:py-3 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-semibold text-gray-900 dark:text-white">
                         {formatEGPShort(property.price)}
                       </div>
                     </td>
-                    <td className="p-3 sm:px-4 sm:py-3">
+                    <td className="px-6 py-4">
                       <div className="text-sm text-gray-900 dark:text-white">
                         {language === 'en' ? property.location : property.locationAr}
                       </div>
                     </td>
-               <td className="p-3 sm:px-4 sm:py-3 whitespace-nowrap">
+               <td className="px-6 py-4 whitespace-nowrap">
                 <Select
                   value={property.status}
                   onValueChange={(value) =>
                     handleStatusChange(property.id, value as PropertyStatus)
                   }
                 >
-                  <SelectTrigger className={`w-[8.75rem] h-8 text-xs font-bold border-0 bg-transparent`}>
-                    <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full w-full ${property.status==='available'?'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':property.status==='rented'?'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400':'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
-                      <span className={`w-1.5 h-1.5 shrink-0 rounded-full ${property.status==='available'?'bg-green-500':property.status==='rented'?'bg-blue-500':'bg-red-500'}`} />
-                      <SelectValue />
-                    </div>
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue />
                   </SelectTrigger>
 
                   <SelectContent>
                     <SelectItem value="available">
-                      <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-green-500"/>{t('property.available')}</div>
+                      {t('property.available')}
                     </SelectItem>
 
                     <SelectItem value="sold">
-                      <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-500"/>{t('property.sold')}</div>
+                      {t('property.sold')}
                     </SelectItem>
 
                     <SelectItem value="rented">
-                      <div className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-blue-500"/>{t('property.rented')}</div>
+                      {t('property.rented')}
                     </SelectItem>
                   </SelectContent>
                 </Select>
               </td>
-                    <td className="p-3 sm:px-4 sm:py-3 whitespace-nowrap text-center">
-                      <div className="flex items-center justify-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white">
-                        <span className="text-blue-500">👁</span> {property.views || 0}
-                      </div>
-                    </td>
-                    <td className="p-3 sm:px-4 sm:py-3 whitespace-nowrap text-center">
-                      <div className="flex items-center justify-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white">
-                        <span className="text-red-500">❤️</span> {property.likes || 0}
-                      </div>
-                    </td>
-                    <td className="p-3 sm:px-4 sm:py-3 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleOpenModal(property)}
-                          className="flex items-center gap-2 px-3 py-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                          className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                           title={t('common.edit')}
                         >
                           <Edit className="w-4 h-4" />
-                          <span className="hidden sm:inline">{t('common.edit')}</span>
                         </button>
                         <button
                           onClick={() => handleDelete(property.id)}
-                          className="flex items-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                          className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                           title={t('common.delete')}
                         >
                           <Trash2 className="w-4 h-4" />
-                          <span className="hidden sm:inline">{t('common.delete')}</span>
                         </button>
                       </div>
                     </td>
@@ -597,21 +559,17 @@ const fetchProperties = async () => {
           </div>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProperties.map((property) => (
             <Card key={property.id} className="overflow-hidden">
               <div className="relative">
-                <ProtectedImage
+                <img
                   src={property.images?.[0] || '/placeholder.jpg'}
                   alt={language === 'en' ? property.title : property.titleAr}
-                  containerClassName="w-full h-48"
-                  className="object-cover"
+                  className="w-full h-48 object-cover"
                 />
                 <div className="absolute top-4 right-4">
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.625rem] font-bold uppercase backdrop-blur-md border ${property.status==='available'?'bg-green-100/90 text-green-700 border-green-200 dark:bg-green-900/60 dark:text-green-400':property.status==='rented'?'bg-blue-100/90 text-blue-700 border-blue-200 dark:bg-blue-900/60 dark:text-blue-400':'bg-red-100/90 text-red-700 border-red-200 dark:bg-red-900/60 dark:text-red-400'}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${property.status==='available'?'bg-green-500':property.status==='rented'?'bg-blue-500':'bg-red-500'}`} />
-                    {t(`property.${property.status}`)}
-                  </span>
+                  <Badge variant={getStatusBadgeVariant(property.status)}>{t(`property.${property.status}`)}</Badge>
                 </div>
               </div>
               <div className="p-4">
@@ -621,15 +579,9 @@ const fetchProperties = async () => {
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                   {language === 'en' ? property.location : property.locationAr}
                 </p>
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                    {formatEGPShort(property.price)}
-                  </p>
-                  <div className="flex gap-3 text-xs font-bold text-gray-500 dark:text-gray-400">
-                    <span className="flex items-center gap-1"><span className="text-blue-500">👁</span> {property.views || 0}</span>
-                    <span className="flex items-center gap-1"><span className="text-red-500">❤️</span> {property.likes || 0}</span>
-                  </div>
-                </div>
+                <p className="text-lg font-bold text-blue-600 dark:text-blue-400 mb-3">
+                  {formatEGPShort(property.price)}
+                </p>
                 <div className="flex gap-2">
                   <Button variant="secondary" size="sm" onClick={() => handleOpenModal(property)} className="flex-1">
                     <Edit className="w-4 h-4 mr-1" />
@@ -695,247 +647,198 @@ const fetchProperties = async () => {
 }
       >
         <form
-          id="propertyForm"
-          onSubmit={handleSubmit}
-          className="space-y-6"
-        >
-          {/* English Title */}
-          <Input
-            required
-            label={language === 'en' ? 'Title (English)' : 'العنوان (إنجليزي)'}
-            placeholder={language === 'en' ? 'e.g. Luxury Apartment' : 'مثال: شقة فاخرة'}
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          />
-          
-          {/* Arabic Title */}
-          <Input
-            required
-            label={language === 'en' ? 'Title (Arabic)' : 'العنوان (عربي)'}
-            placeholder={language === 'en' ? 'e.g. شقة فاخرة' : 'مثال: شقة فاخرة'}
-            value={formData.titleAr}
-            onChange={(e) => setFormData({ ...formData, titleAr: e.target.value })}
-          />
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* English Description */}
-            <TextArea
-              name="description"
-              label={language === 'en' ? 'Description (English)' : 'الوصف (إنجليزي)'}
-              placeholder={language === 'en' ? 'Property details in English...' : 'تفاصيل العقار بالإنجليزية...'}
-              value={formData.description}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  description: e.target.value,
-                })
-              }
-              rows={3}
+  id="propertyForm"
+  onSubmit={handleSubmit}
+  className="space-y-4"
+>
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label={language === 'en' ? 'Title (English)' : 'العنوان (إنجليزي)'}
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              required
             />
-
-            {/* Arabic Description */}
-            <TextArea
-              name="descriptionAr"
-              label={language === 'en' ? 'Description (Arabic)' : 'الوصف (عربي)'}
-              placeholder={language === 'en' ? 'Property details in Arabic...' : 'تفاصيل العقار بالعربية...'}
-              value={formData.descriptionAr}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  descriptionAr: e.target.value,
-                })
-              }
-              rows={3}
+            <Input
+              label={language === 'en' ? 'Title (Arabic)' : 'العنوان (عربي)'}
+              value={formData.titleAr}
+              onChange={(e) => setFormData({ ...formData, titleAr: e.target.value })}
+              required
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Price */}
+         <div className="grid grid-cols-2 gap-4">
+  <TextArea
+    name="description"
+    label={language === 'en' ? 'Description (English)' : 'الوصف (إنجليزي)'}
+    value={formData.description}
+    onChange={(e) =>
+      setFormData({
+        ...formData,
+        description: e.target.value,
+      })
+    }
+    rows={3}
+    required
+  />
+
+  <TextArea
+    name="descriptionAr"
+    label={language === 'en' ? 'Description (Arabic)' : 'الوصف (عربي)'}
+    value={formData.descriptionAr}
+    onChange={(e) =>
+      setFormData({
+        ...formData,
+        descriptionAr: e.target.value,
+      })
+    }
+    rows={3}
+    required
+  />
+</div>
+
+          <div className="grid grid-cols-2 gap-4">
             <Input
-              required
               label={language === 'en' ? 'Price (EGP)' : 'السعر (ج.م)'}
               type="number"
-              placeholder="0"
-              min="1"
-              step="1000"
               value={formData.price}
               onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+              required
             />
-            {/* Size */}
             <Input
               label={language === 'en' ? 'Size (m²)' : 'المساحة (م²)'}
               type="number"
-              placeholder="0"
-              min="0"
-              step="10"
               value={formData.size}
               onChange={(e) => setFormData({ ...formData, size: e.target.value })}
+              required
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Location English */}
+          <div className="grid grid-cols-2 gap-4">
             <Input
-              required
               label={language === 'en' ? 'Location (English)' : 'الموقع (إنجليزي)'}
-              placeholder={language === 'en' ? 'e.g. Downtown Cairo' : 'مثال: وسط القاهرة'}
               value={formData.location}
               onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-            />
-            {/* Location Arabic */}
-            <Input
               required
+            />
+            <Input
               label={language === 'en' ? 'Location (Arabic)' : 'الموقع (عربي)'}
-              placeholder={language === 'en' ? 'e.g. وسط القاهرة' : 'مثال: وسط القاهرة'}
               value={formData.locationAr}
               onChange={(e) => setFormData({ ...formData, locationAr: e.target.value })}
+              required
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Property Type */}
-            <div>
-              <label className="text-sm font-medium block mb-1.5">
-                {language === 'en' ? 'Property Type' : 'نوع العقار'}
-              </label>
+          <div className="grid grid-cols-2 gap-4">
 
-              <Select
-                value={formData.type}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, type: value as PropertyType })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Type" />
-                </SelectTrigger>
+  {/* Property Type */}
+  <div>
+    <label className="text-sm mb-1 block">
+      {language === 'en' ? 'Property Type' : 'نوع العقار'}
+    </label>
 
-                <SelectContent>
-                  <SelectItem value="apartment">
-                    {language === 'en' ? 'Apartment' : 'شقة'}
-                  </SelectItem>
+    <Select
+      value={formData.type}
+      onValueChange={(value) =>
+        setFormData({ ...formData, type: value as PropertyType })
+      }
+    >
+      <SelectTrigger>
+        <SelectValue placeholder="Select Type" />
+      </SelectTrigger>
 
-                  <SelectItem value="villa">
-                    {language === 'en' ? 'Villa' : 'فيلا'}
-                  </SelectItem>
+      <SelectContent>
+        <SelectItem value="apartment">
+          {language === 'en' ? 'Apartment' : 'شقة'}
+        </SelectItem>
 
-                  <SelectItem value="house">
-                    {language === 'en' ? 'House' : 'منزل'}
-                  </SelectItem>
+        <SelectItem value="villa">
+          {language === 'en' ? 'Villa' : 'فيلا'}
+        </SelectItem>
 
-                  <SelectItem value="land">
-                    {language === 'en' ? 'Land' : 'أرض'}
-                  </SelectItem>
+        <SelectItem value="house">
+          {language === 'en' ? 'House' : 'منزل'}
+        </SelectItem>
 
-                  <SelectItem value="commercial">
-                    {language === 'en' ? 'Commercial' : 'تجاري'}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        <SelectItem value="land">
+          {language === 'en' ? 'Land' : 'أرض'}
+        </SelectItem>
 
-            {/* Status */}
-            <div>
-              <label className="text-sm font-medium block mb-1.5">
-                {language === 'en' ? 'Status' : 'الحالة'}
-              </label>
+        <SelectItem value="commercial">
+          {language === 'en' ? 'Commercial' : 'تجاري'}
+        </SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
 
-              <Select
-                value={formData.status}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, status: value as PropertyStatus })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Status" />
-                </SelectTrigger>
+  {/* Status */}
+  <div>
+    <label className="text-sm mb-1 block">
+      {language === 'en' ? 'Status' : 'الحالة'}
+    </label>
 
-                <SelectContent>
-                  <SelectItem value="available">
-                    {t('property.available')}
-                  </SelectItem>
+    <Select
+      value={formData.status}
+      onValueChange={(value) =>
+        setFormData({ ...formData, status: value as PropertyStatus })
+      }
+    >
+      <SelectTrigger>
+        <SelectValue placeholder="Select Status" />
+      </SelectTrigger>
 
-                  <SelectItem value="sold">
-                    {t('property.sold')}
-                  </SelectItem>
+      <SelectContent>
+        <SelectItem value="available">
+          {t('property.available')}
+        </SelectItem>
 
-                  <SelectItem value="rented">
-                    {t('property.rented')}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+        <SelectItem value="sold">
+          {t('property.sold')}
+        </SelectItem>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* Bedrooms */}
+        <SelectItem value="rented">
+          {t('property.rented')}
+        </SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
+
+</div>
+
+          <div className="grid grid-cols-2 gap-4">
             <Input
               label={language === 'en' ? 'Bedrooms' : 'غرف النوم'}
               type="number"
-              min="0"
-              placeholder="0"
               value={formData.bedrooms}
               onChange={(e) => setFormData({ ...formData, bedrooms: e.target.value })}
+              required
             />
-            {/* Bathrooms */}
             <Input
               label={language === 'en' ? 'Bathrooms' : 'الحمامات'}
               type="number"
-              min="0"
-              placeholder="0"
               value={formData.bathrooms}
               onChange={(e) => setFormData({ ...formData, bathrooms: e.target.value })}
+              required
             />
-            {/* Color Picker */}
-            <div>
-              <label className="text-sm font-medium block mb-1.5">
-                {language === 'en' ? 'Theme Color' : 'لون العقار'}
-              </label>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={formData.color}
-                  onChange={(e) => setFormData({ ...formData, color: e.target.value })}
-                  className="w-12 h-10 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer"
-                />
-                <span className="text-xs font-mono text-gray-500 dark:text-gray-400 uppercase flex-1">
-                  {formData.color}
-                </span>
-              </div>
-            </div>
           </div>
 
-          {/* Images */}
-          <div>
-            <label className="text-sm font-medium block mb-1.5">
-              {language === 'en' ? 'Property Images' : 'صور العقار'}
-              {!editingProperty && <span className="text-red-500">*</span>}
-            </label>
+       <div>
+  <label className="block text-sm mb-2">
+    {language === 'en' ? 'Property Images' : 'صور العقار'}
+  </label>
 
-            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 text-center hover:border-blue-500 transition-colors cursor-pointer relative">
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    images: Array.from(e.target.files || []),
-                  })
-                }
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              />
-              <div className="pointer-events-none">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {language === 'en' ? 'Click to upload images' : 'انقر لتحميل الصور'}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {formData.images.length > 0 
-                    ? `${formData.images.length} ${language === 'en' ? 'file(s) selected' : 'ملف محدد'}` 
-                    : language === 'en' ? 'PNG, JPG, GIF (max 5MB)' : 'PNG, JPG, GIF (الحد الأقصى 5 ميجابايت)'}
-                </p>
-              </div>
-            </div>
-          </div>
+  <input
+    type="file"
+    multiple
+    accept="image/*"
+    onChange={(e) =>
+      setFormData({
+        ...formData,
+        images: Array.from(e.target.files || []),
+      })
+    }
+    className="w-full border rounded-lg p-2"
+  />
+</div>
         </form>
       </Modal>
     </div>

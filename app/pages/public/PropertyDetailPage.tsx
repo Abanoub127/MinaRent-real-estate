@@ -3,9 +3,7 @@ import { useParams, Link } from "react-router";
 import { Heart, Bed, Bath, Maximize, MapPin, Phone, MessageCircle, Star, Calendar, ArrowLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useApp } from "../../contexts/AppContext";
-import { getPropertyById, Property, formatEGPShort, getTestimonials, togglePropertyLike } from "../../../services/api";
-import { ProtectedImage } from "../../components/ProtectedImage";
-import { SEO } from "../../components/ui/SEO";
+import { getPropertyById, Property, formatEGPShort, getTestimonials } from "../../../services/api";
 
 export const PropertyDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -37,12 +35,11 @@ export const PropertyDetailPage: React.FC = () => {
       .catch(() => setLoading(false));
   }, [id]);
 
-  const toggleSave = async () => {
+  const toggleSave = () => {
     if (!id) return;
     const saved = JSON.parse(localStorage.getItem("savedProperties") || "[]");
-    const wasSaved = saved.includes(id);
     let newSaved;
-    if (wasSaved) {
+    if (saved.includes(id)) {
       newSaved = saved.filter((savedId: string) => savedId !== id);
       setIsSaved(false);
     } else {
@@ -50,11 +47,6 @@ export const PropertyDetailPage: React.FC = () => {
       setIsSaved(true);
     }
     localStorage.setItem("savedProperties", JSON.stringify(newSaved));
-    try {
-      await togglePropertyLike(id, wasSaved ? 'remove' : 'add');
-    } catch (error) {
-      console.error('Failed to toggle like on backend:', error);
-    }
   };
 
   if (loading) {
@@ -83,16 +75,9 @@ export const PropertyDetailPage: React.FC = () => {
   // Amenities removed
 
   return (
-    <>
-      <SEO 
-        title={title} 
-        description={description} 
-        image={property.images?.[0]} 
-        type="article"
-      />
-      <motion.section 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+    <motion.section 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="mx-auto mt-8 mb-24 max-w-7xl px-4 w-full"
     >
@@ -105,59 +90,52 @@ export const PropertyDetailPage: React.FC = () => {
 
       {/* Gallery */}
       <div className="mt-4 grid gap-3 lg:grid-cols-[2fr_1fr]">
-        <motion.div
+        <motion.div 
           layoutId={`gallery-main-${property.id}`}
-          className="overflow-hidden rounded-[1.25rem] border border-[var(--border)] bg-[var(--card)] shadow-sm relative"
+          className="overflow-hidden rounded-[20px] border border-[var(--border)] bg-[var(--card)] shadow-sm relative"
         >
           <AnimatePresence mode="wait">
-            <motion.div
+            <motion.img
               key={active}
               initial={{ opacity: 0, scale: 1.05 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4 }}
-              className="absolute inset-0 w-full h-full"
-            >
-              <ProtectedImage
-                src={property.images?.[active] || 'https://via.placeholder.com/1200x800'}
-                alt={title}
-                containerClassName="w-full h-full"
-                className="h-[15rem] sm:h-[20rem] md:h-[25rem] lg:h-[30rem] w-full"
-              />
-            </motion.div>
+              src={property.images?.[active] || 'https://via.placeholder.com/1200x800'}
+              alt={title}
+              className="h-[320px] w-full object-cover md:h-[480px] absolute inset-0"
+            />
           </AnimatePresence>
           {/* placeholder for height */}
-          <div className="h-[15rem] sm:h-[20rem] md:h-[25rem] lg:h-[30rem] w-full" />
+          <div className="h-[320px] w-full md:h-[480px]"></div>
         </motion.div>
-
-        {/* Thumbnails: horizontal scroll on mobile, vertical grid on desktop */}
-        <div className="flex flex-row lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto lg:overflow-x-hidden lg:h-[30rem] pb-1 lg:pb-2 lg:pr-2 custom-scrollbar">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-1 h-[320px] md:h-[480px] overflow-y-auto pr-2 pb-2 custom-scrollbar">
           {property.images?.map((g: string, i: number) => (
             <button
               key={i}
               onClick={() => setActive(i)}
-              className={`flex-shrink-0 overflow-hidden rounded-[0.75rem] border transition-all ${
+              className={`overflow-hidden rounded-[12px] border transition-all ${
                 active === i ? "border-[var(--primary)] ring-2 ring-[var(--primary)]/30 opacity-100" : "border-[var(--border)] opacity-70 hover:opacity-100"
               }`}
             >
-              <ProtectedImage src={g} alt="" containerClassName="h-20 w-28 sm:h-24 sm:w-36 lg:h-[9.25rem] lg:w-full" className="w-full h-full" />
+              <img src={g} alt="" className="h-28 w-full object-cover md:h-[148px]" />
             </button>
           ))}
         </div>
       </div>
 
-      <div className="mt-6 sm:mt-8 grid gap-6 sm:gap-8 lg:grid-cols-[1fr_22.5rem]">
+      <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_360px]">
         {/* Main */}
         <div>
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight md:text-4xl text-[var(--foreground)] break-words">{title}</h1>
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight md:text-4xl text-[var(--foreground)]">{title}</h1>
               <p className="mt-2 flex items-center gap-1.5 text-sm text-[var(--text-secondary)] font-medium">
-                <MapPin className="h-4 w-4 text-[var(--primary)] shrink-0" /> {location}
+                <MapPin className="h-4 w-4 text-[var(--primary)]" /> {location}
               </p>
             </div>
-            <div className="rounded-2xl border border-[var(--primary)]/20 bg-[var(--primary)]/10 px-4 sm:px-5 py-3 shadow-sm shrink-0 self-start">
-              <p className="text-xl sm:text-2xl font-bold text-[var(--primary)]">{formatEGPShort(property.price)}</p>
+            <div className="rounded-2xl border border-[var(--primary)]/20 bg-[var(--primary)]/10 px-5 py-3 shadow-sm">
+              <p className="text-2xl font-bold text-[var(--primary)]">{formatEGPShort(property.price)}</p>
               {property.status === 'rented' && <p className="text-xs text-[var(--primary)]/80 font-medium text-center">{language === 'en' ? 'per month' : 'شهرياً'}</p>}
             </div>
           </div>
@@ -165,11 +143,11 @@ export const PropertyDetailPage: React.FC = () => {
           <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Spec icon={Bed} label={language === 'en' ? "Bedrooms" : "غرف النوم"} value={property.bedrooms} />
             <Spec icon={Bath} label={language === 'en' ? "Bathrooms" : "الحمامات"} value={property.bathrooms} />
-            <Spec icon={Maximize} label={language === 'en' ? "Size" : "المساحة"} value={`${property.size} m²`} />
+            <Spec icon={Maximize} label={language === 'en' ? "Size" : "المساحة"} value={`${property.size} ${language === 'en' ? 'sqft' : 'م²'}`} />
             <Spec icon={Calendar} label={language === 'en' ? "Status" : "الحالة"} value={language === 'en' ? property.status : (property.status === 'available' ? 'متاح' : property.status === 'sold' ? 'مباع' : 'مؤجر')} />
           </div>
 
-          <div className="mt-8 rounded-[1.25rem] border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm">
+          <div className="mt-8 rounded-[20px] border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm">
             <h2 className="text-lg font-bold text-[var(--foreground)]">{language === 'en' ? 'Description' : 'الوصف'}</h2>
             <p className="mt-3 text-sm leading-relaxed text-[var(--text-secondary)] whitespace-pre-wrap">{description}</p>
           </div>
@@ -183,7 +161,7 @@ export const PropertyDetailPage: React.FC = () => {
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="rounded-[1.25rem] border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm"
+            className="rounded-[20px] border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm"
           >
             <p className="text-xs font-bold uppercase tracking-wider text-[var(--text-secondary)] mb-4">
               {language === 'en' ? 'Listed by Agency' : 'معروض بواسطة الوكالة'}
@@ -222,19 +200,15 @@ export const PropertyDetailPage: React.FC = () => {
                 }`}
               >
                 <Heart className={`h-4 w-4 ${isSaved ? "fill-[var(--primary)] text-[var(--primary)]" : ""}`} />{" "}
-                <span className="flex-1 text-center">
                 {isSaved
                   ? (language === 'en' ? 'Saved' : 'تم الحفظ')
                   : (language === 'en' ? 'Save Property' : 'حفظ العقار')}
-                </span>
-                <span className="text-xs font-bold bg-[var(--background)] px-2 py-0.5 rounded-md border border-[var(--border)]">{property.likes || 0}</span>
               </button>
             </div>
           </motion.div>
         </aside>
       </div>
     </motion.section>
-    </>
   );
 };
 
