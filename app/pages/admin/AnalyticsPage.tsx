@@ -8,7 +8,7 @@ import {
 
 import { useApp } from '../../contexts/AppContext';
 
-import { Card } from '../../components/ui/Card';
+import { Card } from '../../components/ui/card';
 
 import {
   BarChart,

@@ -1,0 +1,163 @@
+﻿app/components/ui/alert-dialog.tsx(7,32): error TS1149: File name 'G:/my_project/sboba1/app/components/ui/button.tsx' differs from already included file name 'G:/my_project/sboba1/app/components/ui/Button.tsx' only in casing.
+  The file is in the program because:
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/AdminPropertiesPage.tsx'
+    Imported via './button' from file 'G:/my_project/sboba1/app/components/ui/Modal.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/BookingsPage.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/FinancialPage.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/SettingsPage.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/alert-dialog.tsx'
+    Matched by include pattern 'app' in 'G:/my_project/sboba1/tsconfig.json'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/calendar.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/carousel.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/pagination.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/sidebar.tsx'
+app/components/ui/calendar.tsx(8,32): error TS1149: File name 'G:/my_project/sboba1/app/components/ui/button.tsx' differs from already included file name 'G:/my_project/sboba1/app/components/ui/Button.tsx' only in casing.
+  The file is in the program because:
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/AdminPropertiesPage.tsx'
+    Imported via './button' from file 'G:/my_project/sboba1/app/components/ui/Modal.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/BookingsPage.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/FinancialPage.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/SettingsPage.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/alert-dialog.tsx'
+    Matched by include pattern 'app' in 'G:/my_project/sboba1/tsconfig.json'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/calendar.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/carousel.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/pagination.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/sidebar.tsx'
+app/components/ui/carousel.tsx(10,24): error TS1149: File name 'G:/my_project/sboba1/app/components/ui/button.tsx' differs from already included file name 'G:/my_project/sboba1/app/components/ui/Button.tsx' only in casing.
+  The file is in the program because:
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/AdminPropertiesPage.tsx'
+    Imported via './button' from file 'G:/my_project/sboba1/app/components/ui/Modal.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/BookingsPage.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/FinancialPage.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/SettingsPage.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/alert-dialog.tsx'
+    Matched by include pattern 'app' in 'G:/my_project/sboba1/tsconfig.json'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/calendar.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/carousel.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/pagination.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/sidebar.tsx'
+app/components/ui/Modal.tsx(3,24): error TS1149: File name 'G:/my_project/sboba1/app/components/ui/button.tsx' differs from already included file name 'G:/my_project/sboba1/app/components/ui/Button.tsx' only in casing.
+  The file is in the program because:
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/AdminPropertiesPage.tsx'
+    Imported via './button' from file 'G:/my_project/sboba1/app/components/ui/Modal.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/BookingsPage.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/FinancialPage.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/SettingsPage.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/alert-dialog.tsx'
+    Matched by include pattern 'app' in 'G:/my_project/sboba1/tsconfig.json'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/calendar.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/carousel.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/pagination.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/sidebar.tsx'
+app/components/ui/pagination.tsx(9,40): error TS1149: File name 'G:/my_project/sboba1/app/components/ui/button.tsx' differs from already included file name 'G:/my_project/sboba1/app/components/ui/Button.tsx' only in casing.
+  The file is in the program because:
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/AdminPropertiesPage.tsx'
+    Imported via './button' from file 'G:/my_project/sboba1/app/components/ui/Modal.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/BookingsPage.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/FinancialPage.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/SettingsPage.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/alert-dialog.tsx'
+    Matched by include pattern 'app' in 'G:/my_project/sboba1/tsconfig.json'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/calendar.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/carousel.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/pagination.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/sidebar.tsx'
+app/components/ui/sidebar.tsx(10,24): error TS1149: File name 'G:/my_project/sboba1/app/components/ui/button.tsx' differs from already included file name 'G:/my_project/sboba1/app/components/ui/Button.tsx' only in casing.
+  The file is in the program because:
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/AdminPropertiesPage.tsx'
+    Imported via './button' from file 'G:/my_project/sboba1/app/components/ui/Modal.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/BookingsPage.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/FinancialPage.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/SettingsPage.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/alert-dialog.tsx'
+    Matched by include pattern 'app' in 'G:/my_project/sboba1/tsconfig.json'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/calendar.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/carousel.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/pagination.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/sidebar.tsx'
+app/components/ui/sidebar.tsx(11,23): error TS1149: File name 'G:/my_project/sboba1/app/components/ui/input.tsx' differs from already included file name 'G:/my_project/sboba1/app/components/ui/Input.tsx' only in casing.
+  The file is in the program because:
+    Imported via '../../components/ui/Input' from file 'G:/my_project/sboba1/app/pages/admin/AdminPropertiesPage.tsx'
+    Imported via '../../components/ui/Input' from file 'G:/my_project/sboba1/app/pages/admin/BookingsPage.tsx'
+    Imported via '../../components/ui/Input' from file 'G:/my_project/sboba1/app/pages/admin/FinancialPage.tsx'
+    Imported via '../../components/ui/Input' from file 'G:/my_project/sboba1/app/pages/admin/SettingsPage.tsx'
+    Matched by include pattern 'app' in 'G:/my_project/sboba1/tsconfig.json'
+    Imported via "./input" from file 'G:/my_project/sboba1/app/components/ui/sidebar.tsx'
+app/pages/admin/AdminPropertiesPage.tsx(4,22): error TS1261: Already included file name 'G:/my_project/sboba1/app/components/ui/Card.tsx' differs from file name 'G:/my_project/sboba1/app/components/ui/card.tsx' only in casing.
+  The file is in the program because:
+    Imported via '../../components/ui/Card' from file 'G:/my_project/sboba1/app/pages/admin/AdminPropertiesPage.tsx'
+    Imported via '../../components/ui/Card' from file 'G:/my_project/sboba1/app/pages/admin/BookingsPage.tsx'
+    Imported via '../../components/ui/Card' from file 'G:/my_project/sboba1/app/pages/admin/FinancialPage.tsx'
+    Imported via '../../components/ui/Card' from file 'G:/my_project/sboba1/app/pages/admin/AnalyticsPage.tsx'
+    Imported via '../../components/ui/Card' from file 'G:/my_project/sboba1/app/pages/admin/SettingsPage.tsx'
+    Matched by include pattern 'app' in 'G:/my_project/sboba1/tsconfig.json'
+app/pages/admin/AdminPropertiesPage.tsx(5,24): error TS1261: Already included file name 'G:/my_project/sboba1/app/components/ui/Button.tsx' differs from file name 'G:/my_project/sboba1/app/components/ui/button.tsx' only in casing.
+  The file is in the program because:
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/AdminPropertiesPage.tsx'
+    Imported via './button' from file 'G:/my_project/sboba1/app/components/ui/Modal.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/BookingsPage.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/FinancialPage.tsx'
+    Imported via '../../components/ui/Button' from file 'G:/my_project/sboba1/app/pages/admin/SettingsPage.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/alert-dialog.tsx'
+    Matched by include pattern 'app' in 'G:/my_project/sboba1/tsconfig.json'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/calendar.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/carousel.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/pagination.tsx'
+    Imported via "./button" from file 'G:/my_project/sboba1/app/components/ui/sidebar.tsx'
+app/pages/admin/AdminPropertiesPage.tsx(6,23): error TS1261: Already included file name 'G:/my_project/sboba1/app/components/ui/Badge.tsx' differs from file name 'G:/my_project/sboba1/app/components/ui/badge.tsx' only in casing.
+  The file is in the program because:
+    Imported via '../../components/ui/Badge' from file 'G:/my_project/sboba1/app/pages/admin/AdminPropertiesPage.tsx'
+    Matched by include pattern 'app' in 'G:/my_project/sboba1/tsconfig.json'
+app/pages/admin/AdminPropertiesPage.tsx(7,34): error TS1261: Already included file name 'G:/my_project/sboba1/app/components/ui/Input.tsx' differs from file name 'G:/my_project/sboba1/app/components/ui/input.tsx' only in casing.
+  The file is in the program because:
+    Imported via '../../components/ui/Input' from file 'G:/my_project/sboba1/app/pages/admin/AdminPropertiesPage.tsx'
+    Imported via '../../components/ui/Input' from file 'G:/my_project/sboba1/app/pages/admin/BookingsPage.tsx'
+    Imported via '../../components/ui/Input' from file 'G:/my_project/sboba1/app/pages/admin/FinancialPage.tsx'
+    Imported via '../../components/ui/Input' from file 'G:/my_project/sboba1/app/pages/admin/SettingsPage.tsx'
+    Matched by include pattern 'app' in 'G:/my_project/sboba1/tsconfig.json'
+    Imported via "./input" from file 'G:/my_project/sboba1/app/components/ui/sidebar.tsx'
+app/pages/public/HomePage.tsx(155,37): error TS2322: Type '{ hidden: { opacity: number; y: number; }; visible: { opacity: number; y: number; transition: { duration: number; ease: string; }; }; }' is not assignable to type 'Variants'.
+  Property 'visible' is incompatible with index signature.
+    Type '{ opacity: number; y: number; transition: { duration: number; ease: string; }; }' is not assignable to type 'Variant'.
+      Type '{ opacity: number; y: number; transition: { duration: number; ease: string; }; }' is not assignable to type 'TargetAndTransition'.
+        Type '{ opacity: number; y: number; transition: { duration: number; ease: string; }; }' is not assignable to type '{ transition?: Transition<any> | undefined; transitionEnd?: ResolvedValues$1 | undefined; }'.
+          Types of property 'transition' are incompatible.
+            Type '{ duration: number; ease: string; }' is not assignable to type 'Transition<any> | undefined'.
+              Type '{ duration: number; ease: string; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+                Type '{ duration: number; ease: string; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                  Types of property 'ease' are incompatible.
+                    Type 'string' is not assignable to type 'Easing | Easing[] | undefined'.
+app/pages/public/HomePage.tsx(198,45): error TS2322: Type '{ hidden: { opacity: number; y: number; }; visible: { opacity: number; y: number; transition: { duration: number; ease: string; }; }; }' is not assignable to type 'Variants'.
+  Property 'visible' is incompatible with index signature.
+    Type '{ opacity: number; y: number; transition: { duration: number; ease: string; }; }' is not assignable to type 'Variant'.
+      Type '{ opacity: number; y: number; transition: { duration: number; ease: string; }; }' is not assignable to type 'TargetAndTransition'.
+        Type '{ opacity: number; y: number; transition: { duration: number; ease: string; }; }' is not assignable to type '{ transition?: Transition<any> | undefined; transitionEnd?: ResolvedValues$1 | undefined; }'.
+          Types of property 'transition' are incompatible.
+            Type '{ duration: number; ease: string; }' is not assignable to type 'Transition<any> | undefined'.
+              Type '{ duration: number; ease: string; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+                Type '{ duration: number; ease: string; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                  Types of property 'ease' are incompatible.
+                    Type 'string' is not assignable to type 'Easing | Easing[] | undefined'.
+app/pages/public/HomePage.tsx(285,56): error TS2322: Type '{ hidden: { opacity: number; y: number; }; visible: { opacity: number; y: number; transition: { duration: number; ease: string; }; }; }' is not assignable to type 'Variants'.
+  Property 'visible' is incompatible with index signature.
+    Type '{ opacity: number; y: number; transition: { duration: number; ease: string; }; }' is not assignable to type 'Variant'.
+      Type '{ opacity: number; y: number; transition: { duration: number; ease: string; }; }' is not assignable to type 'TargetAndTransition'.
+        Type '{ opacity: number; y: number; transition: { duration: number; ease: string; }; }' is not assignable to type '{ transition?: Transition<any> | undefined; transitionEnd?: ResolvedValues$1 | undefined; }'.
+          Types of property 'transition' are incompatible.
+            Type '{ duration: number; ease: string; }' is not assignable to type 'Transition<any> | undefined'.
+              Type '{ duration: number; ease: string; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+                Type '{ duration: number; ease: string; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                  Types of property 'ease' are incompatible.
+                    Type 'string' is not assignable to type 'Easing | Easing[] | undefined'.
+app/pages/public/PropertiesPage.tsx(182,33): error TS2322: Type '{ hidden: { opacity: number; y: number; }; show: { opacity: number; y: number; transition: { duration: number; ease: string; }; }; }' is not assignable to type 'Variants'.
+  Property 'show' is incompatible with index signature.
+    Type '{ opacity: number; y: number; transition: { duration: number; ease: string; }; }' is not assignable to type 'Variant'.
+      Type '{ opacity: number; y: number; transition: { duration: number; ease: string; }; }' is not assignable to type 'TargetAndTransition'.
+        Type '{ opacity: number; y: number; transition: { duration: number; ease: string; }; }' is not assignable to type '{ transition?: Transition<any> | undefined; transitionEnd?: ResolvedValues$1 | undefined; }'.
+          Types of property 'transition' are incompatible.
+            Type '{ duration: number; ease: string; }' is not assignable to type 'Transition<any> | undefined'.
+              Type '{ duration: number; ease: string; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+                Type '{ duration: number; ease: string; }' is not assignable to type 'ValueAnimationTransition<any>'.
+                  Types of property 'ease' are incompatible.
+                    Type 'string' is not assignable to type 'Easing | Easing[] | undefined'.
