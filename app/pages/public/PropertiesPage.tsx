@@ -4,6 +4,7 @@ import { Heart, Bed, Bath, Maximize, MapPin, Search as SearchIcon, SlidersHorizo
 import { motion } from "framer-motion";
 import { useApp } from "../../contexts/AppContext";
 import { getProperties, Property, formatEGPShort, PropertiesResponse } from "../../../services/api";
+import { PropertyCardSkeleton } from "../../components/ui/PropertyCardSkeleton";
 
 const TYPES = [
   { value: "any", keyEn: "Any", keyAr: "الكل" },
@@ -156,16 +157,7 @@ export const PropertiesPage: React.FC = () => {
 
           {loading ? (
             <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-              {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="rounded-2xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
-                  <div className="h-48 skeleton" />
-                  <div className="p-4 space-y-3">
-                    <div className="h-5 skeleton w-3/4 rounded-lg" />
-                    <div className="h-4 skeleton w-1/2 rounded-lg" />
-                    <div className="h-8 skeleton rounded-lg mt-4" />
-                  </div>
-                </div>
-              ))}
+              {[1, 2, 3, 4, 5, 6].map(i => <PropertyCardSkeleton key={i} />)}
             </div>
           ) : results.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">

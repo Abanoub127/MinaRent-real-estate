@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../../contexts/AppContext';
 import { getProperties, getTestimonials, Property, Testimonial, formatEGPShort, createTestimonial } from '../../../services/api';
 import { MRLogo } from '../../components/ui/MRLogo';
+import { PropertyCardSkeleton } from '../../components/ui/PropertyCardSkeleton';
 
 export const HomePage: React.FC = () => {
   const { language, isRtl, t } = useApp();
@@ -51,8 +52,26 @@ export const HomePage: React.FC = () => {
     finally { setIsSubmitting(false); }
   };
 
-  const containerVariants: any = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
-  const itemVariants: any = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } } };
+  // Animation variants
+  const fadeInUp: any = {
+    hidden: { opacity: 0, y: 40 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: 'easeOut' } },
+  };
+  const slideInRight: any = {
+    hidden: { opacity: 0, x: 60 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease: 'easeOut' } },
+  };
+  const slideInLeft: any = {
+    hidden: { opacity: 0, x: -60 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease: 'easeOut' } },
+  };
+  const staggerContainer: any = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.2 } },
+  };
+  // Legacy aliases used by testimonials section
+  const containerVariants: any = staggerContainer;
+  const itemVariants: any = fadeInUp;
 
   // Pagination logic
   const totalPages = Math.ceil(testimonials.length / testimonialsPerPage);
@@ -78,9 +97,9 @@ export const HomePage: React.FC = () => {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: "easeOut" }}
+              variants={slideInRight}
+              initial="hidden"
+              animate="visible"
               className="flex flex-col gap-6"
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-white/90 font-medium text-sm w-fit border border-white/10">
@@ -129,9 +148,9 @@ export const HomePage: React.FC = () => {
 
             {/* Hero Logo */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
+              variants={slideInLeft}
+              initial="hidden"
+              animate="visible"
               className="relative flex items-center justify-center"
             >
               <div className="absolute w-80 h-80 bg-[var(--accent)]/10 rounded-full blur-3xl" />
@@ -146,13 +165,13 @@ export const HomePage: React.FC = () => {
       {/* ── Features ── */}
       <section className="bg-[var(--card)] py-20 border-y border-[var(--border)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="grid md:grid-cols-3 gap-8">
+          <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="grid md:grid-cols-3 gap-8">
             {[
               { icon: Home, titleEn: 'Vast Selection', titleAr: 'تشكيلة واسعة', descEn: 'Browse thousands of verified properties in prime locations.', descAr: 'تصفح آلاف العقارات الموثقة في مواقع متميزة.' },
               { icon: Shield, titleEn: 'Secure Transactions', titleAr: 'معاملات آمنة', descEn: 'Your investments are protected with our transparent process.', descAr: 'استثماراتك محمية بفضل إجراءاتنا الشفافة.' },
               { icon: Users, titleEn: 'Expert Agents', titleAr: 'وكلاء خبراء', descEn: 'Our local experts guide you every step of the way.', descAr: 'خبراؤنا المحليون يرافقونك في كل خطوة.' }
             ].map((feature, idx) => (
-              <motion.div key={idx} variants={itemVariants} className="premium-card flex flex-col items-center text-center p-8 rounded-2xl hover:bg-[var(--secondary)] transition-all duration-300 group cursor-default">
+              <motion.div key={idx} variants={fadeInUp} className="premium-card flex flex-col items-center text-center p-8 rounded-2xl hover:bg-[var(--secondary)] transition-all duration-300 group cursor-default">
                 <div className="w-16 h-16 bg-[var(--primary)]/10 text-[var(--primary)] rounded-2xl flex items-center justify-center mb-5 group-hover:bg-[var(--primary)] group-hover:text-white transition-all duration-300">
                   <feature.icon className="w-7 h-7" />
                 </div>
@@ -181,21 +200,12 @@ export const HomePage: React.FC = () => {
 
         {loading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="bg-[var(--card)] rounded-2xl border border-[var(--border)] overflow-hidden">
-                <div className="h-48 skeleton" />
-                <div className="p-5 space-y-3">
-                  <div className="h-5 skeleton w-3/4 rounded-lg" />
-                  <div className="h-4 skeleton w-1/2 rounded-lg" />
-                  <div className="h-10 skeleton rounded-lg mt-4" />
-                </div>
-              </div>
-            ))}
+            {[1, 2, 3].map(i => <PropertyCardSkeleton key={i} />)}
           </div>
         ) : (
-          <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {properties.map(property => (
-              <motion.div key={property.id} variants={itemVariants}>
+              <motion.div key={property.id} variants={fadeInUp}>
                 <Link to={`/properties/${property.id}`} className="group flex flex-col bg-[var(--card)] rounded-2xl border border-[var(--border)] overflow-hidden shadow-sm premium-card">
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <img src={property.images[0] || 'https://via.placeholder.com/600x400?text=No+Image'} alt={property.title} className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" loading="lazy" />

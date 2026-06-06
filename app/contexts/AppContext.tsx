@@ -43,6 +43,7 @@ const translations: Record<Language, Record<string, string>> = {
   en: {
     'nav.home': 'Home',
     'nav.properties': 'Properties',
+    'nav.about': 'About Us',
     'nav.contact': 'Contact',
     'nav.login': 'Login',
     'nav.dashboard': 'Dashboard',
@@ -119,6 +120,7 @@ const translations: Record<Language, Record<string, string>> = {
   ar: {
     'nav.home': 'الرئيسية',
     'nav.properties': 'العقارات',
+    'nav.about': 'من نحن',
     'nav.contact': 'اتصل بنا',
     'nav.login': 'تسجيل الدخول',
     'nav.dashboard': 'لوحة التحكم',

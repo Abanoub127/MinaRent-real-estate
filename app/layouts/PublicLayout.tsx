@@ -4,6 +4,7 @@ import { Menu, X, Sun, Moon, Languages, MapPin, Building, Phone, Mail, ArrowUp, 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../contexts/AppContext';
 import { MRLogo } from '../components/ui/MRLogo';
+import { WhatsAppButton } from '../components/ui/WhatsAppButton';
 
 export const PublicLayout: React.FC = () => {
   const { theme, toggleTheme, language, isRtl, toggleLanguage, t, isAuthenticated } = useApp();
@@ -29,6 +30,7 @@ export const PublicLayout: React.FC = () => {
   const navLinks = [
     { name: t('nav.home'), path: '/' },
     { name: t('nav.properties'), path: '/properties' },
+    { name: t('nav.about'), path: '/about' },
     { name: t('nav.contact'), path: '/contact' },
   ];
 
@@ -190,6 +192,9 @@ export const PublicLayout: React.FC = () => {
           </motion.button>
         )}
       </AnimatePresence>
+
+      {/* WhatsApp Floating Button */}
+      <WhatsAppButton />
 
       {/* Footer */}
       <footer className="bg-[var(--card)] border-t border-[var(--border)] mt-auto">

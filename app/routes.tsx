@@ -3,11 +3,14 @@ import { createBrowserRouter } from 'react-router';
 import { PublicLayout } from './layouts/PublicLayout';
 import { AdminLayout } from './layouts/AdminLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { RouteErrorFallback } from './components/RouteErrorFallback';
+import { NotFoundPage } from './pages/public/NotFoundPage';
 
 // Lazy-loaded pages
 const HomePage = lazy(() => import('./pages/public/HomePage').then(m => ({ default: m.HomePage })));
 const PropertiesPage = lazy(() => import('./pages/public/PropertiesPage').then(m => ({ default: m.PropertiesPage })));
 const PropertyDetailPage = lazy(() => import('./pages/public/PropertyDetailPage').then(m => ({ default: m.PropertyDetailPage })));
+const AboutPage = lazy(() => import('./pages/public/AboutPage').then(m => ({ default: m.AboutPage })));
 const ContactPage = lazy(() => import('./pages/public/ContactPage').then(m => ({ default: m.ContactPage })));
 const LoginPage = lazy(() => import('./pages/auth/LoginPage').then(m => ({ default: m.LoginPage })));
 const DashboardPage = lazy(() => import('./pages/admin/DashboardPage').then(m => ({ default: m.DashboardPage })));
@@ -39,16 +42,19 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <PublicLayout />,
+    errorElement: <RouteErrorFallback />,
     children: [
       { index: true, element: <SuspenseWrap><HomePage /></SuspenseWrap> },
       { path: 'properties', element: <SuspenseWrap><PropertiesPage /></SuspenseWrap> },
       { path: 'properties/:id', element: <SuspenseWrap><PropertyDetailPage /></SuspenseWrap> },
+      { path: 'about', element: <SuspenseWrap><AboutPage /></SuspenseWrap> },
       { path: 'contact', element: <SuspenseWrap><ContactPage /></SuspenseWrap> },
     ],
   },
   {
     path: '/login',
     element: <SuspenseWrap><LoginPage /></SuspenseWrap>,
+    errorElement: <RouteErrorFallback />,
   },
   {
     path: '/admin',
@@ -57,11 +63,11 @@ export const router = createBrowserRouter([
         <AdminLayout />
       </ProtectedRoute>
     ),
+    errorElement: <RouteErrorFallback />,
     children: [
       { index: true, element: <SuspenseWrap><DashboardPage /></SuspenseWrap> },
       { path: 'properties', element: <SuspenseWrap><AdminPropertiesPage /></SuspenseWrap> },
       { path: 'bookings', element: <SuspenseWrap><BookingsPage /></SuspenseWrap> },
-
       { path: 'messages', element: <SuspenseWrap><MessagesPage /></SuspenseWrap> },
       { path: 'financial', element: <SuspenseWrap><FinancialPage /></SuspenseWrap> },
       { path: 'analytics', element: <SuspenseWrap><AnalyticsPage /></SuspenseWrap> },
@@ -70,4 +76,10 @@ export const router = createBrowserRouter([
       { path: 'testimonials', element: <SuspenseWrap><AdminCommentsPage /></SuspenseWrap> },
     ],
   },
+  // 404 catch-all — must be last
+  {
+    path: '*',
+    element: <NotFoundPage />,
+  },
 ]);
+
