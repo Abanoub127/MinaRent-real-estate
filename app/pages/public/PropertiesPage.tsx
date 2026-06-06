@@ -105,7 +105,7 @@ export const PropertiesPage: React.FC = () => {
         title={language === 'en' ? 'Properties' : 'العقارات'} 
         description={language === 'en' ? 'Browse curated listings across the city' : 'تصفح القوائم المنسقة عبر المدينة'} 
       />
-      <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="mx-auto mt-6 mb-24 max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
+      <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="mx-auto py-14 sm:py-20 max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
         <div className="flex flex-wrap items-end justify-between gap-4 mb-2">
         <div>
           <p className="text-sm font-semibold text-[var(--primary)] mb-1">{language === 'en' ? 'Explore' : 'استكشف'}</p>

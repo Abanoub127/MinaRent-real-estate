@@ -49,8 +49,8 @@ export const PublicLayout: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-[var(--background)] transition-colors duration-300">
       {/* Floating Navbar */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled ? 'py-2 px-3' : 'py-3 px-3 md:px-6'
+        className={`fixed left-0 right-0 z-50 transition-all duration-500 ${
+          scrolled ? 'top-2 px-3' : 'top-4 px-3 md:px-6'
         }`}
       >
         <div

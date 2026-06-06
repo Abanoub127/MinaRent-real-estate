@@ -94,7 +94,7 @@ export const PropertyDetailPage: React.FC = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="mx-auto mt-8 mb-24 max-w-7xl px-4 w-full"
+      className="mx-auto py-14 sm:py-20 max-w-7xl px-4 sm:px-6 lg:px-8 w-full"
     >
       <Link
         to="/properties"

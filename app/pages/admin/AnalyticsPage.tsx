@@ -255,7 +255,7 @@ const conversionData = [
       </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="p-6">
+        <Card className="group p-6 hover:-translate-y-[2px] transition-all duration-300 shadow-sm hover:shadow-md border border-[var(--border)] bg-gradient-to-br from-[var(--card)] to-[var(--secondary)]">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
@@ -269,13 +269,13 @@ const conversionData = [
               </h3>
             </div>
 
-            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
               <Eye className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="group p-6 hover:-translate-y-[2px] transition-all duration-300 shadow-sm hover:shadow-md border border-[var(--border)] bg-gradient-to-br from-[var(--card)] to-[var(--secondary)]">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
@@ -289,13 +289,13 @@ const conversionData = [
               </h3>
             </div>
 
-            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
               <MousePointerClick className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="group p-6 hover:-translate-y-[2px] transition-all duration-300 shadow-sm hover:shadow-md border border-[var(--border)] bg-gradient-to-br from-[var(--card)] to-[var(--secondary)]">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
@@ -309,13 +309,13 @@ const conversionData = [
               </h3>
             </div>
 
-            <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
               <TrendingUp className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="group p-6 hover:-translate-y-[2px] transition-all duration-300 shadow-sm hover:shadow-md border border-[var(--border)] bg-gradient-to-br from-[var(--card)] to-[var(--secondary)]">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
@@ -329,7 +329,7 @@ const conversionData = [
               </h3>
             </div>
 
-            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
+            <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
               <MapPin className="w-6 h-6 text-orange-600 dark:text-orange-400" />
             </div>
           </div>
@@ -337,7 +337,7 @@ const conversionData = [
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+        <Card className="border border-[var(--border)] shadow-sm bg-[var(--card)]">
           <div className="p-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               {language === 'en'
@@ -413,7 +413,7 @@ const conversionData = [
           </div>
         </Card>
 
-        <Card>
+        <Card className="border border-[var(--border)] shadow-sm bg-[var(--card)]">
           <div className="p-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               {language === 'en'
@@ -468,7 +468,7 @@ const conversionData = [
         </Card>
       </div>
 
-      <Card>
+      <Card className="border border-[var(--border)] shadow-sm bg-[var(--card)]">
         <div className="p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             {language === 'en'

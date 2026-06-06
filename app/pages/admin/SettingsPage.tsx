@@ -542,7 +542,7 @@ const notificationLabels: Record<
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-[var(--secondary)]/50 border border-[var(--border)] rounded-xl">
               <div>
                 <p className="font-medium text-gray-900 dark:text-white">
                   {language === 'en'
@@ -566,7 +566,7 @@ const notificationLabels: Record<
               </Button>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <div className="flex items-center justify-between p-4 bg-[var(--secondary)]/50 border border-[var(--border)] rounded-xl">
               <div>
                 <p className="font-medium text-gray-900 dark:text-white">
                   {language === 'en'
@@ -624,7 +624,7 @@ const notificationLabels: Record<
             ).map(([key, value]) => (
               <div
                 key={key}
-                className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                className="flex items-center justify-between p-4 bg-[var(--secondary)]/50 border border-[var(--border)] rounded-xl"
               >
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">
@@ -645,8 +645,8 @@ const notificationLabels: Record<
                   }
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                     value
-                      ? 'bg-blue-600'
-                      : 'bg-gray-300 dark:bg-gray-600'
+                      ? 'bg-[var(--primary)]'
+                      : 'bg-[var(--border)]'
                   }`}
                 >
                   <span
