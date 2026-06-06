@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { loginUser as apiLogin, getCurrentUser, logoutUser as apiLogout } from '../../services/api';
+import { loginUser as apiLogin, getCurrentUser } from '../../services/api';
 
 // Types
 export type Theme = 'light' | 'dark';
@@ -122,8 +122,8 @@ const translations: Record<Language, Record<string, string>> = {
     'nav.contact': 'اتصل بنا',
     'nav.login': 'تسجيل الدخول',
     'nav.dashboard': 'لوحة التحكم',
-    'home.hero.title': 'استثمر أو اسكن في عقارك المثالي',
-    'home.hero.subtitle': 'اكتشف أفضل العروض العقارية الموثوقة التي تناسب تطلعاتك',
+    'home.hero.title': 'اعثر على عقارك المثالي',
+    'home.hero.subtitle': 'اكتشف المكان المثالي لتسميه منزلك',
     'home.search.placeholder': 'ابحث بالموقع، نوع العقار...',
     'home.search.button': 'بحث',
     'home.featured': 'العقارات المميزة',
@@ -159,22 +159,22 @@ const translations: Record<Language, Record<string, string>> = {
     'contact.phone': 'الهاتف',
     'contact.message': 'الرسالة',
     'contact.send': 'إرسال الرسالة',
-    'admin.dashboard': 'الرئيسية (لوحة التحكم)',
-    'admin.properties': 'إدارة العقارات',
-    'admin.bookings': 'إدارة الحجوزات',
-    'admin.clients': 'قاعدة العملاء',
-    'admin.financial': 'الحسابات والمالية',
-    'admin.analytics': 'التقارير التحليلية',
+    'admin.dashboard': 'لوحة التحكم',
+    'admin.properties': 'العقارات',
+    'admin.bookings': 'الحجوزات',
+    'admin.clients': 'العملاء',
+    'admin.financial': 'المالية',
+    'admin.analytics': 'التحليلات',
     'admin.settings': 'الإعدادات',
     'admin.calendar': 'التقويم',
     'admin.messages': 'الرسائل',
     'admin.logout': 'تسجيل الخروج',
-    'dashboard.totalProperties': 'إجمالي العقارات المتاحة',
-    'dashboard.totalBookings': 'الحجوزات النشطة',
-    'dashboard.monthlyRevenue': 'أرباح الشهر الحالي',
-    'dashboard.activeClients': 'العملاء المتفاعلون',
-    'dashboard.revenueChart': 'مؤشر الأرباح السنوي',
-    'dashboard.recentActivity': 'أحدث الحركات والتغييرات',
+    'dashboard.totalProperties': 'إجمالي العقارات',
+    'dashboard.totalBookings': 'إجمالي الحجوزات',
+    'dashboard.monthlyRevenue': 'الإيرادات الشهرية',
+    'dashboard.activeClients': 'العملاء النشطون',
+    'dashboard.revenueChart': 'نظرة على الإيرادات',
+    'dashboard.recentActivity': 'النشاط الأخير',
     'propertiesMgmt.add': 'إضافة عقار',
     'propertiesMgmt.edit': 'تعديل',
     'propertiesMgmt.delete': 'حذف',
@@ -201,10 +201,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   });
 
   const [language, setLanguage] = useState<Language>(() => {
-    // Default to Arabic on first load
     const saved = localStorage.getItem('language');
-    // If nothing saved, default to 'ar'
-    return (saved as Language) || 'ar';
+    return (saved as Language) || 'en';
   });
 
   const [user, setUser] = useState<User | null>(null);
@@ -216,8 +214,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Validate token on mount
   useEffect(() => {
     const validateAuth = async () => {
-      const storedUser = localStorage.getItem('user');
-      if (!storedUser) {
+      const token = localStorage.getItem('token');
+      if (!token) {
         setIsAuthLoading(false);
         return;
       }
@@ -238,6 +236,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           name: 'Mina Rent',
         });
       } catch {
+        localStorage.removeItem('token');
         localStorage.removeItem('user');
         localStorage.removeItem('tenant');
         setUser(null);
@@ -280,6 +279,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       const data = await apiLogin(email, password);
+      localStorage.setItem('token', data.token);
 
       const userData: User = {
         id: data.user.id || data.user._id,
@@ -306,14 +306,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
-  const logout = useCallback(async () => {
-    try {
-      if (typeof apiLogout === 'function') await apiLogout();
-    } catch (e) {
-      console.error('Logout error', e);
-    }
+  const logout = useCallback(() => {
     setUser(null);
     setTenant(null);
+    localStorage.removeItem('token');
     localStorage.removeItem('user');
     localStorage.removeItem('tenant');
   }, []);

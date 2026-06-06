@@ -3,7 +3,6 @@ import { createBrowserRouter } from 'react-router';
 import { PublicLayout } from './layouts/PublicLayout';
 import { AdminLayout } from './layouts/AdminLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { RouteErrorFallback } from './components/RouteErrorFallback';
 
 // Lazy-loaded pages
 const HomePage = lazy(() => import('./pages/public/HomePage').then(m => ({ default: m.HomePage })));
@@ -40,7 +39,6 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <PublicLayout />,
-    errorElement: <RouteErrorFallback />,
     children: [
       { index: true, element: <SuspenseWrap><HomePage /></SuspenseWrap> },
       { path: 'properties', element: <SuspenseWrap><PropertiesPage /></SuspenseWrap> },
@@ -51,7 +49,6 @@ export const router = createBrowserRouter([
   {
     path: '/login',
     element: <SuspenseWrap><LoginPage /></SuspenseWrap>,
-    errorElement: <RouteErrorFallback />,
   },
   {
     path: '/admin',
@@ -60,7 +57,6 @@ export const router = createBrowserRouter([
         <AdminLayout />
       </ProtectedRoute>
     ),
-    errorElement: <RouteErrorFallback />,
     children: [
       { index: true, element: <SuspenseWrap><DashboardPage /></SuspenseWrap> },
       { path: 'properties', element: <SuspenseWrap><AdminPropertiesPage /></SuspenseWrap> },

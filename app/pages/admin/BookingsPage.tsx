@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
-import { Card } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Input, TextArea } from '../../components/ui/input';
+import { Card } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { Input, TextArea } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
 import {
   Select,

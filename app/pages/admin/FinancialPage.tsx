@@ -8,9 +8,9 @@ import {
 
 import { useApp } from '../../contexts/AppContext';
 
-import { Card } from '../../components/ui/card';
-import { Button } from '../../components/ui/button';
-import { Input, TextArea } from '../../components/ui/input';
+import { Card } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { Input, TextArea } from '../../components/ui/Input';
 import { Modal } from '../../components/ui/Modal';
 
 import {

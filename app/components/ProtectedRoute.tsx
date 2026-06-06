@@ -29,7 +29,7 @@ export const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ childr
             animation: 'spin 0.8s linear infinite',
           }} />
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-          <span style={{ color: '#6B9B7D', fontSize: '0.875rem', fontWeight: 500 }}>Loading...</span>
+          <span style={{ color: '#6B9B7D', fontSize: 14, fontWeight: 500 }}>Loading...</span>
         </div>
       </div>
     );

@@ -11,12 +11,12 @@ interface MRLogoProps {
   dark?: boolean;
 }
 
-const sizeMap: Record<LogoSize, { icon: string; text: string; gap: string }> = {
-  xs: { icon: '2.125rem', text: 'text-base', gap: 'gap-1.5' },
-  sm: { icon: '2.875rem', text: 'text-xl', gap: 'gap-2' },
-  md: { icon: '3.625rem', text: 'text-2xl', gap: 'gap-2.5' },
-  lg: { icon: '4.875rem', text: 'text-3xl', gap: 'gap-3' },
-  xl: { icon: '6.875rem', text: 'text-5xl', gap: 'gap-4' },
+const sizeMap: Record<LogoSize, { icon: number; text: string; gap: string }> = {
+  xs: { icon: 34, text: 'text-base', gap: 'gap-1.5' },
+  sm: { icon: 46, text: 'text-xl', gap: 'gap-2' },
+  md: { icon: 58, text: 'text-2xl', gap: 'gap-2.5' },
+  lg: { icon: 78, text: 'text-3xl', gap: 'gap-3' },
+  xl: { icon: 110, text: 'text-5xl', gap: 'gap-4' },
 };
 
 export const MRLogo: React.FC<MRLogoProps> = ({
@@ -31,7 +31,7 @@ export const MRLogo: React.FC<MRLogoProps> = ({
   const iconSize = s.icon;
 
   return (
-    <div className={`flex items-center ${s.gap} ${className}`} style={{ direction: 'ltr' }}>
+    <div className={`flex items-center ${s.gap} ${className}`}>
       {/* Logo Image */}
       <div
         className={`relative shrink-0 ${animated ? 'logo-float' : ''}`}
@@ -61,11 +61,11 @@ export const MRLogo: React.FC<MRLogoProps> = ({
                 WebkitTextFillColor: "transparent",
               }}
               className={`font-bold tracking-wide leading-none ${
-                size === 'xs' ? 'text-[1.375rem]' : 
-                size === 'sm' ? 'text-[2rem]' : 
-                size === 'md' ? 'text-[2.375rem]' : 
-                size === 'lg' ? 'text-[3.125rem]' : 
-                'text-[4rem]'
+                size === 'xs' ? 'text-[22px]' : 
+                size === 'sm' ? 'text-[32px]' : 
+                size === 'md' ? 'text-[38px]' : 
+                size === 'lg' ? 'text-[50px]' : 
+                'text-[64px]'
               }`}
             >
               Mina
@@ -80,11 +80,11 @@ export const MRLogo: React.FC<MRLogoProps> = ({
                 WebkitTextFillColor: "transparent",
               }}
               className={`font-bold tracking-wider leading-none ml-1 ${
-                size === 'xs' ? 'text-[0.9375rem] translate-y-[-0.125rem]' : 
-                size === 'sm' ? 'text-[1.375rem] translate-y-[-0.1875rem]' : 
-                size === 'md' ? 'text-[1.625rem] translate-y-[-0.25rem]' : 
-                size === 'lg' ? 'text-[2.125rem] translate-y-[-0.3125rem]' : 
-                'text-[2.875rem] translate-y-[-0.375rem]'
+                size === 'xs' ? 'text-[15px] translate-y-[-2px]' : 
+                size === 'sm' ? 'text-[22px] translate-y-[-3px]' : 
+                size === 'md' ? 'text-[26px] translate-y-[-4px]' : 
+                size === 'lg' ? 'text-[34px] translate-y-[-5px]' : 
+                'text-[46px] translate-y-[-6px]'
               } ${textClassName}`}
             >
               Rent
@@ -96,7 +96,7 @@ export const MRLogo: React.FC<MRLogoProps> = ({
             <div className="flex flex-col select-none mt-1">
               <span
                 style={{
-                  fontSize: size === 'sm' ? '0.4375rem' : size === 'md' ? '0.5rem' : size === 'lg' ? '0.625rem' : '0.8125rem',
+                  fontSize: size === 'sm' ? '7px' : size === 'md' ? '8px' : size === 'lg' ? '10px' : '13px',
                   letterSpacing: '0.18em',
                   color: '#D4AF37',
                   fontFamily: "'Inter', sans-serif",
@@ -110,7 +110,7 @@ export const MRLogo: React.FC<MRLogoProps> = ({
               {(size === 'lg' || size === 'xl') && (
                 <span
                   style={{
-                    fontSize: size === 'lg' ? '0.46875rem' : '0.59375rem',
+                    fontSize: size === 'lg' ? '7.5px' : '9.5px',
                     letterSpacing: '0.24em',
                     color: '#00A2E2',
                     fontFamily: "'Inter', sans-serif",

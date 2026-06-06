@@ -85,8 +85,8 @@ export const PropertiesPage: React.FC = () => {
   const reset = () => { setMinPriceInput(""); setMaxPriceInput(""); setType("any"); setRooms("any"); setLocation(""); setQuery(""); };
   const locations = Array.from(new Set(properties.map((p) => language === 'en' ? p.location : p.locationAr).filter(Boolean)));
 
-  const containerVariants: any = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };
-  const itemVariants: any = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } } };
+  const containerVariants = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.08 } } };
+  const itemVariants = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } } };
 
   return (
     <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="mx-auto mt-6 mb-24 max-w-7xl px-4 w-full">
