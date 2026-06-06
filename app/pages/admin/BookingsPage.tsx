@@ -191,7 +191,7 @@ if (editingBooking) {
   if (loading) return <div className="text-center py-10">Loading...</div>;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 md:p-6 lg:p-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{t('admin.bookings')}</h1>
@@ -206,7 +206,7 @@ if (editingBooking) {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
         {(['pending', 'confirmed', 'cancelled'] as BookingStatus[]).map((s) => {
           const colors = {
             pending: 'yellow',
@@ -240,7 +240,7 @@ if (editingBooking) {
           <table className="w-full min-w-[600px]">
             <thead className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md sticky top-0 z-20 shadow-sm">
               <tr>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase whitespace-nowrap sticky ltr:left-0 rtl:right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md z-30 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none sm:bg-transparent">
+                <th className="p-3 sm:px-4 sm:py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase whitespace-nowrap sticky ltr:left-0 rtl:right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md z-30 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none sm:bg-transparent">
                   {language === 'en' ? 'Property' : 'العقار'}
                 </th>
                 {[
@@ -251,7 +251,7 @@ if (editingBooking) {
                   language === 'en' ? 'Status' : 'الحالة',
                   language === 'en' ? 'Actions' : 'الإجراءات',
                 ].map((h) => (
-                  <th key={h} className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase whitespace-nowrap">
+                  <th key={h} className="p-3 sm:px-4 sm:py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase whitespace-nowrap">
                     {h}
                   </th>
                 ))}
@@ -263,7 +263,7 @@ if (editingBooking) {
 
     return (
       <tr key={id} className="group hover:bg-gradient-to-r hover:from-[#C9A84C]/5 hover:to-transparent transition-colors">
-        <td className="px-3 sm:px-6 py-3 sm:py-4 sticky ltr:left-0 rtl:right-0 bg-white dark:bg-gray-800 z-10 group-hover:bg-[#C9A84C]/5 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none sm:group-hover:bg-transparent">
+        <td className="p-3 sm:px-4 sm:py-3 sticky ltr:left-0 rtl:right-0 bg-white dark:bg-gray-800 z-10 group-hover:bg-[#C9A84C]/5 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none sm:group-hover:bg-transparent">
           <div className="text-sm font-medium text-gray-900 dark:text-white">
             {language === 'en'
               ? booking.propertyId?.title || '—'
@@ -277,7 +277,7 @@ if (editingBooking) {
           </div>
         </td>
 
-        <td className="px-3 sm:px-6 py-3 sm:py-4">
+        <td className="p-3 sm:px-4 sm:py-3">
           <div className="text-sm text-gray-900 dark:text-white">
             {booking.clientId?.name || '—'}
           </div>
@@ -286,16 +286,16 @@ if (editingBooking) {
             {booking.clientId?.phone || ''}
           </div>
         </td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    <td className="p-3 sm:px-4 sm:py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {booking.startDate ? formatDate(booking.startDate, language) : '—'}
                     </td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                    <td className="p-3 sm:px-4 sm:py-3 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {booking.endDate ? formatDate(booking.endDate, language) : '—'}
                     </td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                    <td className="p-3 sm:px-4 sm:py-3 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                       {booking.paidAmount ? `${booking.paidAmount.toLocaleString()} EGP` : '—'}
                     </td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
+                    <td className="p-3 sm:px-4 sm:py-3 whitespace-nowrap">
                       <Select
                         value={booking.status}
                         onValueChange={(val) => handleStatusChange(id, val as BookingStatus)}

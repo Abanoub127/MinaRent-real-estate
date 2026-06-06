@@ -57,17 +57,17 @@ export const MessagesPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 p-4 md:p-6 lg:p-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div><h1 className="text-2xl font-bold text-[var(--foreground)]">{language === 'en' ? 'Messages' : 'الرسائل'}</h1><p className="text-[var(--text-secondary)] text-sm mt-0.5">{language === 'en' ? 'Manage incoming messages from contact forms.' : 'إدارة الرسائل الواردة من نماذج الاتصال.'}</p></div>
         {data && <span className="px-4 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-bold rounded-xl text-sm">{data.unreadCount} {language === 'en' ? 'unread' : 'غير مقروءة'}</span>}
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
         <div className="flex-1 flex items-center gap-2 px-4 py-2.5 bg-[var(--card)] border border-[var(--border)] rounded-xl"><Search className="w-4 h-4 text-[var(--text-secondary)]" /><input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} placeholder={language === 'en' ? 'Search messages...' : 'بحث في الرسائل...'} className="w-full bg-transparent text-sm outline-none text-[var(--foreground)]" /></div>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2">
           {['all', 'unread', 'read', 'replied'].map(s => (
-            <button key={s} onClick={() => { setStatusFilter(s); setPage(1); }} className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${statusFilter === s ? 'bg-[var(--primary)] text-white' : 'bg-[var(--card)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--foreground)]'}`}>
+            <button key={s} onClick={() => { setStatusFilter(s); setPage(1); }} className={`w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${statusFilter === s ? 'bg-[var(--primary)] text-white' : 'bg-[var(--card)] border border-[var(--border)] text-[var(--text-secondary)] hover:text-[var(--foreground)]'}`}>
               {language === 'en' ? s.charAt(0).toUpperCase() + s.slice(1) : (s === 'all' ? 'الكل' : s === 'unread' ? 'غير مقروءة' : s === 'read' ? 'مقروءة' : 'تم الرد')}
             </button>
           ))}

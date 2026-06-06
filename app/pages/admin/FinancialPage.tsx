@@ -244,7 +244,7 @@ export const FinancialPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 md:p-6 lg:p-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
           {t('admin.financial')}
@@ -263,7 +263,7 @@ export const FinancialPage: React.FC = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
         <Card className="p-4 sm:p-6">
           <div className="flex items-start justify-between">
             <div>
@@ -273,7 +273,7 @@ export const FinancialPage: React.FC = () => {
                   : 'إجمالي الإيرادات'}
               </p>
 
-              <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              <h3 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 EGP{' '}
                 {(
                   stats.totalRevenue / 1000000
@@ -297,7 +297,7 @@ export const FinancialPage: React.FC = () => {
                   : 'إجمالي المصروفات'}
               </p>
 
-              <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              <h3 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 EGP{' '}
                 {(
                   stats.totalExpenses / 1000
@@ -321,7 +321,7 @@ export const FinancialPage: React.FC = () => {
                   : 'صافي الربح'}
               </p>
 
-              <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              <h3 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 EGP{' '}
                 {(
                   stats.profit / 1000000
@@ -347,10 +347,10 @@ export const FinancialPage: React.FC = () => {
                 : 'الإيرادات حسب الفئة'}
             </h3>
 
-            <div dir="ltr">
+            <div dir="ltr" className="h-[200px] sm:h-[280px]">
               <ResponsiveContainer
                 width="100%"
-                height={300}
+                height="100%"
               >
                 <PieChart>
                   <Pie
@@ -393,10 +393,10 @@ export const FinancialPage: React.FC = () => {
                 : 'المصروفات حسب الفئة'}
             </h3>
 
-            <div dir="ltr">
+            <div dir="ltr" className="h-[200px] sm:h-[280px]">
               <ResponsiveContainer
                 width="100%"
-                height={300}
+                height="100%"
               >
                 <PieChart>
                   <Pie

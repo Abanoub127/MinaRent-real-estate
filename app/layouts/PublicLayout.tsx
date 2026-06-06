@@ -47,21 +47,16 @@ export const PublicLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--background)] transition-colors duration-300">
-      {/* Floating Navbar */}
+      {/* Navbar */}
       <header
-        className={`fixed left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled ? 'top-2 px-3' : 'top-4 px-3 md:px-6'
+        className={`fixed top-0 left-0 right-0 h-16 z-50 transition-all duration-300 border-b ${
+          scrolled
+            ? 'bg-[var(--card)]/90 backdrop-blur-xl border-[var(--border)] shadow-sm'
+            : 'bg-transparent border-transparent'
         }`}
       >
-        <div
-          className={`max-w-6xl mx-auto rounded-2xl border transition-all duration-500 ${
-            scrolled
-              ? 'bg-[var(--card)]/85 backdrop-blur-xl shadow-lg border-[var(--border)]'
-              : 'bg-[var(--card)]/95 backdrop-blur-md border-[var(--border)] shadow-md'
-          }`}
-        >
-          {/* ref wraps entire bar for click-outside */}
-          <div ref={menuRef} className="px-5 h-16 flex items-center justify-between">
+        <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div ref={menuRef} className="h-full flex items-center justify-between">
 
             {/* RTL: hamburger appears on the LEFT */}
             {isRtl && (
@@ -216,7 +211,7 @@ export const PublicLayout: React.FC = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 pt-24 pb-12">
+      <main className={`flex-1 ${location.pathname === '/' ? '' : 'pt-24 pb-12'}`}>
         <Outlet />
       </main>
 

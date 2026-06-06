@@ -287,7 +287,7 @@ const fetchProperties = async () => {
   }
 };
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 md:p-6 lg:p-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -303,7 +303,7 @@ const fetchProperties = async () => {
       </div>
 
       {/* Search and Filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+      <div className="flex flex-col sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
 
   <Input
     icon={<Search className="w-5 h-5" />}
@@ -478,28 +478,28 @@ const fetchProperties = async () => {
             <table className="w-full min-w-[600px]">
               <thead className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md sticky top-0 z-20 shadow-sm">
                 <tr>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap sticky ltr:left-0 rtl:right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md z-30 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none sm:bg-transparent">
+                  <th className="p-3 sm:px-4 sm:py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap sticky ltr:left-0 rtl:right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md z-30 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none sm:bg-transparent">
                     {language === 'en' ? 'Image' : 'الصورة'}
                   </th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
+                  <th className="p-3 sm:px-4 sm:py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
                     {t('propertiesMgmt.title')}
                   </th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
+                  <th className="p-3 sm:px-4 sm:py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
                     {t('propertiesMgmt.price')}
                   </th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
+                  <th className="p-3 sm:px-4 sm:py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
                     {language === 'en' ? 'Location' : 'الموقع'}
                   </th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
+                  <th className="p-3 sm:px-4 sm:py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
                     {t('propertiesMgmt.status')}
                   </th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
+                  <th className="p-3 sm:px-4 sm:py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
                     {language === 'en' ? 'Views' : 'المشاهدات'}
                   </th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
+                  <th className="p-3 sm:px-4 sm:py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
                     {language === 'en' ? 'Likes' : 'الإعجابات'}
                   </th>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
+                  <th className="p-3 sm:px-4 sm:py-3 text-left text-xs font-medium text-[var(--foreground)] uppercase tracking-wider whitespace-nowrap">
                     {t('propertiesMgmt.actions')}
                   </th>
                 </tr>
@@ -507,31 +507,31 @@ const fetchProperties = async () => {
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {filteredProperties.map((property) => (
                   <tr key={property.id} className="group hover:bg-gradient-to-r hover:from-[#C9A84C]/5 hover:to-transparent transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap sticky ltr:left-0 rtl:right-0 bg-white dark:bg-gray-800 z-10 group-hover:bg-[#C9A84C]/5 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none sm:group-hover:bg-transparent">
+                    <td className="p-3 sm:px-4 sm:py-3 whitespace-nowrap sticky ltr:left-0 rtl:right-0 bg-white dark:bg-gray-800 z-10 group-hover:bg-[#C9A84C]/5 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none sm:group-hover:bg-transparent">
                       <ProtectedImage
                         src={property.images[0]}
                         alt={language === 'en' ? property.title : property.titleAr}
-                        containerClassName="w-16 h-16 rounded-lg"
+                        containerClassName="w-10 h-10 sm:w-12 sm:h-12 rounded-lg"
                         className="object-cover"
                       />
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="p-3 sm:px-4 sm:py-3">
                       <div className="text-sm font-medium text-gray-900 dark:text-white">
                         {language === 'en' ? property.title : property.titleAr}
                       </div>
                       <div className="text-sm text-gray-500 dark:text-gray-400 capitalize">{property.type}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="p-3 sm:px-4 sm:py-3 whitespace-nowrap">
                       <div className="text-sm font-semibold text-gray-900 dark:text-white">
                         {formatEGPShort(property.price)}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="p-3 sm:px-4 sm:py-3">
                       <div className="text-sm text-gray-900 dark:text-white">
                         {language === 'en' ? property.location : property.locationAr}
                       </div>
                     </td>
-               <td className="px-6 py-4 whitespace-nowrap">
+               <td className="p-3 sm:px-4 sm:py-3 whitespace-nowrap">
                 <Select
                   value={property.status}
                   onValueChange={(value) =>
@@ -539,7 +539,7 @@ const fetchProperties = async () => {
                   }
                 >
                   <SelectTrigger className={`w-[8.75rem] h-8 text-xs font-bold border-0 bg-transparent`}>
-                    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full w-full ${property.status==='available'?'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':property.status==='rented'?'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400':'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
+                    <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full w-full ${property.status==='available'?'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':property.status==='rented'?'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400':'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
                       <span className={`w-1.5 h-1.5 shrink-0 rounded-full ${property.status==='available'?'bg-green-500':property.status==='rented'?'bg-blue-500':'bg-red-500'}`} />
                       <SelectValue />
                     </div>
@@ -560,17 +560,17 @@ const fetchProperties = async () => {
                   </SelectContent>
                 </Select>
               </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <td className="p-3 sm:px-4 sm:py-3 whitespace-nowrap text-center">
                       <div className="flex items-center justify-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white">
                         <span className="text-blue-500">👁</span> {property.views || 0}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <td className="p-3 sm:px-4 sm:py-3 whitespace-nowrap text-center">
                       <div className="flex items-center justify-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white">
                         <span className="text-red-500">❤️</span> {property.likes || 0}
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="p-3 sm:px-4 sm:py-3 whitespace-nowrap">
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleOpenModal(property)}

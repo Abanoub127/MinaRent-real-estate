@@ -5,20 +5,21 @@ import {
   Building2, LayoutGrid, Rows,
 } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
-import { getProperties, getBookings, Property, Booking, formatEGP, formatDate } from '../../../services/api';
+import { getProperties, getBookings, updateBooking, Property, Booking, formatEGP, formatDate } from '../../../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ProtectedImage } from '../../components/ProtectedImage';
 
-type FilterStatus = 'all' | 'confirmed' | 'pending' | 'cancelled' | 'available' | 'checkout';
+type FilterStatus = 'all' | 'confirmed' | 'pending' | 'completed' | 'cancelled' | 'available' | 'checkout';
 type ViewMode = 'month' | 'week';
 
 // ── Status colors ─────────────────────────────────────────────────────────────
 const STATUS_COLORS = {
-  available: { bg: '#dcfce7', border: '#22c55e', text: '#166534', dot: '#22c55e' },
-  confirmed: { bg: '#dbeafe', border: '#3b82f6', text: '#1e40af', dot: '#3b82f6' },
-  pending: { bg: '#fef3c7', border: '#f59e0b', text: '#92400e', dot: '#f59e0b' },
-  cancelled: { bg: '#fee2e2', border: '#ef4444', text: '#991b1b', dot: '#ef4444' },
-  checkout: { bg: '#f3e8ff', border: '#a855f7', text: '#6b21a8', dot: '#a855f7' },
+  available: { bg: 'rgba(34, 197, 94, 0.15)', border: '#22c55e', text: 'var(--foreground)', dot: '#22c55e' },
+  confirmed: { bg: 'rgba(59, 130, 246, 0.15)', border: '#3b82f6', text: 'var(--foreground)', dot: '#3b82f6' },
+  pending: { bg: 'rgba(245, 158, 11, 0.15)', border: '#f59e0b', text: 'var(--foreground)', dot: '#f59e0b' },
+  completed: { bg: 'rgba(107, 114, 128, 0.15)', border: '#6b7280', text: 'var(--foreground)', dot: '#6b7280' },
+  cancelled: { bg: 'rgba(239, 68, 68, 0.15)', border: '#ef4444', text: 'var(--foreground)', dot: '#ef4444' },
+  checkout: { bg: 'rgba(168, 85, 247, 0.15)', border: '#a855f7', text: 'var(--foreground)', dot: '#a855f7' },
 } as const;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -52,6 +53,7 @@ const DesktopCell = memo(({
   const status: Exclude<FilterStatus, 'all'> = useMemo(() => {
     if (!hasBook) return 'available';
     if (cellBs.some(b => b.status === 'cancelled')) return 'cancelled';
+    if (cellBs.some(b => b.status === 'completed')) return 'completed';
     if (cellBs.some(b => b.status === 'pending')) return 'pending';
     // Checkout: booking ends today (endDate === this cell's date)
     const cellDateStr = date.toISOString().slice(0, 10);
@@ -67,7 +69,7 @@ const DesktopCell = memo(({
 
   return (
     <div
-      className={`flex-shrink-0 border-r border-gray-100 p-[0.125rem] ${isToday ? 'bg-[#F5F3FF]/40' : ''}`}
+      className={`flex-shrink-0 border-r border-[var(--border)] p-[0.125rem] ${isToday ? 'bg-[var(--primary)]/5' : ''}`}
       style={{ width: dayColW, height: rowH }}
     >
       <div
@@ -119,6 +121,7 @@ const MobileCell = memo(({
   const status: Exclude<FilterStatus, 'all'> = useMemo(() => {
     if (!hasBook) return 'available';
     if (cellBs.some(b => b.status === 'cancelled')) return 'cancelled';
+    if (cellBs.some(b => b.status === 'completed')) return 'completed';
     if (cellBs.some(b => b.status === 'pending')) return 'pending';
     // Checkout: booking ends today (endDate === this cell's date)
     const cellDateStr = date.toISOString().slice(0, 10);
@@ -134,7 +137,7 @@ const MobileCell = memo(({
 
   return (
     <div
-      className="border-r border-b border-gray-100 p-[0.125rem]"
+      className="border-r border-b border-[var(--border)] p-[0.125rem]"
       style={{ minWidth: colMinW, flex: 1, height: cellH }}
     >
       <div
@@ -186,32 +189,32 @@ const DesktopRow = memo(({
   prop, dateRange, bookingMap, filterStatus, occupancy,
   isTodayFn, propColW, dayColW, rowH, onClickBooking, isAr, propCodeFn,
 }: DesktopRowProps) => (
-  <div className="flex group hover:bg-gray-50/70 transition-colors border-b border-gray-100">
+  <div className="flex group hover:bg-[var(--secondary)] transition-colors border-b border-[var(--border)]">
     {/* Sticky property info */}
     <div
-      className="sticky left-0 z-20 flex-shrink-0 border-r border-gray-100 bg-white group-hover:bg-gray-50/70 px-2.5 py-2 flex items-center gap-2.5 transition-colors"
+      className="sticky left-0 z-20 flex-shrink-0 border-r border-[var(--border)] bg-[var(--card)] group-hover:bg-[var(--secondary)] px-2.5 py-2 flex items-center gap-2.5 transition-colors"
       style={{ width: propColW, height: rowH }}
     >
       {/* Property image — 40×40 */}
-      <div className="w-10 h-10 rounded-[0.5rem] overflow-hidden flex-shrink-0 bg-gray-100 border border-gray-200 shadow-sm relative">
+      <div className="w-10 h-10 rounded-[0.5rem] overflow-hidden flex-shrink-0 bg-[var(--secondary)] border border-[var(--border)] shadow-sm relative">
         {prop.images?.[0] ? (
           <ProtectedImage src={prop.images[0]} alt={prop.title} containerClassName="absolute inset-0" className="w-full h-full object-cover" />
         ) : (
-          <Building2 size={16} className="text-gray-400 m-auto h-full" />
+          <Building2 size={16} className="text-[var(--text-secondary)] m-auto h-full" />
         )}
       </div>
       {/* Property details */}
       <div className="flex flex-col flex-1 min-w-0 justify-center">
-        <p className="font-bold text-gray-900 truncate" style={{ fontSize: '0.75rem' }}>
+        <p className="font-bold text-[var(--foreground)] truncate" style={{ fontSize: '0.75rem' }}>
           {isAr && (prop as any).titleAr ? (prop as any).titleAr : prop.title}
         </p>
-        <p className="text-gray-400 truncate" style={{ fontSize: '0.5625rem' }}>{propCodeFn(prop)}</p>
+        <p className="text-[var(--text-secondary)] truncate" style={{ fontSize: '0.5625rem' }}>{propCodeFn(prop)}</p>
         <div className="flex items-center gap-1.5 mt-1">
           {/* Thinner occupancy bar */}
-          <div className="flex-1 bg-gray-200 rounded-full overflow-hidden" style={{ height: '0.1875rem' }}>
-            <div className="bg-[#534AB7] h-full transition-all duration-500" style={{ width: `${occupancy}%` }} />
+          <div className="flex-1 bg-[var(--border)] rounded-full overflow-hidden" style={{ height: '0.1875rem' }}>
+            <div className="bg-[var(--primary)] h-full transition-all duration-500" style={{ width: `${occupancy}%` }} />
           </div>
-          <span className="text-[#534AB7] font-bold leading-none" style={{ fontSize: '0.5625rem' }}>{occupancy}%</span>
+          <span className="text-[var(--primary)] font-bold leading-none" style={{ fontSize: '0.5625rem' }}>{occupancy}%</span>
         </div>
       </div>
     </div>
@@ -289,7 +292,21 @@ export const AdminCalendarPage: React.FC = () => {
       try {
         const [pr, br] = await Promise.all([getProperties(1, 100), getBookings()]);
         setProperties(pr.properties || []);
-        setBookings(br || []);
+        let books = (br && (br as any).bookings ? (br as any).bookings : Array.isArray(br) ? br : []) as Booking[];
+        
+        const todayStr = new Date().toISOString().slice(0, 10);
+        const expired = books.filter(b => {
+          if (b.status !== 'confirmed' && b.status !== 'pending') return false;
+          const end = new Date(b.endDate); end.setHours(0, 0, 0, 0);
+          return end.toISOString().slice(0, 10) < todayStr;
+        });
+
+        if (expired.length > 0) {
+          await Promise.all(expired.map(b => updateBooking(b._id as string, { status: 'completed' })));
+          books = books.map(b => expired.some(e => e._id === b._id) ? { ...b, status: 'completed' } : b);
+        }
+
+        setBookings(books);
       } catch (e) { console.error(e); }
       finally { setLoading(false); }
     })();
@@ -387,10 +404,10 @@ export const AdminCalendarPage: React.FC = () => {
   }, []);
 
   if (loading) return (
-    <div className="flex items-center justify-center h-full bg-white">
+    <div className="flex items-center justify-center h-full bg-[var(--background)]">
       <div className="text-center">
-        <div className="w-9 h-9 border-4 border-purple-100 border-t-[#534AB7] rounded-full animate-spin mx-auto mb-3" />
-        <p className="text-gray-400 text-sm">{isAr ? 'جار التحميل...' : 'Loading...'}</p>
+        <div className="w-9 h-9 border-4 border-[var(--primary)]/20 border-t-[var(--primary)] rounded-full animate-spin mx-auto mb-3" />
+        <p className="text-[var(--text-secondary)] text-sm">{isAr ? 'جار التحميل...' : 'Loading...'}</p>
       </div>
     </div>
   );
@@ -415,30 +432,30 @@ export const AdminCalendarPage: React.FC = () => {
 
   // ── Mobile Grid ───────────────────────────────────────────────────────────
   const renderMobileGrid = () => (
-    <div ref={scrollContainerRef} className="flex-1 overflow-auto bg-white" style={{ scrollbarWidth: 'none' }}>
+    <div ref={scrollContainerRef} className="flex-1 overflow-auto bg-[var(--background)]" style={{ scrollbarWidth: 'none' }}>
       <div className="inline-flex flex-col min-w-max w-full">
 
         {/* Sticky header: property columns */}
-        <div className="sticky top-0 z-30 flex w-full bg-white border-b border-gray-100" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+        <div className="sticky top-0 z-10 flex w-full bg-[var(--card)] border-b border-[var(--border)]" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
           {/* Corner */}
-          <div className="sticky left-0 z-40 bg-white border-r border-gray-100 flex-shrink-0 flex items-center justify-center"
+          <div className="sticky left-0 z-20 bg-[var(--card)] border-r border-[var(--border)] flex-shrink-0 flex items-center justify-center"
             style={{ width: DATE_COL_W, height: MOB_HEADER_H }}>
-            <span className="text-[0.5625rem] font-bold text-gray-400 uppercase tracking-wide">{isAr ? 'يوم' : 'Day'}</span>
+            <span className="text-[0.5625rem] font-bold text-[var(--text-secondary)] uppercase tracking-wide">{isAr ? 'يوم' : 'Day'}</span>
           </div>
 
           {filteredProps.map(prop => (
-            <div key={prop._id} className="flex flex-col border-r border-gray-100 bg-white items-center justify-center p-1"
+            <div key={prop._id} className="flex flex-col border-r border-[var(--border)] bg-[var(--card)] items-center justify-center p-1"
               style={{ minWidth: COL_MIN_W, flex: 1, height: MOB_HEADER_H }}>
               {/* Property image */}
-              <div className="w-full overflow-hidden rounded-[0.3125rem] bg-gray-100 border border-gray-200 relative flex-shrink-0"
+              <div className="w-full overflow-hidden rounded-[0.3125rem] bg-[var(--secondary)] border border-[var(--border)] relative flex-shrink-0"
                 style={{ height: '1.75rem', maxWidth: '3.25rem' }}>
                 {prop.images?.[0] ? (
                   <ProtectedImage src={prop.images[0]} alt={prop.title} containerClassName="absolute inset-0" className="w-full h-full object-cover" />
                 ) : (
-                  <Building2 size={13} className="text-gray-400 m-auto h-full" />
+                  <Building2 size={13} className="text-[var(--text-secondary)] m-auto h-full" />
                 )}
               </div>
-              <p className="font-bold text-gray-800 mt-[0.1875rem] truncate w-full text-center" style={{ fontSize: '0.5625rem' }}>
+              <p className="font-bold text-[var(--foreground)] mt-[0.1875rem] truncate w-full text-center" style={{ fontSize: '0.5625rem' }}>
                 {propCodeFn(prop)}
               </p>
             </div>
@@ -450,15 +467,15 @@ export const AdminCalendarPage: React.FC = () => {
           const isT = isTodayFn(date);
           return (
             <div key={date.toISOString()} ref={isT ? todayRowRef : undefined}
-              className={`flex w-full ${isT ? 'bg-[#F5F3FF]' : 'bg-white hover:bg-gray-50/60'} transition-colors`}>
+              className={`flex w-full ${isT ? 'bg-[var(--primary)]/5' : 'bg-[var(--card)] hover:bg-[var(--secondary)]'} transition-colors`}>
               {/* Date label */}
-              <div className={`sticky left-0 z-20 flex-shrink-0 border-r border-b border-gray-100 flex flex-col items-center justify-center select-none ${isT ? 'bg-[#F5F3FF]' : 'bg-white'}`}
+              <div className={`sticky left-0 z-10 flex-shrink-0 border-r border-b border-[var(--border)] flex flex-col items-center justify-center select-none ${isT ? 'bg-[var(--primary)]/5' : 'bg-[var(--card)]'}`}
                 style={{ width: DATE_COL_W, height: CELL_H }}>
-                <div className={`flex items-center justify-center font-bold leading-none ${isT ? 'bg-[#534AB7] text-white rounded-full' : 'text-gray-800'
+                <div className={`flex items-center justify-center font-bold leading-none ${isT ? 'bg-[var(--primary)] text-white rounded-full' : 'text-[var(--foreground)]'
                   }`} style={{ fontSize: '0.6875rem', width: isT ? '1.25rem' : 'auto', height: isT ? '1.25rem' : 'auto' }}>
                   {date.getDate()}
                 </div>
-                <span className="text-gray-400 mt-[0.0625rem]" style={{ fontSize: '0.5rem' }}>{getDayShort(date)}</span>
+                <span className="text-[var(--text-secondary)] mt-[0.0625rem]" style={{ fontSize: '0.5rem' }}>{getDayShort(date)}</span>
               </div>
 
               {/* Cells */}
@@ -509,11 +526,11 @@ export const AdminCalendarPage: React.FC = () => {
     });
 
     if (relevantBookings.length === 0) {
-      return <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">{isAr ? 'لا توجد حجوزات في هذه الفترة.' : 'No bookings in this period.'}</div>
+      return <div className="flex-1 flex items-center justify-center text-[var(--text-secondary)] text-sm">{isAr ? 'لا توجد حجوزات في هذه الفترة.' : 'No bookings in this period.'}</div>
     }
 
     return (
-      <div className="flex-1 overflow-auto bg-gray-50 p-4 space-y-3">
+      <div className="flex-1 overflow-auto bg-[var(--background)] p-4 space-y-3">
         {relevantBookings.map(b => {
            const pId = typeof b.propertyId === 'object' && b.propertyId ? b.propertyId._id : b.propertyId;
            const prop = properties.find(p => p._id === pId);
@@ -526,14 +543,14 @@ export const AdminCalendarPage: React.FC = () => {
            const sColor = STATUS_COLORS[b.status as keyof typeof STATUS_COLORS] || STATUS_COLORS.confirmed;
            const sLabel = isAr ? (statusLabels[b.status]?.ar || b.status) : (statusLabels[b.status]?.en || b.status);
            return (
-             <div key={(b as any)._id || b.id} onClick={() => handleClickBooking(b, prop)} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col gap-2 active:scale-[0.98] transition-transform">
+             <div key={(b as any)._id || b.id} onClick={() => handleClickBooking(b, prop)} className="bg-[var(--card)] p-4 rounded-xl border border-[var(--border)] shadow-sm flex flex-col gap-2 active:scale-[0.98] transition-transform">
                <div className="flex justify-between items-start">
-                 <h3 className="font-bold text-gray-900 text-sm truncate pr-2">{pName}</h3>
+                 <h3 className="font-bold text-[var(--foreground)] text-sm truncate pr-2">{pName}</h3>
                  <span className="px-2 py-0.5 rounded-full text-[0.625rem] font-bold whitespace-nowrap" style={{ backgroundColor: sColor.bg, color: sColor.text, border: `1px solid ${sColor.border}` }}>
                    {sLabel}
                  </span>
                </div>
-               <div className="flex items-center text-gray-500 text-xs gap-3 mt-1">
+               <div className="flex items-center text-[var(--text-secondary)] text-xs gap-3 mt-1">
                  <div className="flex items-center gap-1.5"><Calendar size={12} /> {formatDate(b.startDate, language)} - {formatDate(b.endDate, language)}</div>
                  <div className="flex items-center gap-1.5"><Users size={12} /> {typeof b.clientId === 'object' ? b.clientId?.name : (isAr ? 'ضيف' : 'Guest')}</div>
                </div>
@@ -546,15 +563,15 @@ export const AdminCalendarPage: React.FC = () => {
 
   // ── Desktop Grid ──────────────────────────────────────────────────────────
   const renderDesktopGrid = () => (
-    <div ref={scrollContainerRef} className="flex-1 overflow-auto bg-gray-50/40" style={{ scrollbarWidth: 'thin' }}>
-      <div className="inline-flex flex-col min-w-max bg-white">
+    <div ref={scrollContainerRef} className="flex-1 overflow-auto bg-[var(--background)]" style={{ scrollbarWidth: 'thin' }}>
+      <div className="inline-flex flex-col min-w-max bg-[var(--card)]">
 
         {/* Sticky top header */}
-        <div className="sticky top-0 z-30 flex bg-white border-b border-gray-100" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+        <div className="sticky top-0 z-10 flex bg-[var(--card)] border-b border-[var(--border)]" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
           {/* Corner */}
-          <div className="sticky left-0 z-40 bg-white border-r border-gray-100 flex-shrink-0 flex items-center px-3"
+          <div className="sticky left-0 z-20 bg-[var(--card)] border-r border-[var(--border)] flex-shrink-0 flex items-center px-3"
             style={{ width: PROP_COL_W, height: HEADER_H }}>
-            <span className="text-[0.625rem] font-bold text-gray-400 uppercase tracking-wider">
+            <span className="text-[0.625rem] font-bold text-[var(--text-secondary)] uppercase tracking-wider">
               {isAr ? 'العقارات' : 'Properties'}
             </span>
           </div>
@@ -565,14 +582,14 @@ export const AdminCalendarPage: React.FC = () => {
             return (
               <div key={date.toISOString()}
                 ref={isT ? todayColRef : undefined}
-                className={`flex-shrink-0 border-r border-gray-100 flex flex-col items-center justify-center ${isT ? 'bg-[#F5F3FF]' : 'bg-white'}`}
+                className={`flex-shrink-0 border-r border-[var(--border)] flex flex-col items-center justify-center ${isT ? 'bg-[var(--primary)]/5' : 'bg-[var(--card)]'}`}
                 style={{ width: DAY_COL_W, height: HEADER_H }}
               >
-                <div className={`flex items-center justify-center font-bold leading-none ${isT ? 'bg-[#534AB7] text-white rounded-full' : 'text-gray-800'
+                <div className={`flex items-center justify-center font-bold leading-none ${isT ? 'bg-[var(--primary)] text-white rounded-full' : 'text-[var(--foreground)]'
                   }`} style={{ fontSize: '0.75rem', width: isT ? '1.5rem' : 'auto', height: isT ? '1.5rem' : 'auto' }}>
                   {date.getDate()}
                 </div>
-                <span className="text-gray-400 mt-[0.125rem]" style={{ fontSize: '0.5625rem' }}>{getDayShort(date)}</span>
+                <span className="text-[var(--text-secondary)] mt-[0.125rem]" style={{ fontSize: '0.5625rem' }}>{getDayShort(date)}</span>
               </div>
             );
           })}
@@ -601,26 +618,26 @@ export const AdminCalendarPage: React.FC = () => {
   );
 
   return (
-    <div className="flex flex-col h-full w-full bg-white overflow-hidden">
+    <div className="flex flex-col h-full w-full bg-[var(--background)] overflow-hidden">
 
       {/* ══════════════════════════ TOOLBAR ══════════════════════════ */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-100 px-4 py-2.5 flex flex-col gap-2.5 z-40"
+      <div className="flex-shrink-0 bg-[var(--card)] border-b border-[var(--border)] px-4 md:px-6 lg:px-8 py-2.5 flex flex-col gap-2.5 z-10"
         style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
 
         {/* Row 1 */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2.5">
-            <h1 className="text-sm font-bold text-gray-900 whitespace-nowrap">
+            <h1 className="text-sm font-bold text-[var(--foreground)] whitespace-nowrap">
               {isAr ? 'التقويم' : 'Calendar'}
             </h1>
-            <div className="flex items-center gap-1 bg-gray-50 rounded-lg p-[0.1875rem] border border-gray-100">
-              <button onClick={goToPrev} className="p-1 rounded hover:bg-gray-200 text-gray-500 transition" title="Previous">
+            <div className="flex items-center gap-1 bg-[var(--secondary)] rounded-lg p-[0.1875rem] border border-[var(--border)]">
+              <button onClick={goToPrev} className="p-1 rounded hover:bg-[var(--border)] text-[var(--text-secondary)] transition" title="Previous">
                 <ChevronLeft size={14} />
               </button>
-              <span className="text-xs font-semibold text-gray-800 min-w-[6.25rem] text-center select-none">
+              <span className="text-xs font-semibold text-[var(--foreground)] min-w-[6.25rem] text-center select-none">
                 {getMonthName(currentDate)}
               </span>
-              <button onClick={goToNext} className="p-1 rounded hover:bg-gray-200 text-gray-500 transition" title="Next">
+              <button onClick={goToNext} className="p-1 rounded hover:bg-[var(--border)] text-[var(--text-secondary)] transition" title="Next">
                 <ChevronRight size={14} />
               </button>
             </div>
@@ -628,17 +645,17 @@ export const AdminCalendarPage: React.FC = () => {
 
           <div className="flex items-center gap-2">
             {isMobile && (
-              <div className="flex items-center bg-gray-100 rounded-lg p-[0.1875rem] gap-[0.125rem]">
-                <button onClick={() => setMobileViewMode('list')} className={`p-1.5 rounded-md transition ${mobileViewMode === 'list' ? 'bg-white text-[#534AB7] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}><Rows size={14} /></button>
-                <button onClick={() => setMobileViewMode('grid')} className={`p-1.5 rounded-md transition ${mobileViewMode === 'grid' ? 'bg-white text-[#534AB7] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}><LayoutGrid size={14} /></button>
+              <div className="flex items-center bg-[var(--secondary)] rounded-lg p-[0.1875rem] gap-[0.125rem]">
+                <button onClick={() => setMobileViewMode('list')} className={`p-1.5 rounded-md transition ${mobileViewMode === 'list' ? 'bg-[var(--card)] text-[var(--primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--foreground)]'}`}><Rows size={14} /></button>
+                <button onClick={() => setMobileViewMode('grid')} className={`p-1.5 rounded-md transition ${mobileViewMode === 'grid' ? 'bg-[var(--card)] text-[var(--primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--foreground)]'}`}><LayoutGrid size={14} /></button>
               </div>
             )}
-            <div className="flex items-center bg-gray-100 rounded-lg p-[0.1875rem] gap-[0.125rem]">
+            <div className="flex items-center bg-[var(--secondary)] rounded-lg p-[0.1875rem] gap-[0.125rem]">
               {(['month', 'week'] as ViewMode[]).map(v => (
                 <button key={v} onClick={() => setViewMode(v)}
                   className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-semibold transition ${viewMode === v
-                      ? 'bg-white text-[#534AB7] shadow-sm'
-                      : 'text-gray-500 hover:text-gray-700'
+                      ? 'bg-[var(--card)] text-[var(--primary)] shadow-sm'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--foreground)]'
                     }`}>
                   {v === 'month' ? <LayoutGrid size={12} /> : <Rows size={12} />}
                   {v === 'month' ? (isAr ? 'شهر' : 'Month') : (isAr ? 'أسبوع' : 'Week')}
@@ -646,7 +663,7 @@ export const AdminCalendarPage: React.FC = () => {
               ))}
             </div>
             <button onClick={scrollToToday}
-              className="flex items-center gap-1 px-3 py-1.5 bg-[#534AB7] hover:bg-[#6B5AC8] active:scale-95 text-white rounded-lg text-xs font-semibold transition-all shadow-sm whitespace-nowrap">
+              className="flex items-center gap-1 px-3 py-1.5 bg-[var(--primary)] hover:brightness-110 active:scale-95 text-[var(--primary-foreground)] rounded-lg text-xs font-semibold transition-all shadow-sm whitespace-nowrap">
               <Calendar size={13} />
               {isAr ? 'اليوم' : 'Today'}
             </button>
@@ -656,35 +673,35 @@ export const AdminCalendarPage: React.FC = () => {
         {/* Row 2: filters + search */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
-            {(['all', 'confirmed', 'pending', 'cancelled', 'available', 'checkout'] as FilterStatus[]).map(s => {
+            {(['all', 'confirmed', 'pending', 'completed', 'cancelled', 'available', 'checkout'] as FilterStatus[]).map(s => {
               const active = filterStatus === s;
               const col = filterDotColor[s];
               return (
                 <button key={s} onClick={() => setFilterStatus(s)}
                   className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.6875rem] font-semibold whitespace-nowrap border transition-all ${active
-                      ? 'text-white border-transparent shadow-sm'
-                      : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                      ? 'text-[var(--foreground)] border-[var(--border)] shadow-sm'
+                      : 'bg-[var(--card)] text-[var(--text-secondary)] border-[var(--border)] hover:bg-[var(--secondary)]'
                     }`}
-                  style={active ? { background: col, borderColor: col } : {}}>
-                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: active ? '#fff' : col }} />
-                  {isAr ? filterLabels[s].ar : filterLabels[s].en}
+                  style={active ? { background: col } : {}}>
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: active ? 'var(--foreground)' : col }} />
+                  {isAr ? filterLabels[s]?.ar : filterLabels[s]?.en}
                 </button>
               );
             })}
           </div>
 
-          <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5 w-56 focus-within:border-[#534AB7] focus-within:ring-1 focus-within:ring-[#534AB7] transition-all">
-            <Search size={13} className="text-gray-400 flex-shrink-0" />
+          <div className="flex items-center gap-1.5 bg-[var(--secondary)] border border-[var(--border)] rounded-lg px-2.5 py-1.5 w-56 focus-within:border-[var(--primary)] focus-within:ring-1 focus-within:ring-[var(--primary)] transition-all">
+            <Search size={13} className="text-[var(--text-secondary)] flex-shrink-0" />
             <input
               type="text"
               placeholder={isAr ? 'ابحث عن عقار...' : 'Search property...'}
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="flex-1 bg-transparent outline-none text-xs text-gray-900 placeholder:text-gray-400"
+              className="flex-1 bg-transparent outline-none text-xs text-[var(--foreground)] placeholder:text-[var(--text-secondary)]"
             />
             {searchQuery && (
               <button onClick={() => setSearchQuery('')}>
-                <X size={12} className="text-gray-400 hover:text-gray-700" />
+                <X size={12} className="text-[var(--text-secondary)] hover:text-[var(--foreground)]" />
               </button>
             )}
           </div>
@@ -707,14 +724,14 @@ export const AdminCalendarPage: React.FC = () => {
               exit={{ y: isMobile ? '100%' : 0, scale: isMobile ? 1 : 0.96, opacity: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               onClick={e => e.stopPropagation()}
-              className="w-full md:max-w-md bg-white rounded-t-2xl md:rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto p-5 border border-gray-100">
+              className="w-full md:max-w-md bg-[var(--card)] rounded-t-2xl md:rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto p-5 border border-[var(--border)]">
 
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-bold text-gray-900">
+                <h2 className="text-sm font-bold text-[var(--foreground)]">
                   {isAr ? 'تفاصيل الحجز' : 'Booking Details'}
                 </h2>
                 <button onClick={() => setShowDetail(false)}
-                  className="p-1.5 rounded-full hover:bg-gray-100 transition-colors text-gray-500">
+                  className="p-1.5 rounded-full hover:bg-[var(--secondary)] transition-colors text-[var(--text-secondary)]">
                   <X size={16} />
                 </button>
               </div>
@@ -725,6 +742,7 @@ export const AdminCalendarPage: React.FC = () => {
                 const statusLabels: Record<string, { ar: string; en: string }> = {
                   confirmed: { ar: 'مؤكد', en: 'Confirmed' },
                   pending: { ar: 'في الانتظار', en: 'Pending' },
+                  completed: { ar: 'منتهي', en: 'Completed' },
                   cancelled: { ar: 'ملغى', en: 'Cancelled' },
                 };
                 return (
@@ -741,52 +759,52 @@ export const AdminCalendarPage: React.FC = () => {
               })()}
 
               <DS title={isAr ? 'الضيف' : 'Guest'}>
-                <p className="font-bold text-sm text-gray-900">
+                <p className="font-bold text-sm text-[var(--foreground)]">
                   {typeof selectedBooking.clientId === 'object' ? selectedBooking.clientId?.name : (isAr ? 'ضيف' : 'Guest')}
                 </p>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
                   {typeof selectedBooking.clientId === 'object' ? selectedBooking.clientId?.phone : '—'}
                 </p>
               </DS>
 
               {selectedProp && (
                 <DS title={isAr ? 'العقار' : 'Property'}>
-                  <p className="font-bold text-sm text-gray-900">
+                  <p className="font-bold text-sm text-[var(--foreground)]">
                     {isAr && (selectedProp as any).titleAr ? (selectedProp as any).titleAr : selectedProp.title}
                   </p>
                 </DS>
               )}
 
               <DS title={isAr ? 'التواريخ' : 'Dates'}>
-                <div className="flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-100 mt-1">
+                <div className="flex justify-between items-center bg-[var(--secondary)] p-3 rounded-xl border border-[var(--border)] mt-1">
                   <div>
-                    <p className="text-[0.625rem] font-semibold text-gray-400 mb-1">{isAr ? 'دخول' : 'Check In'}</p>
-                    <p className="font-bold text-sm text-[#534AB7]">{formatDate(selectedBooking.startDate, language)}</p>
+                    <p className="text-[0.625rem] font-semibold text-[var(--text-secondary)] mb-1">{isAr ? 'دخول' : 'Check In'}</p>
+                    <p className="font-bold text-sm text-[var(--primary)]">{formatDate(selectedBooking.startDate, language)}</p>
                   </div>
-                  <div className="w-8 h-px bg-gray-200" />
+                  <div className="w-8 h-px bg-[var(--border)]" />
                   <div className={isAr ? 'text-right' : 'text-left'}>
-                    <p className="text-[0.625rem] font-semibold text-gray-400 mb-1">{isAr ? 'خروج' : 'Check Out'}</p>
-                    <p className="font-bold text-sm text-gray-900">{formatDate(selectedBooking.endDate, language)}</p>
+                    <p className="text-[0.625rem] font-semibold text-[var(--text-secondary)] mb-1">{isAr ? 'خروج' : 'Check Out'}</p>
+                    <p className="font-bold text-sm text-[var(--foreground)]">{formatDate(selectedBooking.endDate, language)}</p>
                   </div>
                 </div>
               </DS>
 
-              <div className="p-3.5 rounded-xl mb-4 bg-gray-50 border border-gray-100">
+              <div className="p-3.5 rounded-xl mb-4 bg-[var(--secondary)] border border-[var(--border)]">
                 <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-500 font-medium text-xs">{isAr ? 'الإجمالي' : 'Total'}</span>
-                  <span className="font-bold text-gray-900 text-sm">{formatEGP(selectedBooking.totalPrice)}</span>
+                  <span className="text-[var(--text-secondary)] font-medium text-xs">{isAr ? 'الإجمالي' : 'Total'}</span>
+                  <span className="font-bold text-[var(--foreground)] text-sm">{formatEGP(selectedBooking.totalPrice)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-500 font-medium text-xs">{isAr ? 'المتبقي' : 'Remaining'}</span>
+                  <span className="text-[var(--text-secondary)] font-medium text-xs">{isAr ? 'المتبقي' : 'Remaining'}</span>
                   <span className="font-bold text-red-500 text-sm">{formatEGP(selectedBooking.remainingAmount)}</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-2.5">
-                <button className="py-2.5 bg-[#534AB7] hover:bg-[#6B5AC8] active:scale-95 text-white rounded-xl text-sm font-bold transition-all shadow-md shadow-[#534AB7]/20">
+                <button className="py-2.5 bg-[var(--primary)] hover:brightness-110 active:scale-95 text-white rounded-xl text-sm font-bold transition-all shadow-md shadow-[#534AB7]/20">
                   {isAr ? 'تعديل' : 'Edit'}
                 </button>
-                <button className="py-2.5 bg-red-50 text-red-600 hover:bg-red-100 active:scale-95 rounded-xl text-sm font-bold transition-all">
+                <button className="py-2.5 bg-red-50 dark:bg-red-900/20 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/40 active:scale-95 rounded-xl text-sm font-bold transition-all">
                   {isAr ? 'حذف' : 'Delete'}
                 </button>
               </div>
@@ -800,8 +818,8 @@ export const AdminCalendarPage: React.FC = () => {
 
 // ── Detail section helper ─────────────────────────────────────────────────────
 const DS: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-  <div className="border-b border-gray-100 pb-3.5 mb-3.5">
-    <p className="text-[0.625rem] font-bold text-gray-400 mb-1.5 uppercase tracking-wider">{title}</p>
+  <div className="border-b border-[var(--border)] pb-3.5 mb-3.5">
+    <p className="text-[0.625rem] font-bold text-[var(--text-secondary)] mb-1.5 uppercase tracking-wider">{title}</p>
     {children}
   </div>
 );

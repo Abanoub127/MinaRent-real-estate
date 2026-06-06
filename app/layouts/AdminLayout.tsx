@@ -199,9 +199,9 @@ export const AdminLayout: React.FC = () => {
           // Mobile & Tablet: fixed drawer; Desktop: static in-flow
           'fixed lg:static',
           // Mobile & Tablet always full drawer width
-          'w-72',
+          'w-[15rem]',
           // Desktop: responds to isSidebarOpen
-          isSidebarOpen ? 'lg:w-72' : 'lg:w-20',
+          isSidebarOpen ? 'lg:w-[15rem]' : 'lg:w-[4rem]',
           // ─ Slide: mobile/tablet only ─
           isMobileOpen
             ? 'translate-x-0'
@@ -240,37 +240,35 @@ export const AdminLayout: React.FC = () => {
           </div>
 
           {/* Nav */}
-          <div className="flex-1 overflow-y-auto py-4 px-2 md:px-3 space-y-1 scrollbar-hide">
+          <div className="flex-1 overflow-y-auto py-4 px-4 space-y-1 scrollbar-hide">
             {navLinks.map((link) => {
               const Icon = link.icon;
               const isActive =
                 location.pathname === link.path ||
                 (link.path !== '/admin' && location.pathname.startsWith(link.path));
-              // Show text: on mobile (drawer) always full; on tablet always icon; on desktop respects isSidebarOpen
               const showText = isMobileOpen || isSidebarOpen;
 
               return (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`group flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-300 ${
-                    showText ? '' : 'justify-center'
-                  } ${isActive
-                    ? 'text-[#0D1B2A] font-bold shadow-[0_0_15px_rgba(201,168,76,0.4)] bg-gradient-to-r from-[#C9A84C] to-[#D4B96A]'
-                    : 'text-white/70 hover:bg-white/10 hover:text-white'
-                  }`}
                   title={!showText ? link.name : undefined}
+                  className={`group relative flex items-center h-[2.75rem] px-3 transition-all duration-200 overflow-hidden ${
+                    isActive
+                      ? 'bg-white/10 text-[#C9A84C] font-bold rounded-lg shadow-sm'
+                      : 'text-white/70 hover:bg-white/5 hover:text-white rounded-lg'
+                  }`}
                   onClick={() => setIsMobileOpen(false)}
                 >
                   <Icon className={`w-5 h-5 shrink-0 transition-transform duration-300 group-hover:scale-110 ${!isActive && 'opacity-70 group-hover:opacity-100'}`} />
-                  {showText && <span className="font-medium text-sm truncate">{link.name}</span>}
+                  {showText && <span className="ml-3 font-medium text-sm truncate">{link.name}</span>}
                 </Link>
               );
             })}
           </div>
 
-          {/* User */}
-          <div className="p-3 border-t border-[var(--sidebar-border)]">
+          {/* User / Logout */}
+          <div className="p-4 border-t border-[var(--sidebar-border)] space-y-1">
             <div
               className={`flex items-center gap-3 px-3 py-3 rounded-xl bg-white/5 border border-white/10 ${
                 (isMobileOpen || isSidebarOpen) ? '' : 'justify-center'
@@ -295,9 +293,7 @@ export const AdminLayout: React.FC = () => {
 
             <button
               onClick={handleLogout}
-              className={`mt-2 w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors ${
-                (isMobileOpen || isSidebarOpen) ? '' : 'justify-center'
-              }`}
+              className="group flex w-full items-center h-[2.75rem] px-3 rounded-lg text-white/70 hover:bg-red-500/10 hover:text-red-400 transition-colors"
               title={!(isMobileOpen || isSidebarOpen) ? t('admin.logout') : undefined}
             >
               <LogOut className="w-5 h-5 shrink-0" />
@@ -310,9 +306,9 @@ export const AdminLayout: React.FC = () => {
       </aside>
 
       {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top Header */}
-        <header className="h-16 bg-[var(--card)]/80 backdrop-blur-md border-b border-[var(--border)] flex items-center justify-between px-4 sm:px-6 z-40 relative" style={{ boxShadow: 'var(--shadow-sm)' }}>
+      <div className="flex-1 flex flex-col min-w-0 h-screen">
+        {/* Header */}
+        <header className="h-16 bg-[var(--card)] border-b border-[var(--border)] flex items-center justify-between px-4 lg:px-6 z-30 shrink-0 sticky top-0 backdrop-blur-md bg-[var(--card)]/80">
           <div className="flex items-center gap-3">
 
             {/* Mobile/Tablet (<lg): opens drawer */}

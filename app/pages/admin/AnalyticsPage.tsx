@@ -247,14 +247,14 @@ const conversionData = [
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 md:p-6 lg:p-8">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
         {language === 'en'
           ? 'Analytics'
           : 'التحليلات'}
       </h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         <Card className="group p-6 hover:-translate-y-[2px] transition-all duration-300 shadow-sm hover:shadow-md border border-[var(--border)] bg-gradient-to-br from-[var(--card)] to-[var(--secondary)]">
           <div className="flex items-start justify-between">
             <div>
@@ -264,7 +264,7 @@ const conversionData = [
                   : 'إجمالي العقارات'}
               </p>
 
-              <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h3 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                 {stats?.totalProperties || 0}
               </h3>
             </div>
@@ -284,7 +284,7 @@ const conversionData = [
                   : 'إجمالي الحجوزات'}
               </p>
 
-              <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h3 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                 {stats?.totalBookings || 0}
               </h3>
             </div>
@@ -304,7 +304,7 @@ const conversionData = [
                   : 'الحجوزات المؤكدة'}
               </p>
 
-              <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h3 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                 {stats?.confirmedBookings || 0}
               </h3>
             </div>
@@ -324,7 +324,7 @@ const conversionData = [
                   : 'العملاء'}
               </p>
 
-              <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
+              <h3 className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white">
                 {stats?.totalClients || 0}
               </h3>
             </div>
