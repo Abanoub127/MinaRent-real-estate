@@ -1,65 +1,23 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router';
 import {
   LayoutDashboard, Building, Users, Calendar,
   DollarSign, PieChart, Settings, LogOut, Menu,
-  Sun, Moon, Languages, Bell, MessageSquare, Globe,
-  ChevronDown, X, CheckCheck, Mail
+  Sun, Moon, Languages, Globe,
+  Mail, MessageSquare
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../contexts/AppContext';
-import { getNotifications, markAllNotificationsRead, markNotificationRead, type Notification } from '../../services/api';
 import { MRLogo } from '../components/ui/MRLogo';
 
 export const AdminLayout: React.FC = () => {
   const { theme, toggleTheme, language, isRtl, toggleLanguage, t, user, tenant, logout } = useApp();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => { setIsMobileOpen(false); }, [location.pathname]);
-
-  // Fetch notifications
-  const fetchNotifications = useCallback(async () => {
-    try {
-      const data = await getNotifications(1, 10);
-      setNotifications(data.notifications);
-      setUnreadCount(data.unreadCount);
-    } catch { /* ignore */ }
-  }, []);
-
-  useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000); // Poll every 30s
-    return () => clearInterval(interval);
-  }, [fetchNotifications]);
-
-  // When notification panel opens, mark all as read immediately
-  const handleOpenNotifications = async () => {
-    const wasOpen = showNotifications;
-    setShowNotifications(!wasOpen);
-
-    // If opening and there are unread notifications, mark all as read
-    if (!wasOpen && unreadCount > 0) {
-      try {
-        await markAllNotificationsRead();
-        setUnreadCount(0);
-        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
-      } catch { /* ignore */ }
-    }
-  };
-
-  const handleNotificationClick = async (n: Notification) => {
-    setShowNotifications(false);
-    if (n.type === 'message') navigate('/admin/messages');
-    else if (n.type === 'booking') navigate('/admin/bookings');
-    else if (n.type === 'comment') navigate('/admin/testimonials');
-    else if (n.type === 'property') navigate('/admin/properties');
-  };
 
   const handleLogout = () => { logout(); navigate('/login'); };
 
@@ -74,16 +32,6 @@ export const AdminLayout: React.FC = () => {
     { name: t('admin.analytics'), path: '/admin/analytics', icon: PieChart },
     { name: t('admin.settings'), path: '/admin/settings', icon: Settings },
   ];
-
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case 'booking': return '📅';
-      case 'message': return '✉️';
-      case 'comment': return '💬';
-      case 'property': return '🏠';
-      default: return '🔔';
-    }
-  };
 
   return (
     <div className="min-h-screen bg-[var(--background)] flex overflow-hidden">
@@ -193,75 +141,6 @@ export const AdminLayout: React.FC = () => {
 
             <div className="hidden md:block h-5 w-px bg-[var(--border)] mx-1" />
 
-            {/* Notification Bell — marks all read on open */}
-            <div className="relative">
-              <button
-                onClick={handleOpenNotifications}
-                className="p-2.5 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--secondary)] hover:text-[var(--primary)] transition-all relative"
-              >
-                <Bell className="w-5 h-5" />
-                {unreadCount > 0 && (
-                  <motion.span
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-[var(--card)]"
-                  >
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </motion.span>
-                )}
-              </button>
-
-              {/* Notification Dropdown */}
-              <AnimatePresence>
-                {showNotifications && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8, scale: 0.96 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                    transition={{ duration: 0.15 }}
-                    className={`absolute ${isRtl ? 'left-0' : 'right-0'} top-12 w-80 bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-xl overflow-hidden z-50`}
-                  >
-                    <div className="flex items-center justify-between p-4 border-b border-[var(--border)]">
-                      <h3 className="font-bold text-[var(--foreground)] text-sm">
-                        {language === 'en' ? 'Notifications' : 'الإشعارات'}
-                      </h3>
-                      <span className="text-xs text-[var(--text-secondary)]">
-                        {language === 'en' ? 'All caught up ✓' : 'تم قراءة الكل ✓'}
-                      </span>
-                    </div>
-                    <div className="max-h-72 overflow-y-auto">
-                      {notifications.length === 0 ? (
-                        <div className="p-8 text-center text-[var(--text-secondary)] text-sm">
-                          {language === 'en' ? 'No notifications yet' : 'لا توجد إشعارات بعد'}
-                        </div>
-                      ) : (
-                        notifications.map(n => (
-                          <button
-                            key={n.id}
-                            onClick={() => handleNotificationClick(n)}
-                            className="w-full text-left p-3 hover:bg-[var(--secondary)] transition-colors border-b border-[var(--border)] last:border-0"
-                          >
-                            <div className="flex items-start gap-3">
-                              <span className="text-lg mt-0.5">{getNotificationIcon(n.type)}</span>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm truncate text-[var(--foreground)]">
-                                  {n.title}
-                                </p>
-                                <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">{n.body}</p>
-                                <p className="text-[10px] text-[var(--text-secondary)] mt-1">
-                                  {new Date(n.createdAt).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                </p>
-                              </div>
-                            </div>
-                          </button>
-                        ))
-                      )}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-
             <button onClick={toggleTheme} className="p-2.5 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--secondary)] transition-all">
               {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </button>
@@ -272,11 +151,6 @@ export const AdminLayout: React.FC = () => {
             </button>
           </div>
         </header>
-
-        {/* Close notifications on outside click */}
-        {showNotifications && (
-          <div className="fixed inset-0 z-30" onClick={() => setShowNotifications(false)} />
-        )}
 
         {/* Page Content */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">

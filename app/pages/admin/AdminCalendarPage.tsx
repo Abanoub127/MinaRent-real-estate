@@ -2,14 +2,14 @@ import React, { useState, useEffect, useRef, useMemo, useCallback, memo } from '
 import {
   Search, Calendar, ChevronLeft, ChevronRight,
   Plus, X, Users, CheckCircle2, Clock, XCircle,
-  Building2, LayoutGrid, Rows,
+  Building2, LayoutGrid, Rows, Bell,
 } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
-import { getProperties, getBookings, updateBooking, Property, Booking, formatEGP, formatDate } from '../../../services/api';
+import { getProperties, getBookings, updateBooking, getNotifications, markAllNotificationsRead, type Property, type Booking, type Notification, formatEGP, formatDate } from '../../../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ProtectedImage } from '../../components/ProtectedImage';
 
-type FilterStatus = 'all' | 'confirmed' | 'pending' | 'completed' | 'cancelled' | 'available' | 'checkout';
+type FilterStatus = 'all' | 'confirmed' | 'pending' | 'cancelled' | 'available';
 type ViewMode = 'month' | 'week';
 
 // ── Status colors ─────────────────────────────────────────────────────────────
@@ -17,9 +17,8 @@ const STATUS_COLORS = {
   available: { bg: 'rgba(34, 197, 94, 0.15)', border: '#22c55e', text: 'var(--foreground)', dot: '#22c55e' },
   confirmed: { bg: 'rgba(59, 130, 246, 0.15)', border: '#3b82f6', text: 'var(--foreground)', dot: '#3b82f6' },
   pending: { bg: 'rgba(245, 158, 11, 0.15)', border: '#f59e0b', text: 'var(--foreground)', dot: '#f59e0b' },
-  completed: { bg: 'rgba(107, 114, 128, 0.15)', border: '#6b7280', text: 'var(--foreground)', dot: '#6b7280' },
   cancelled: { bg: 'rgba(239, 68, 68, 0.15)', border: '#ef4444', text: 'var(--foreground)', dot: '#ef4444' },
-  checkout: { bg: 'rgba(168, 85, 247, 0.15)', border: '#a855f7', text: 'var(--foreground)', dot: '#a855f7' },
+  completed: { bg: 'rgba(107, 114, 128, 0.15)', border: '#6b7280', text: 'var(--foreground)', dot: '#6b7280' },
 } as const;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -53,16 +52,9 @@ const DesktopCell = memo(({
   const status: Exclude<FilterStatus, 'all'> = useMemo(() => {
     if (!hasBook) return 'available';
     if (cellBs.some(b => b.status === 'cancelled')) return 'cancelled';
-    if (cellBs.some(b => b.status === 'completed')) return 'completed';
     if (cellBs.some(b => b.status === 'pending')) return 'pending';
-    // Checkout: booking ends today (endDate === this cell's date)
-    const cellDateStr = date.toISOString().slice(0, 10);
-    if (cellBs.some(b => {
-      const end = new Date(b.endDate); end.setHours(0, 0, 0, 0);
-      return end.toISOString().slice(0, 10) === cellDateStr;
-    })) return 'checkout';
     return 'confirmed';
-  }, [cellBs, hasBook, date]);
+  }, [cellBs, hasBook]);
 
   const opacity = getCellOpacity(status, filterStatus);
   const colors = STATUS_COLORS[status];
@@ -121,16 +113,9 @@ const MobileCell = memo(({
   const status: Exclude<FilterStatus, 'all'> = useMemo(() => {
     if (!hasBook) return 'available';
     if (cellBs.some(b => b.status === 'cancelled')) return 'cancelled';
-    if (cellBs.some(b => b.status === 'completed')) return 'completed';
     if (cellBs.some(b => b.status === 'pending')) return 'pending';
-    // Checkout: booking ends today (endDate === this cell's date)
-    const cellDateStr = date.toISOString().slice(0, 10);
-    if (cellBs.some(b => {
-      const end = new Date(b.endDate); end.setHours(0, 0, 0, 0);
-      return end.toISOString().slice(0, 10) === cellDateStr;
-    })) return 'checkout';
     return 'confirmed';
-  }, [cellBs, hasBook, date]);
+  }, [cellBs, hasBook]);
 
   const opacity = getCellOpacity(status, filterStatus);
   const colors = STATUS_COLORS[status];
@@ -151,7 +136,7 @@ const MobileCell = memo(({
         }}
       >
         {hasBook && (
-          <div className="w-full h-full px-[0.1875rem] py-[0.125rem] flex flex-col justify-center relative">
+<div className="w-full h-full px-[0.1875rem] py-[0.125rem] flex flex-col justify-center relative">
             <div className="flex items-center justify-between">
               <span className="font-bold truncate" style={{ fontSize: '0.5rem', color: colors.text }}>{propCode}</span>
               <div className="flex items-center gap-[0.0625rem]" style={{ fontSize: '0.5rem', color: colors.text, opacity: 0.85 }}>
@@ -180,7 +165,7 @@ interface DesktopRowProps {
   propColW: number;
   dayColW: number;
   rowH: number;
-  onClickBooking: (b: Booking, p: Property) => void;
+  onClickBooking: (b: Booking, p?: Property) => void;
   isAr: boolean;
   propCodeFn: (p: Property) => string;
 }
@@ -255,6 +240,9 @@ export const AdminCalendarPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [mobileViewMode, setMobileViewMode] = useState<'grid' | 'list'>('list');
   const [isMobile, setIsMobile] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const todayColRef = useRef<HTMLDivElement>(null);
@@ -311,6 +299,33 @@ export const AdminCalendarPage: React.FC = () => {
       finally { setLoading(false); }
     })();
   }, []);
+
+  // ── Notifications ───────────────────────────────────────────────────────────
+  useEffect(() => {
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const data = await getNotifications(1, 10);
+      setNotifications(data.notifications);
+      setUnreadCount(data.unreadCount);
+    } catch { /* ignore */ }
+  };
+
+  const handleOpenNotifications = async () => {
+    const wasOpen = showNotifications;
+    setShowNotifications(!wasOpen);
+    if (!wasOpen && unreadCount > 0) {
+      try {
+        await markAllNotificationsRead();
+        setUnreadCount(0);
+        setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      } catch { /* ignore */ }
+    }
+  };
 
   // ── Filtered props ────────────────────────────────────────────────────────
   const filteredProps = useMemo(() =>
@@ -417,19 +432,25 @@ export const AdminCalendarPage: React.FC = () => {
     all: { ar: 'الكل', en: 'All' },
     confirmed: { ar: 'مؤكد', en: 'Confirmed' },
     pending: { ar: 'في الانتظار', en: 'Pending' },
-    completed: { ar: 'منتهي', en: 'Completed' },
     cancelled: { ar: 'ملغى', en: 'Cancelled' },
     available: { ar: 'متاح', en: 'Available' },
-    checkout: { ar: 'انتهى', en: 'Checked Out' },
   };
   const filterDotColor: Record<FilterStatus, string> = {
     all: '#6b7280',
     confirmed: STATUS_COLORS.confirmed.dot,
     pending: STATUS_COLORS.pending.dot,
-    completed: STATUS_COLORS.completed.dot,
     cancelled: STATUS_COLORS.cancelled.dot,
     available: STATUS_COLORS.available.dot,
-    checkout: STATUS_COLORS.checkout.dot,
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case 'booking': return '📅';
+      case 'message': return '✉️';
+      case 'comment': return '💬';
+      case 'property': return '🏠';
+      default: return '🔔';
+    }
   };
 
   // ── Mobile Grid ───────────────────────────────────────────────────────────
@@ -514,16 +535,12 @@ export const AdminCalendarPage: React.FC = () => {
       const s = new Date(b.startDate); s.setHours(0,0,0,0);
       const e = new Date(b.endDate); e.setHours(0,0,0,0);
       if (e < rs || s > re) return false;
-      if (filterStatus !== 'all') {
-         if (filterStatus === 'available') return false;
-         if (filterStatus === 'checkout') {
-            const endStr = e.toISOString().slice(0, 10);
-            const inRange = dateRange.some(d => d.toISOString().slice(0,10) === endStr);
-            if (!inRange) return false;
-         } else if (b.status !== filterStatus) {
-            return false;
-         }
-      }
+if (filterStatus !== 'all') {
+          if (filterStatus === 'available') return false;
+          if (b.status !== filterStatus) {
+             return false;
+          }
+       }
       return true;
     });
 
@@ -533,32 +550,32 @@ export const AdminCalendarPage: React.FC = () => {
 
     return (
       <div className="flex-1 overflow-auto bg-[var(--background)] p-4 space-y-3">
-        {relevantBookings.map(b => {
-           const pId = typeof b.propertyId === 'object' && b.propertyId ? b.propertyId._id : b.propertyId;
-           const prop = properties.find(p => p._id === pId);
-           const pName = prop ? (isAr && (prop as any).titleAr ? (prop as any).titleAr : prop.title) : '—';
-           const statusLabels: Record<string, { ar: string; en: string }> = {
-                  confirmed: { ar: 'مؤكد', en: 'Confirmed' },
-                  pending: { ar: 'في الانتظار', en: 'Pending' },
-                  cancelled: { ar: 'ملغى', en: 'Cancelled' },
-           };
-           const sColor = STATUS_COLORS[b.status as keyof typeof STATUS_COLORS] || STATUS_COLORS.confirmed;
-           const sLabel = isAr ? (statusLabels[b.status]?.ar || b.status) : (statusLabels[b.status]?.en || b.status);
-           return (
-             <div key={(b as any)._id || b.id} onClick={() => handleClickBooking(b, prop)} className="bg-[var(--card)] p-4 rounded-xl border border-[var(--border)] shadow-sm flex flex-col gap-2 active:scale-[0.98] transition-transform">
-               <div className="flex justify-between items-start">
-                 <h3 className="font-bold text-[var(--foreground)] text-sm truncate pr-2">{pName}</h3>
-                 <span className="px-2 py-0.5 rounded-full text-[0.625rem] font-bold whitespace-nowrap" style={{ backgroundColor: sColor.bg, color: sColor.text, border: `1px solid ${sColor.border}` }}>
-                   {sLabel}
-                 </span>
-               </div>
-               <div className="flex items-center text-[var(--text-secondary)] text-xs gap-3 mt-1">
-                 <div className="flex items-center gap-1.5"><Calendar size={12} /> {formatDate(b.startDate, language)} - {formatDate(b.endDate, language)}</div>
-                 <div className="flex items-center gap-1.5"><Users size={12} /> {typeof b.clientId === 'object' ? b.clientId?.name : (isAr ? 'ضيف' : 'Guest')}</div>
-               </div>
-             </div>
-           );
-        })}
+{relevantBookings.map(b => {
+            const pId = typeof b.propertyId === 'object' && b.propertyId ? b.propertyId._id : b.propertyId;
+            const prop = properties.find(p => p._id === pId);
+            const pName = prop ? (isAr && (prop as any).titleAr ? (prop as any).titleAr : prop.title) : '—';
+            const statusLabels: Record<string, { ar: string; en: string }> = {
+              confirmed: { ar: 'مؤكد', en: 'Confirmed' },
+              pending: { ar: 'في الانتظار', en: 'Pending' },
+              cancelled: { ar: 'ملغى', en: 'Cancelled' },
+            };
+            const sColor = STATUS_COLORS[(b.status as keyof typeof STATUS_COLORS) || 'confirmed'];
+            const sLabel = isAr ? (statusLabels[b.status]?.ar || b.status) : (statusLabels[b.status]?.en || b.status);
+            return (
+              <div key={(b as any)._id || b.id} onClick={() => handleClickBooking(b, prop)} className="bg-[var(--card)] p-4 rounded-xl border border-[var(--border)] shadow-sm flex flex-col gap-2 active:scale-[0.98] transition-transform">
+                <div className="flex justify-between items-start">
+                  <h3 className="font-bold text-[var(--foreground)] text-sm truncate pr-2">{pName}</h3>
+                  <span className="px-2 py-0.5 rounded-full text-[0.625rem] font-bold whitespace-nowrap" style={{ backgroundColor: sColor.bg, color: sColor.text, border: `1px solid ${sColor.border}` }}>
+                    {sLabel}
+                  </span>
+                </div>
+                <div className="flex items-center text-[var(--text-secondary)] text-xs gap-3 mt-1">
+                  <div className="flex items-center gap-1.5"><Calendar size={12} /> {formatDate(b.startDate, language)} - {formatDate(b.endDate, language)}</div>
+                  <div className="flex items-center gap-1.5"><Users size={12} /> {typeof b.clientId === 'object' ? b.clientId?.name : (isAr ? 'ضيف' : 'Guest')}</div>
+                </div>
+              </div>
+            );
+         })}
       </div>
     );
   };
@@ -646,6 +663,71 @@ export const AdminCalendarPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Notification Bell */}
+            <div className="relative">
+              <button
+                onClick={handleOpenNotifications}
+                className="p-2.5 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--secondary)] hover:text-[var(--primary)] transition-all relative"
+              >
+                <Bell className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 border-2 border-[var(--card)]">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Notification Dropdown */}
+              <AnimatePresence>
+                {showNotifications && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                    transition={{ duration: 0.15 }}
+                    className={`absolute ${isAr ? 'left-0' : 'right-0'} top-12 w-80 bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-xl overflow-hidden z-50`}
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <div className="flex items-center justify-between p-4 border-b border-[var(--border)]">
+                      <h3 className="font-bold text-[var(--foreground)] text-sm">
+                        {language === 'en' ? 'Notifications' : 'الإشعارات'}
+                      </h3>
+                      <span className="text-xs text-[var(--text-secondary)]">
+                        {language === 'en' ? 'All caught up ✓' : 'تم قراءة الكل ✓'}
+                      </span>
+                    </div>
+                    <div className="max-h-72 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-8 text-center text-[var(--text-secondary)] text-sm">
+                          {language === 'en' ? 'No notifications yet' : 'لا توجد إشعارات بعد'}
+                        </div>
+                      ) : (
+                        notifications.map(n => (
+                          <button
+                            key={n.id}
+                            className="w-full text-left p-3 hover:bg-[var(--secondary)] transition-colors border-b border-[var(--border)] last:border-0"
+                          >
+                            <div className="flex items-start gap-3">
+                              <span className="text-lg mt-0.5">{getNotificationIcon(n.type)}</span>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm truncate text-[var(--foreground)]">
+                                  {n.title}
+                                </p>
+                                <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">{n.body}</p>
+                                <p className="text-[10px] text-[var(--text-secondary)] mt-1">
+                                  {new Date(n.createdAt).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                              </div>
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {isMobile && (
               <div className="flex items-center bg-[var(--secondary)] rounded-lg p-[0.1875rem] gap-[0.125rem]">
                 <button onClick={() => setMobileViewMode('list')} className={`p-1.5 rounded-md transition ${mobileViewMode === 'list' ? 'bg-[var(--card)] text-[var(--primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--foreground)]'}`}><Rows size={14} /></button>
@@ -675,7 +757,7 @@ export const AdminCalendarPage: React.FC = () => {
         {/* Row 2: filters + search */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex gap-1.5 overflow-x-auto scrollbar-none">
-            {(['all', 'confirmed', 'pending', 'completed', 'cancelled', 'available', 'checkout'] as FilterStatus[]).map(s => {
+            {(['all', 'confirmed', 'pending', 'cancelled', 'available'] as FilterStatus[]).map(s => {
               const active = filterStatus === s;
               const col = filterDotColor[s];
               return (
@@ -739,13 +821,13 @@ export const AdminCalendarPage: React.FC = () => {
               </div>
 
               {/* Status badge */}
-              {(() => {
+{(() => {
                 const sc = STATUS_COLORS[selectedBooking.status as keyof typeof STATUS_COLORS] || STATUS_COLORS.confirmed;
                 const statusLabels: Record<string, { ar: string; en: string }> = {
                   confirmed: { ar: 'مؤكد', en: 'Confirmed' },
                   pending: { ar: 'في الانتظار', en: 'Pending' },
-                  completed: { ar: 'منتهي', en: 'Completed' },
                   cancelled: { ar: 'ملغى', en: 'Cancelled' },
+                  completed: { ar: 'منتهي', en: 'Completed' },
                 };
                 return (
                   <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold inline-flex mb-4"
