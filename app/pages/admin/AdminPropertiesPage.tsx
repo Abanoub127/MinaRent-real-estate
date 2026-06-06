@@ -1,10 +1,10 @@
 import React, { useEffect,useState } from 'react';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
-import { Card } from '../../components/ui/Card';
-import { Button } from '../../components/ui/Button';
-import { Badge } from '../../components/ui/Badge';
-import { Input,  TextArea } from '../../components/ui/Input';
+import { Card } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { Badge } from '../../components/ui/badge';
+import { Input,  TextArea } from '../../components/ui/input';
 import { Modal } from '../../components/ui/Modal';
 import { Select, SelectContent,SelectItem, SelectTrigger, SelectValue,} from "../../components/ui/Select";
 import { getProperties, createProperty, updateProperty, deleteProperty, Property, PropertyStatus, PropertyType, PropertiesResponse, formatEGPShort} from "../../../services/api";
