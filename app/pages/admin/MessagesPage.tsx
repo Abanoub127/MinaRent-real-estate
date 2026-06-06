@@ -14,6 +14,7 @@ export const MessagesPage: React.FC = () => {
   const [selected, setSelected] = useState<Message | null>(null);
   const [replyText, setReplyText] = useState('');
   const [replying, setReplying] = useState(false);
+  const [mobileTab, setMobileTab] = useState<'list' | 'detail'>('list');
 
   const fetchMessages = useCallback(async () => {
     setLoading(true);
@@ -44,6 +45,7 @@ export const MessagesPage: React.FC = () => {
   };
   const openMessage = async (m: Message) => {
     setSelected(m);
+    setMobileTab('detail');
     if (m.status === 'unread') { try { await markMessageRead(m.id); fetchMessages(); } catch {} }
   };
 
@@ -72,9 +74,16 @@ export const MessagesPage: React.FC = () => {
         </div>
       </div>
 
+      <div className="block lg:hidden mb-4">
+        <div className="flex p-1 bg-[var(--card)] border border-[var(--border)] rounded-xl">
+          <button onClick={() => setMobileTab('list')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors ${mobileTab === 'list' ? 'bg-[var(--primary)] text-white' : 'text-[var(--text-secondary)] hover:bg-[var(--secondary)]'}`}>{language === 'en' ? 'Messages' : 'الرسائل'}</button>
+          <button onClick={() => setMobileTab('detail')} disabled={!selected} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors disabled:opacity-50 ${mobileTab === 'detail' ? 'bg-[var(--primary)] text-white' : 'text-[var(--text-secondary)] hover:bg-[var(--secondary)]'}`}>{language === 'en' ? 'Content' : 'المحتوى'}</button>
+        </div>
+      </div>
+
       <div className="grid lg:grid-cols-5 gap-5">
         {/* List */}
-        <div className="lg:col-span-3 bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
+        <div className={`lg:col-span-3 bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm ${mobileTab === 'list' ? 'block' : 'hidden lg:block'}`}>
           {loading ? <div className="p-6 space-y-4">{[1,2,3,4,5].map(i => <div key={i} className="h-16 skeleton rounded-xl" />)}</div> : !data || data.messages.length === 0 ? (
             <div className="p-12 text-center"><Mail className="w-12 h-12 text-[var(--text-secondary)] mx-auto mb-3 opacity-50" /><p className="text-[var(--text-secondary)] text-sm">{language === 'en' ? 'No messages found.' : 'لا توجد رسائل.'}</p></div>
           ) : (
@@ -103,7 +112,7 @@ export const MessagesPage: React.FC = () => {
         </div>
 
         {/* Detail */}
-        <div className="lg:col-span-2">
+        <div className={`lg:col-span-2 ${mobileTab === 'detail' ? 'block' : 'hidden lg:block'}`}>
           {selected ? (
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm sticky top-24">
               <div className="flex items-start justify-between mb-4">

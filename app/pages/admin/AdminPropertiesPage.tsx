@@ -474,11 +474,11 @@ const fetchProperties = async () => {
       {/* Properties Table/Grid */}
       {viewMode === 'table' ? (
         <Card>
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="overflow-x-auto w-full pb-4">
+            <table className="w-full min-w-[600px]">
               <thead className="bg-gray-50 dark:bg-gray-700">
                 <tr>
-                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
+                  <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap sticky ltr:left-0 rtl:right-0 bg-gray-50 dark:bg-gray-700 z-10 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none">
                     {language === 'en' ? 'Image' : 'الصورة'}
                   </th>
                   <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider whitespace-nowrap">
@@ -507,7 +507,7 @@ const fetchProperties = async () => {
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {filteredProperties.map((property) => (
                   <tr key={property.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-6 py-4 whitespace-nowrap sticky ltr:left-0 rtl:right-0 bg-white dark:bg-gray-800 z-10 ltr:shadow-[inset_-4px_0_4px_-4px_rgba(0,0,0,0.1)] rtl:shadow-[inset_4px_0_4px_-4px_rgba(0,0,0,0.1)] sm:static sm:shadow-none">
                       <ProtectedImage
                         src={property.images[0]}
                         alt={language === 'en' ? property.title : property.titleAr}
@@ -571,17 +571,19 @@ const fetchProperties = async () => {
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => handleOpenModal(property)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                          className="flex items-center gap-2 px-3 py-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
                           title={t('common.edit')}
                         >
                           <Edit className="w-4 h-4" />
+                          <span className="hidden sm:inline">{t('common.edit')}</span>
                         </button>
                         <button
                           onClick={() => handleDelete(property.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                          className="flex items-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                           title={t('common.delete')}
                         >
                           <Trash2 className="w-4 h-4" />
+                          <span className="hidden sm:inline">{t('common.delete')}</span>
                         </button>
                       </div>
                     </td>

@@ -105,11 +105,11 @@ export const PropertiesPage: React.FC = () => {
         title={language === 'en' ? 'Properties' : 'العقارات'} 
         description={language === 'en' ? 'Browse curated listings across the city' : 'تصفح القوائم المنسقة عبر المدينة'} 
       />
-      <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="mx-auto mt-6 mb-24 max-w-7xl px-4 w-full">
+      <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="mx-auto mt-6 mb-24 max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
         <div className="flex flex-wrap items-end justify-between gap-4 mb-2">
         <div>
           <p className="text-sm font-semibold text-[var(--primary)] mb-1">{language === 'en' ? 'Explore' : 'استكشف'}</p>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight md:text-4xl text-[var(--foreground)]">{language === 'en' ? 'Find your next home' : 'ابحث عن منزلك القادم'}</h1>
+          <h1 className="text-[clamp(1.5rem,4vw,2.5rem)] font-bold tracking-tight text-[var(--foreground)]">{language === 'en' ? 'Find your next home' : 'ابحث عن منزلك القادم'}</h1>
           <p className="mt-1.5 text-sm text-[var(--text-secondary)]">{language === 'en' ? 'Browse curated listings across the city' : 'تصفح القوائم المنسقة عبر المدينة'}</p>
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -195,7 +195,7 @@ export const PropertiesPage: React.FC = () => {
           <p className="mb-4 text-sm text-[var(--text-secondary)] font-medium">{loading ? '...' : `${totalProperties} ${language === 'en' ? 'properties found' : 'عقار'}`}</p>
 
           {loading ? (
-            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-5 grid-cols-[repeat(auto-fill,minmax(18rem,1fr))]">
               {[1, 2, 3, 4, 5, 6].map(i => (
                 <div key={i} className="rounded-2xl border border-[var(--border)] bg-[var(--card)] overflow-hidden">
                   <div className="h-48 skeleton" />
@@ -217,7 +217,7 @@ export const PropertiesPage: React.FC = () => {
               <button onClick={reset} className="mt-4 px-5 py-2.5 bg-[var(--primary)] text-white rounded-xl text-sm font-semibold">{language === 'en' ? 'Reset Filters' : 'إعادة تعيين'}</button>
             </div>
           ) : (
-            <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            <motion.div variants={containerVariants} initial="hidden" animate="show" className="grid gap-5 grid-cols-[repeat(auto-fill,minmax(18rem,1fr))]">
               {results.map((p) => (
                 <motion.article variants={itemVariants} whileHover={{ y: -4 }} key={p.id || p._id} className="group overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-sm transition-shadow hover:shadow-xl">
                   <div className="relative overflow-hidden">

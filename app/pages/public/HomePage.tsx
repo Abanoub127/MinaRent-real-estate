@@ -95,7 +95,7 @@ export const HomePage: React.FC = () => {
     <div className="flex flex-col min-h-screen">
       <SEO />
       {/* ── Hero Section ── */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden min-h-[100svh] flex flex-col justify-center">
         <div className="gradient-hero absolute inset-0 opacity-95" />
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.15\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")' }} />
 
@@ -122,7 +122,7 @@ export const HomePage: React.FC = () => {
                 {language === 'en' ? 'Premium Properties in Egypt' : 'عقارات فاخرة في مصر'}
               </div>
 
-              <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-white leading-[1.15] tracking-tight">
+              <h1 className="text-[clamp(2rem,5vw,4rem)] font-bold text-white leading-[1.15] tracking-tight">
                 {language === 'en' ? (
                   <>Find Your Perfect <span className="text-shimmer-gold">Space</span> With Us</>
                 ) : (
@@ -130,7 +130,7 @@ export const HomePage: React.FC = () => {
                 )}
               </h1>
 
-              <p className="text-base sm:text-lg text-white/70 leading-relaxed max-w-lg">
+              <p className="text-[clamp(1rem,2vw,1.125rem)] text-white/70 leading-relaxed max-w-lg">
                 {language === 'en'
                   ? 'Discover curated properties that match your lifestyle. From modern apartments to luxury villas, your next chapter starts here.'
                   : 'اكتشف عقارات منتقاة بعناية تناسب أسلوب حياتك. من الشقق الحديثة إلى الفيلات الفاخرة، فصلك القادم يبدأ هنا.'}
@@ -177,7 +177,7 @@ export const HomePage: React.FC = () => {
       {/* ── Features ── */}
       <section className="bg-[var(--card)] py-20 border-y border-[var(--border)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="grid md:grid-cols-3 gap-8">
+          <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-6.25rem" }} className="grid grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] md:grid-cols-3 gap-8">
             {[
               { icon: Home, titleEn: 'Vast Selection', titleAr: 'تشكيلة واسعة', descEn: 'Browse thousands of verified properties in prime locations.', descAr: 'تصفح آلاف العقارات الموثقة في مواقع متميزة.' },
               { icon: Shield, titleEn: 'Secure Transactions', titleAr: 'معاملات آمنة', descEn: 'Your investments are protected with our transparent process.', descAr: 'استثماراتك محمية بفضل إجراءاتنا الشفافة.' },
@@ -211,7 +211,7 @@ export const HomePage: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] gap-6">
             {[1, 2, 3].map(i => (
               <div key={i} className="bg-[var(--card)] rounded-2xl border border-[var(--border)] overflow-hidden">
                 <div className="h-48 skeleton" />
@@ -224,14 +224,14 @@ export const HomePage: React.FC = () => {
             ))}
           </div>
         ) : (
-          <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid grid-cols-[repeat(auto-fill,minmax(20rem,1fr))] gap-6">
             {properties.map(property => (
               <motion.div key={property.id} variants={itemVariants}>
                 <Link to={`/properties/${property.id}`} className="group flex flex-col bg-[var(--card)] rounded-2xl border border-[var(--border)] overflow-hidden shadow-sm premium-card">
                   <div className="relative aspect-[4/3] overflow-hidden">
                     <ProtectedImage src={property.images[0] || 'https://via.placeholder.com/600x400?text=No+Image'} alt={property.title} containerClassName="w-full h-full" className="transform transition-transform duration-700 group-hover:scale-110" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="absolute top-3 left-3 z-10 flex gap-2">
+                    <div className="absolute top-3 start-3 z-10 flex gap-2">
                       <span className="px-3 py-1 bg-white/90 backdrop-blur text-[var(--foreground)] text-xs font-bold rounded-lg capitalize shadow-sm">{language === 'en' ? property.type : (property.type === 'villa' ? 'فيلا' : property.type === 'apartment' ? 'شقة' : property.type)}</span>
                     </div>
                     <button
@@ -248,7 +248,7 @@ export const HomePage: React.FC = () => {
                       />
                       <span className="text-xs font-bold leading-none mt-[0.0625rem]">{property.likes || 0}</span>
                     </button>
-                    <div className="absolute bottom-3 right-3 z-10">
+                    <div className="absolute bottom-3 end-3 z-10">
                       <span className="px-3 py-1.5 bg-[var(--accent)] text-[var(--accent-foreground)] text-sm font-bold rounded-lg shadow-lg">{formatEGPShort(property.price)}</span>
                     </div>
                   </div>
@@ -325,7 +325,7 @@ export const HomePage: React.FC = () => {
                 </div>
               ) : (
                 <>
-                  <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid sm:grid-cols-2 gap-5">
+                  <motion.div variants={containerVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-5">
                     {paginatedTestimonials.map(testimonial => (
                       <motion.div key={testimonial.id} variants={itemVariants} className="bg-[var(--card)] p-5 rounded-2xl border border-[var(--border)] hover:shadow-md transition-all premium-card">
                         <div className="flex gap-1 mb-3">

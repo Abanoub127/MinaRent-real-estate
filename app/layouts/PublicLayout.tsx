@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, Link, useLocation } from 'react-router';
 import { Menu, X, Sun, Moon, Languages, MapPin, Building, Phone, Mail, ArrowUp, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,6 +11,7 @@ export const PublicLayout: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const location = useLocation();
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,6 +26,18 @@ export const PublicLayout: React.FC = () => {
     setIsMenuOpen(false);
     window.scrollTo(0, 0);
   }, [location.pathname]);
+
+  // Click-outside closes the mobile menu
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler, true);
+    return () => document.removeEventListener('mousedown', handler, true);
+  }, [isMenuOpen]);
 
   const navLinks = [
     { name: t('nav.home'), path: '/' },
@@ -47,7 +60,21 @@ export const PublicLayout: React.FC = () => {
               : 'bg-[var(--card)]/95 backdrop-blur-md border-[var(--border)] shadow-md'
           }`}
         >
-          <div className="px-5 h-16 flex items-center justify-between">
+          {/* ref wraps entire bar for click-outside */}
+          <div ref={menuRef} className="px-5 h-16 flex items-center justify-between">
+
+            {/* RTL: hamburger appears on the LEFT */}
+            {isRtl && (
+              <button
+                className="md:hidden p-2 rounded-xl text-[var(--foreground)] hover:bg-[var(--secondary)] transition-colors"
+                onClick={() => setIsMenuOpen(prev => !prev)}
+                aria-expanded={isMenuOpen}
+                aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+              >
+                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            )}
+
             {/* Logo */}
             <Link to="/" className="flex items-center group">
               <MRLogo size="sm" showText={true} animated={false} />
@@ -72,7 +99,7 @@ export const PublicLayout: React.FC = () => {
                       <motion.div
                         layoutId="nav-indicator"
                         className="absolute bottom-0 left-3 right-3 h-0.5 bg-[var(--primary)] rounded-full"
-                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                       />
                     )}
                   </Link>
@@ -80,7 +107,7 @@ export const PublicLayout: React.FC = () => {
               })}
             </nav>
 
-            {/* Actions */}
+            {/* Desktop Actions */}
             <div className="hidden md:flex items-center gap-2">
               <button
                 onClick={toggleTheme}
@@ -104,68 +131,86 @@ export const PublicLayout: React.FC = () => {
               </Link>
             </div>
 
-            {/* Mobile Menu Button */}
-            <button
-              className="md:hidden p-2 text-[var(--foreground)] rounded-xl hover:bg-[var(--secondary)]"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label="Toggle menu"
-            >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+            {/* LTR: hamburger appears on the RIGHT */}
+            {!isRtl && (
+              <button
+                className="md:hidden p-2 rounded-xl text-[var(--foreground)] hover:bg-[var(--secondary)] transition-colors"
+                onClick={() => setIsMenuOpen(prev => !prev)}
+                aria-expanded={isMenuOpen}
+                aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+              >
+                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Drawer — slides down from top, backdrop behind */}
         <AnimatePresence>
           {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -10, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -10, scale: 0.98 }}
-              transition={{ duration: 0.2 }}
-              className="md:hidden absolute top-[4.75rem] left-3 right-3 bg-[var(--card)] rounded-2xl border border-[var(--border)] shadow-xl p-4 overflow-hidden"
-            >
-              <nav className="flex flex-col gap-1">
-                {navLinks.map((link) => (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                key="backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="md:hidden fixed inset-0 top-[5.5rem] bg-black/40 backdrop-blur-[2px] z-40"
+                onClick={() => setIsMenuOpen(false)}
+              />
+
+              {/* Drawer panel */}
+              <motion.div
+                key="drawer"
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.22, ease: 'easeOut' }}
+                className="md:hidden absolute top-full left-0 right-0 z-50 bg-[var(--card)] border-b border-[var(--border)] shadow-2xl px-4 pt-3 pb-5"
+              >
+                <nav className="flex flex-col gap-1">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.path}
+                      to={link.path}
+                      onClick={() => setIsMenuOpen(false)}
+                      className={`px-4 py-3.5 rounded-xl text-sm font-medium transition-colors ${
+                        location.pathname === link.path
+                          ? 'bg-[var(--primary)]/10 text-[var(--primary)] font-semibold'
+                          : 'text-[var(--foreground)] hover:bg-[var(--secondary)]'
+                      }`}
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
+                  <div className="h-px bg-[var(--border)] my-2" />
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={toggleTheme}
+                      className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-[var(--secondary)] text-[var(--foreground)] font-medium text-sm hover:bg-[var(--border)] transition-colors"
+                    >
+                      {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                      {theme === 'light' ? 'Dark' : 'Light'}
+                    </button>
+                    <button
+                      onClick={toggleLanguage}
+                      className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-[var(--secondary)] text-[var(--foreground)] font-medium text-sm hover:bg-[var(--border)] transition-colors"
+                    >
+                      <Languages className="w-4 h-4" />
+                      {language === 'en' ? 'العربية' : 'English'}
+                    </button>
+                  </div>
                   <Link
-                    key={link.path}
-                    to={link.path}
+                    to={isAuthenticated ? '/admin' : '/login'}
                     onClick={() => setIsMenuOpen(false)}
-                    className={`px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
-                      location.pathname === link.path
-                        ? 'bg-[var(--primary)]/10 text-[var(--primary)] font-semibold'
-                        : 'text-[var(--foreground)] hover:bg-[var(--secondary)]'
-                    }`}
+                    className="mt-2 block text-center py-3.5 bg-[var(--primary)] text-white text-sm font-semibold rounded-xl btn-premium"
                   >
-                    {link.name}
+                    {isAuthenticated ? t('nav.dashboard') : t('nav.login')}
                   </Link>
-                ))}
-                <div className="h-px bg-[var(--border)] my-2" />
-                <div className="flex items-center gap-2 px-1">
-                  <button
-                    onClick={toggleTheme}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-[var(--secondary)] text-[var(--foreground)] font-medium text-sm"
-                  >
-                    {theme === 'light' ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-                    {theme === 'light' ? 'Dark' : 'Light'}
-                  </button>
-                  <button
-                    onClick={toggleLanguage}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-[var(--secondary)] text-[var(--foreground)] font-medium text-sm"
-                  >
-                    <Languages className="w-4 h-4" />
-                    {language === 'en' ? 'العربية' : 'English'}
-                  </button>
-                </div>
-                <Link
-                  to={isAuthenticated ? '/admin' : '/login'}
-                  onClick={() => setIsMenuOpen(false)}
-                  className="mt-2 text-center py-3 bg-[var(--primary)] text-white text-sm font-semibold rounded-xl btn-premium"
-                >
-                  {isAuthenticated ? t('nav.dashboard') : t('nav.login')}
-                </Link>
-              </nav>
-            </motion.div>
+                </nav>
+              </motion.div>
+            </>
           )}
         </AnimatePresence>
       </header>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router';
 import {
   LayoutDashboard, Building, Users, CalendarDays, CalendarRange,
@@ -15,16 +15,59 @@ import { ar, enUS } from 'date-fns/locale';
 
 export const AdminLayout: React.FC = () => {
   const { theme, toggleTheme, language, isRtl, toggleLanguage, t, user, tenant, logout } = useApp();
+
+  // ── Sidebar state ────────────────────────────────────────────────────
+  // isSidebarOpen  →  desktop (lg+): full width vs icon-only
+  // isMobileOpen   →  mobile (<md): drawer open/closed
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const sidebarRef = useRef<HTMLElement>(null);
+
   const [showNotifications, setShowNotifications] = useState(false);
+  const notifPanelRef = useRef<HTMLDivElement>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [activeTab, setActiveTab] = useState<'all' | 'property' | 'booking' | 'system'>('all');
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Close drawer on route change
   useEffect(() => { setIsMobileOpen(false); }, [location.pathname]);
+
+  // ── Responsive sidebar behaviour ──────────────────────────────────────
+  // • lg+ (≥1024px)  → static sidebar, isSidebarOpen controls full/icon
+  // • <lg (<1024px)  → drawer (isMobileOpen)
+  useEffect(() => {
+    const lgQuery  = window.matchMedia('(min-width: 1024px)');
+
+    const applyBreakpoint = () => {
+      if (lgQuery.matches) {
+        // Desktop: keep user's choice
+        setIsMobileOpen(false);
+      } else {
+        // Tablet/Mobile: drawer
+        setIsMobileOpen(false); // start closed
+      }
+    };
+
+    applyBreakpoint(); // run once on mount
+    lgQuery.addEventListener('change', applyBreakpoint);
+    return () => {
+      lgQuery.removeEventListener('change', applyBreakpoint);
+    };
+  }, []);
+
+  // ── Mobile drawer: click-outside ───────────────────────────────────────
+  useEffect(() => {
+    if (!isMobileOpen) return;
+    const handleOutside = (e: MouseEvent) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(e.target as Node)) {
+        setIsMobileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutside, true);
+    return () => document.removeEventListener('mousedown', handleOutside, true);
+  }, [isMobileOpen]);
 
   // Fetch notifications
   const fetchNotifications = useCallback(async () => {
@@ -40,6 +83,19 @@ export const AdminLayout: React.FC = () => {
     const interval = setInterval(fetchNotifications, 30000); // Poll every 30s
     return () => clearInterval(interval);
   }, [fetchNotifications]);
+
+  // ── Click outside detection ────────────────────────────────────────────────
+  useEffect(() => {
+    if (!showNotifications) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (notifPanelRef.current && !notifPanelRef.current.contains(e.target as Node)) {
+        setShowNotifications(false);
+      }
+    };
+    // Use capture phase so it fires before any stopPropagation
+    document.addEventListener('mousedown', handleClickOutside, true);
+    return () => document.removeEventListener('mousedown', handleClickOutside, true);
+  }, [showNotifications]);
 
   // When notification panel opens, mark all as read immediately
   const handleOpenNotifications = async () => {
@@ -115,57 +171,104 @@ export const AdminLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[var(--background)] flex overflow-hidden">
-      {/* Mobile Overlay */}
+
+      {/* ── Backdrop: visible on mobile (<md) when drawer is open ── */}
       <AnimatePresence>
         {isMobileOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
             onClick={() => setIsMobileOpen(false)}
           />
         )}
       </AnimatePresence>
 
-      {/* Sidebar — Navy Dark */}
+      {/* ── Sidebar ──
+          Mobile/Tablet (<lg): fixed drawer, slides in from left/right
+          Desktop (lg+):       static, full (w-72) or icon-only (w-20)
+      */}
       <aside
-        className={`fixed lg:static inset-y-0 z-50 w-72 transition-all duration-300 ease-in-out lg:transform-none ${isRtl ? 'right-0' : 'left-0'
-          } ${isMobileOpen
+        ref={sidebarRef}
+        style={{ background: 'var(--sidebar)' }}
+        className={[
+          // ─ Base ─
+          'inset-y-0 z-50 flex-shrink-0',
+          // Mobile & Tablet: fixed drawer; Desktop: static in-flow
+          'fixed lg:static',
+          // Mobile & Tablet always full drawer width
+          'w-72',
+          // Desktop: responds to isSidebarOpen
+          isSidebarOpen ? 'lg:w-72' : 'lg:w-20',
+          // ─ Slide: mobile/tablet only ─
+          isMobileOpen
             ? 'translate-x-0'
             : isRtl
               ? 'translate-x-full lg:translate-x-0'
-              : '-translate-x-full lg:translate-x-0'
-          } ${!isSidebarOpen && 'lg:w-20'}`}
-        style={{ background: 'var(--sidebar)' }}
+              : '-translate-x-full lg:translate-x-0',
+          // ─ RTL anchor ─
+          isRtl ? 'right-0' : 'left-0',
+          // ─ Smooth transition ─
+          'transition-all duration-300 ease-in-out',
+        ].join(' ')}
       >
-        <div className="h-full flex flex-col border-r border-[var(--sidebar-border)]" style={isRtl ? { borderRight: 'none', borderLeft: '1px solid var(--sidebar-border)' } : {}}>
+        <div
+          className="h-full flex flex-col border-r border-[var(--sidebar-border)]"
+          style={isRtl ? { borderRight: 'none', borderLeft: '1px solid var(--sidebar-border)' } : {}}
+        >
           {/* Logo */}
-          <div className="h-20 flex items-center justify-between px-5 border-b border-[var(--sidebar-border)]">
+          <div className="h-16 md:h-20 flex items-center justify-between px-4 md:px-5 border-b border-[var(--sidebar-border)]">
             <Link to="/admin" className="flex items-center gap-3 overflow-hidden">
-              <MRLogo size={isSidebarOpen ? 'sm' : 'xs'} showText={isSidebarOpen} animated={false} dark={true} />
+              {/* Desktop: respects isSidebarOpen; Tablet/Mobile: always full (icon+text) inside drawer */}
+              <MRLogo
+                size={(isMobileOpen || isSidebarOpen) ? 'sm' : 'xs'}
+                showText={isMobileOpen || isSidebarOpen}
+                animated={false}
+                dark={true}
+              />
             </Link>
+            {/* X button inside drawer on mobile/tablet */}
+            <button
+              className="lg:hidden p-1.5 rounded-lg text-[var(--sidebar-foreground)]/60 hover:bg-[var(--sidebar-accent)] transition-colors"
+              onClick={() => setIsMobileOpen(false)}
+              aria-label="Close sidebar"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
           {/* Nav */}
-          <div className="flex-1 overflow-y-auto py-4 px-3 space-y-1 scrollbar-hide">
+          <div className="flex-1 overflow-y-auto py-4 px-2 md:px-3 space-y-1 scrollbar-hide">
             {navLinks.map((link) => {
               const Icon = link.icon;
-              const isActive = location.pathname === link.path || (link.path !== '/admin' && location.pathname.startsWith(link.path));
+              const isActive =
+                location.pathname === link.path ||
+                (link.path !== '/admin' && location.pathname.startsWith(link.path));
+              // Show text: on mobile (drawer) always full; on tablet always icon; on desktop respects isSidebarOpen
+              const showText = isMobileOpen || isSidebarOpen;
 
               return (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${isActive
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+                    showText ? '' : 'justify-center'
+                  } ${isActive
                     ? 'text-[var(--sidebar-primary-foreground)]'
                     : 'hover:bg-[var(--sidebar-accent)]'
-                    }`}
-                  style={isActive ? { background: 'var(--sidebar-primary)', color: 'var(--sidebar-primary-foreground)' } : { color: 'var(--sidebar-foreground)' }}
-                  title={!isSidebarOpen ? link.name : undefined}
+                  }`}
+                  style={
+                    isActive
+                      ? { background: 'var(--sidebar-primary)', color: 'var(--sidebar-primary-foreground)' }
+                      : { color: 'var(--sidebar-foreground)' }
+                  }
+                  title={!showText ? link.name : undefined}
+                  onClick={() => setIsMobileOpen(false)}
                 >
                   <Icon className="w-5 h-5 shrink-0" style={isActive ? {} : { opacity: 0.7 }} />
-                  {isSidebarOpen && <span className="font-medium text-sm truncate">{link.name}</span>}
+                  {showText && <span className="font-medium text-sm truncate">{link.name}</span>}
                 </Link>
               );
             })}
@@ -173,25 +276,41 @@ export const AdminLayout: React.FC = () => {
 
           {/* User */}
           <div className="p-3 border-t border-[var(--sidebar-border)]">
-            <div className={`flex items-center gap-3 px-3 py-3 rounded-xl ${!isSidebarOpen && 'justify-center'}`} style={{ background: 'var(--sidebar-accent)' }}>
-              <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold shrink-0 text-sm" style={{ background: 'var(--sidebar-primary)', color: 'var(--sidebar-primary-foreground)' }}>
+            <div
+              className={`flex items-center gap-3 px-3 py-3 rounded-xl ${
+                (isMobileOpen || isSidebarOpen) ? '' : 'justify-center'
+              }`}
+              style={{ background: 'var(--sidebar-accent)' }}
+            >
+              <div
+                className="w-10 h-10 rounded-full flex items-center justify-center font-bold shrink-0 text-sm"
+                style={{ background: 'var(--sidebar-primary)', color: 'var(--sidebar-primary-foreground)' }}
+              >
                 {user?.name?.charAt(0).toUpperCase() || 'A'}
               </div>
-              {isSidebarOpen && (
+              {(isMobileOpen || isSidebarOpen) && (
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold truncate" style={{ color: 'var(--sidebar-foreground)' }}>{user?.name}</p>
-                  <p className="text-xs truncate" style={{ color: 'var(--sidebar-foreground)', opacity: 0.6 }}>{user?.email}</p>
+                  <p className="text-sm font-bold truncate" style={{ color: 'var(--sidebar-foreground)' }}>
+                    {user?.name}
+                  </p>
+                  <p className="text-xs truncate" style={{ color: 'var(--sidebar-foreground)', opacity: 0.6 }}>
+                    {user?.email}
+                  </p>
                 </div>
               )}
             </div>
 
             <button
               onClick={handleLogout}
-              className={`mt-2 w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors ${!isSidebarOpen && 'justify-center'}`}
-              title={!isSidebarOpen ? t('admin.logout') : undefined}
+              className={`mt-2 w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-400 hover:bg-red-500/10 transition-colors ${
+                (isMobileOpen || isSidebarOpen) ? '' : 'justify-center'
+              }`}
+              title={!(isMobileOpen || isSidebarOpen) ? t('admin.logout') : undefined}
             >
               <LogOut className="w-5 h-5 shrink-0" />
-              {isSidebarOpen && <span className="font-medium text-sm">{t('admin.logout')}</span>}
+              {(isMobileOpen || isSidebarOpen) && (
+                <span className="font-medium text-sm">{t('admin.logout')}</span>
+              )}
             </button>
           </div>
         </div>
@@ -202,12 +321,25 @@ export const AdminLayout: React.FC = () => {
         {/* Top Header */}
         <header className="h-16 bg-[var(--card)] border-b border-[var(--border)] flex items-center justify-between px-4 sm:px-6 z-40 relative" style={{ boxShadow: 'var(--shadow-sm)' }}>
           <div className="flex items-center gap-3">
-            <button onClick={() => setIsMobileOpen(true)} className="lg:hidden p-2 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--secondary)]">
+
+            {/* Mobile/Tablet (<lg): opens drawer */}
+            <button
+              onClick={() => setIsMobileOpen(true)}
+              className="lg:hidden p-2 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--secondary)]"
+              aria-label="Open sidebar"
+            >
               <Menu className="w-5 h-5" />
             </button>
-            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="hidden lg:block p-2 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--secondary)]">
+
+            {/* Desktop (lg+): toggles between icon-only and full */}
+            <button
+              onClick={() => setIsSidebarOpen(prev => !prev)}
+              className="hidden lg:block p-2 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--secondary)] transition-colors"
+              aria-label="Toggle sidebar"
+            >
               <Menu className="w-5 h-5" />
             </button>
+
             <h2 className="text-lg font-bold text-[var(--foreground)] hidden sm:block">
               {navLinks.find(l => l.path === location.pathname)?.name || t('admin.dashboard')}
             </h2>
@@ -225,10 +357,11 @@ export const AdminLayout: React.FC = () => {
             <div className="hidden md:block h-5 w-px bg-[var(--border)] mx-1" />
 
             {/* Notification Bell — marks all read on open */}
-            <div className="relative">
+            <div ref={notifPanelRef} className="relative">
               <button
                 onClick={handleOpenNotifications}
                 className="p-2.5 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--secondary)] hover:text-[var(--primary)] transition-all relative"
+                aria-label={language === 'en' ? 'Notifications' : 'الإشعارات'}
               >
                 <Bell className="w-5 h-5" />
                 {unreadCount > 0 && (
@@ -242,62 +375,73 @@ export const AdminLayout: React.FC = () => {
                 )}
               </button>
 
-              {/* Notification Dropdown */}
+              {/* Notification Panel — fixed, full height below header */}
               <AnimatePresence>
                 {showNotifications && (
                   <motion.div
-                    initial={{ opacity: 0, y: 8, scale: 0.96 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                    transition={{ duration: 0.15 }}
-                    className={`
-                      fixed left-4 right-4 top-20 w-auto
-                      sm:absolute sm:top-12 ${isRtl ? 'sm:left-0 sm:right-auto' : 'sm:right-0 sm:left-auto'} sm:w-[25rem] 
-                      bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-xl overflow-hidden z-50
-                    `}
+                    initial={{ opacity: 0, x: isRtl ? -16 : 16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: isRtl ? -16 : 16 }}
+                    transition={{ duration: 0.18, ease: 'easeOut' }}
+                    style={{
+                      position: 'fixed',
+                      top: '4rem',           /* header h-16 */
+                      [isRtl ? 'left' : 'right']: 0,
+                      width: 'min(20rem, 100vw)',
+                      height: 'calc(100dvh - 4rem)',
+                      zIndex: 9999,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      borderLeft: isRtl ? 'none' : '1px solid var(--border)',
+                      borderRight: isRtl ? '1px solid var(--border)' : 'none',
+                    }}
+                    className="bg-[var(--card)] shadow-2xl overflow-hidden"
                   >
-                    <div className="flex flex-col border-b border-[var(--border)]">
-                      <div className="flex items-center justify-between p-4">
-                        <h3 className="font-bold text-[var(--foreground)] flex items-center gap-2">
-                          {language === 'en' ? 'Notifications' : 'الإشعارات'}
-                          {unreadCount > 0 && (
-                            <span className="bg-[var(--primary)] text-white text-[0.625rem] px-2 py-0.5 rounded-full">
-                              {unreadCount} {language === 'en' ? 'New' : 'جديد'}
-                            </span>
-                          )}
-                        </h3>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setShowNotifications(false); }}
-                          className="p-1 text-[var(--text-secondary)] hover:bg-[var(--secondary)] rounded-md transition-colors"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-
-                      {/* Tabs */}
-                      <div className="flex px-4 py-3 gap-2 overflow-x-auto scrollbar-hide border-b border-[var(--border)] bg-[var(--card)] relative z-10">
-                        {(['all', 'property', 'booking', 'system'] as const).map(tab => {
-                          const isActive = activeTab === tab;
-                          return (
-                            <button
-                              key={tab}
-                              onClick={(e) => { e.stopPropagation(); setActiveTab(tab); }}
-                              className={`flex-shrink-0 px-4 py-2 text-xs font-bold rounded-full transition-all duration-200 outline-none ${isActive
-                                ? 'bg-[var(--primary)] text-white shadow-md shadow-[var(--primary)]/30'
-                                : 'bg-[var(--secondary)] text-[var(--text-secondary)] hover:bg-[var(--border)] hover:text-[var(--foreground)]'
-                                }`}
-                            >
-                              {tab === 'all' && (language === 'en' ? 'All' : 'الكل')}
-                              {tab === 'property' && (language === 'en' ? 'Properties' : 'عقارات')}
-                              {tab === 'booking' && (language === 'en' ? 'Bookings' : 'حجوزات')}
-                              {tab === 'system' && (language === 'en' ? 'System & Finance' : 'نظام ومالية')}
-                            </button>
-                          );
-                        })}
-                      </div>
+                    {/* Header */}
+                    <div className="flex-shrink-0 flex items-center justify-between px-4 py-3.5 border-b border-[var(--border)] bg-[var(--card)]">
+                      <h3 className="font-bold text-[var(--foreground)] flex items-center gap-2">
+                        <Bell className="w-4 h-4 text-[var(--primary)]" />
+                        {language === 'en' ? 'Notifications' : 'الإشعارات'}
+                        {unreadCount > 0 && (
+                          <span className="bg-[var(--primary)] text-white text-[0.625rem] px-2 py-0.5 rounded-full">
+                            {unreadCount} {language === 'en' ? 'new' : 'جديد'}
+                          </span>
+                        )}
+                      </h3>
+                      <button
+                        onClick={() => setShowNotifications(false)}
+                        className="p-1.5 text-[var(--text-secondary)] hover:bg-[var(--secondary)] rounded-lg transition-colors"
+                        aria-label="Close"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
                     </div>
 
-                    <div className="max-h-[30rem] overflow-y-auto custom-scrollbar bg-[var(--card)]">
+                    {/* Tabs */}
+                    <div className="flex-shrink-0 flex px-3 py-2.5 gap-1.5 overflow-x-auto scrollbar-hide border-b border-[var(--border)] bg-[var(--secondary)]/40">
+                      {(['all', 'property', 'booking', 'system'] as const).map(tab => {
+                        const isActive = activeTab === tab;
+                        return (
+                          <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            className={`flex-shrink-0 px-3 py-1.5 text-xs font-bold rounded-full transition-all duration-200 ${
+                              isActive
+                                ? 'bg-[var(--primary)] text-white shadow-sm'
+                                : 'bg-[var(--card)] text-[var(--text-secondary)] hover:bg-[var(--border)] hover:text-[var(--foreground)] border border-[var(--border)]'
+                            }`}
+                          >
+                            {tab === 'all'      && (language === 'en' ? 'All'      : 'الكل')}
+                            {tab === 'property' && (language === 'en' ? 'Property' : 'عقارات')}
+                            {tab === 'booking'  && (language === 'en' ? 'Bookings' : 'حجوزات')}
+                            {tab === 'system'   && (language === 'en' ? 'System'   : 'نظام')}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Scrollable list — fills remaining height */}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar">
                       {filteredNotifications.length === 0 ? (
                         <div className="p-10 text-center flex flex-col items-center justify-center gap-3">
                           <div className="w-12 h-12 rounded-full bg-[var(--secondary)] flex items-center justify-center">
@@ -312,37 +456,55 @@ export const AdminLayout: React.FC = () => {
                           <button
                             key={n.id}
                             onClick={() => handleNotificationClick(n)}
-                            className={`w-full text-left p-4 hover:bg-[var(--secondary)] transition-all border-b border-[var(--border)] last:border-0 relative group flex items-start gap-4 ${!n.isRead ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}
+                            className={`w-full text-${isRtl ? 'right' : 'left'} px-4 py-3.5 hover:bg-[var(--secondary)] transition-all border-b border-[var(--border)] last:border-0 relative flex items-start gap-3 ${
+                              !n.isRead ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
+                            }`}
                           >
+                            {/* Unread indicator */}
                             {!n.isRead && (
-                              <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-r-full" />
+                              <span className={`absolute top-0 bottom-0 ${isRtl ? 'right-0' : 'left-0'} w-[0.1875rem] bg-[var(--primary)] rounded-full`} />
                             )}
 
-                            {/* Icon Box */}
-                            <div className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center border border-[var(--border)] ${!n.isRead ? 'bg-white dark:bg-gray-800 shadow-sm' : 'bg-[var(--secondary)]'}`}>
+                            {/* Icon */}
+                            <div className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center border border-[var(--border)] ${
+                              !n.isRead ? 'bg-white dark:bg-gray-800 shadow-sm' : 'bg-[var(--secondary)]'
+                            }`}>
                               {getNotificationIcon(n.type)}
                             </div>
 
-                            <div className="flex-1 min-w-0 flex flex-col">
-                              <div className="flex items-center justify-between gap-2 mb-1">
-                                <p className={`text-sm truncate ${!n.isRead ? 'font-bold text-[var(--foreground)]' : 'font-semibold text-[var(--text-secondary)]'}`}>
-                                  {n.title}
-                                </p>
-                                <p className="text-[0.625rem] font-medium text-[var(--text-secondary)] whitespace-nowrap opacity-80 flex items-center gap-1 shrink-0">
-                                  <Clock className="w-3 h-3" />
-                                  <span className="ltr-content">
-                                    {formatDistanceToNow(new Date(n.createdAt), {
-                                      addSuffix: true,
-                                      locale: language === 'ar' ? ar : enUS
-                                    })}
-                                  </span>
-                                </p>
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                              {/* Type badge + time */}
+                              <div className="flex items-center justify-between gap-2 mb-0.5">
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[0.5625rem] font-bold uppercase tracking-wide bg-[var(--primary)]/10 text-[var(--primary)]">
+                                  {getNotificationTypeLabel(n.type)}
+                                </span>
+                                <span className="text-[0.5625rem] text-[var(--text-secondary)] whitespace-nowrap flex items-center gap-0.5 opacity-70">
+                                  <Clock className="w-2.5 h-2.5" />
+                                  {formatDistanceToNow(new Date(n.createdAt), {
+                                    addSuffix: true,
+                                    locale: language === 'ar' ? ar : enUS,
+                                  })}
+                                </span>
                               </div>
-                              <p className={`text-xs leading-relaxed line-clamp-2 mb-1 ${!n.isRead ? 'text-[var(--text-secondary)] font-medium' : 'text-[var(--text-secondary)]/80'}`}>
-                                {n.body}
+
+                              {/* Title */}
+                              <p className={`text-sm leading-snug mb-0.5 ${
+                                !n.isRead ? 'font-bold text-[var(--foreground)]' : 'font-semibold text-[var(--text-secondary)]'
+                              }`}>
+                                {n.title}
                               </p>
+
+                              {/* Body — full text, 2 lines */}
+                              {n.body && (
+                                <p className="text-xs text-[var(--text-secondary)] leading-relaxed line-clamp-2">
+                                  {n.body}
+                                </p>
+                              )}
+
+                              {/* Extra description if present */}
                               {n.description && (
-                                <p className="text-[0.6875rem] text-[var(--text-secondary)]/70 italic line-clamp-1 truncate">
+                                <p className="text-[0.625rem] text-[var(--text-secondary)]/60 italic mt-0.5 truncate">
                                   {n.description}
                                 </p>
                               )}
@@ -367,10 +529,7 @@ export const AdminLayout: React.FC = () => {
           </div>
         </header>
 
-        {/* Close notifications on outside click */}
-        {showNotifications && (
-          <div className="fixed inset-0 z-30" onClick={() => setShowNotifications(false)} />
-        )}
+        {/* Backdrop removed — useRef handles click-outside */}
 
         {/* Page Content */}
         <main className="flex-1 overflow-hidden min-h-0">

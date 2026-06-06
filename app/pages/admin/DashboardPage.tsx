@@ -55,7 +55,7 @@ export const DashboardPage: React.FC = () => {
       <div className="grid lg:grid-cols-3 gap-5">
         <motion.div variants={iV} className="lg:col-span-2 bg-[var(--card)] p-4 sm:p-6 rounded-2xl border border-[var(--border)] shadow-sm">
           <h3 className="text-lg font-bold text-[var(--foreground)] mb-4">{t('dashboard.revenueChart')}</h3>
-          <div className="h-[13.75rem] sm:h-[17.5rem] w-full"><ResponsiveContainer width="100%" height="100%"><AreaChart data={stats.monthlyRevenueData||[]} margin={{top:10,right:10,left:0,bottom:0}}>
+          <div className="h-[12.5rem] sm:h-[17.5rem] w-full"><ResponsiveContainer width="100%" height="100%"><AreaChart data={stats.monthlyRevenueData||[]} margin={{top:10,right:10,left:0,bottom:0}}>
             <defs><linearGradient id="cr" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/><stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/></linearGradient></defs>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)"/>
             <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill:'var(--text-secondary)',fontSize:'0.75rem'}} dy={10}/>

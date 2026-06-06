@@ -250,6 +250,7 @@ export const AdminCalendarPage: React.FC = () => {
   const [selectedProp, setSelectedProp] = useState<Property | null>(null);
   const [showDetail, setShowDetail] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('month');
+  const [mobileViewMode, setMobileViewMode] = useState<'grid' | 'list'>('list');
   const [isMobile, setIsMobile] = useState(false);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -481,6 +482,68 @@ export const AdminCalendarPage: React.FC = () => {
     </div>
   );
 
+  // ── Mobile List ───────────────────────────────────────────────────────────
+  const renderMobileList = () => {
+    const rangeStart = dateRange[0];
+    const rs = new Date(rangeStart); rs.setHours(0,0,0,0);
+    const rangeEnd = dateRange[dateRange.length - 1];
+    const re = new Date(rangeEnd); re.setHours(23,59,59,999);
+    
+    const relevantBookings = bookings.filter(b => {
+      const pId = typeof b.propertyId === 'object' && b.propertyId ? b.propertyId._id : b.propertyId;
+      if (!filteredProps.some(p => p._id === pId)) return false;
+      const s = new Date(b.startDate); s.setHours(0,0,0,0);
+      const e = new Date(b.endDate); e.setHours(0,0,0,0);
+      if (e < rs || s > re) return false;
+      if (filterStatus !== 'all') {
+         if (filterStatus === 'available') return false;
+         if (filterStatus === 'checkout') {
+            const endStr = e.toISOString().slice(0, 10);
+            const inRange = dateRange.some(d => d.toISOString().slice(0,10) === endStr);
+            if (!inRange) return false;
+         } else if (b.status !== filterStatus) {
+            return false;
+         }
+      }
+      return true;
+    });
+
+    if (relevantBookings.length === 0) {
+      return <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">{isAr ? 'لا توجد حجوزات في هذه الفترة.' : 'No bookings in this period.'}</div>
+    }
+
+    return (
+      <div className="flex-1 overflow-auto bg-gray-50 p-4 space-y-3">
+        {relevantBookings.map(b => {
+           const pId = typeof b.propertyId === 'object' && b.propertyId ? b.propertyId._id : b.propertyId;
+           const prop = properties.find(p => p._id === pId);
+           const pName = prop ? (isAr && (prop as any).titleAr ? (prop as any).titleAr : prop.title) : '—';
+           const statusLabels: Record<string, { ar: string; en: string }> = {
+                  confirmed: { ar: 'مؤكد', en: 'Confirmed' },
+                  pending: { ar: 'في الانتظار', en: 'Pending' },
+                  cancelled: { ar: 'ملغى', en: 'Cancelled' },
+           };
+           const sColor = STATUS_COLORS[b.status as keyof typeof STATUS_COLORS] || STATUS_COLORS.confirmed;
+           const sLabel = isAr ? (statusLabels[b.status]?.ar || b.status) : (statusLabels[b.status]?.en || b.status);
+           return (
+             <div key={(b as any)._id || b.id} onClick={() => handleClickBooking(b, prop)} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex flex-col gap-2 active:scale-[0.98] transition-transform">
+               <div className="flex justify-between items-start">
+                 <h3 className="font-bold text-gray-900 text-sm truncate pr-2">{pName}</h3>
+                 <span className="px-2 py-0.5 rounded-full text-[0.625rem] font-bold whitespace-nowrap" style={{ backgroundColor: sColor.bg, color: sColor.text, border: `1px solid ${sColor.border}` }}>
+                   {sLabel}
+                 </span>
+               </div>
+               <div className="flex items-center text-gray-500 text-xs gap-3 mt-1">
+                 <div className="flex items-center gap-1.5"><Calendar size={12} /> {formatDate(b.startDate, language)} - {formatDate(b.endDate, language)}</div>
+                 <div className="flex items-center gap-1.5"><Users size={12} /> {typeof b.clientId === 'object' ? b.clientId?.name : (isAr ? 'ضيف' : 'Guest')}</div>
+               </div>
+             </div>
+           );
+        })}
+      </div>
+    );
+  };
+
   // ── Desktop Grid ──────────────────────────────────────────────────────────
   const renderDesktopGrid = () => (
     <div ref={scrollContainerRef} className="flex-1 overflow-auto bg-gray-50/40" style={{ scrollbarWidth: 'thin' }}>
@@ -564,6 +627,12 @@ export const AdminCalendarPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            {isMobile && (
+              <div className="flex items-center bg-gray-100 rounded-lg p-[0.1875rem] gap-[0.125rem]">
+                <button onClick={() => setMobileViewMode('list')} className={`p-1.5 rounded-md transition ${mobileViewMode === 'list' ? 'bg-white text-[#534AB7] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}><Rows size={14} /></button>
+                <button onClick={() => setMobileViewMode('grid')} className={`p-1.5 rounded-md transition ${mobileViewMode === 'grid' ? 'bg-white text-[#534AB7] shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}><LayoutGrid size={14} /></button>
+              </div>
+            )}
             <div className="flex items-center bg-gray-100 rounded-lg p-[0.1875rem] gap-[0.125rem]">
               {(['month', 'week'] as ViewMode[]).map(v => (
                 <button key={v} onClick={() => setViewMode(v)}
@@ -623,7 +692,7 @@ export const AdminCalendarPage: React.FC = () => {
       </div>
 
       {/* ══════════════════════════ GRID ══════════════════════════════ */}
-      {isMobile ? renderMobileGrid() : renderDesktopGrid()}
+      {isMobile ? (mobileViewMode === 'list' ? renderMobileList() : renderMobileGrid()) : renderDesktopGrid()}
 
       {/* ══════════════════════════ DETAIL MODAL ══════════════════════ */}
       <AnimatePresence>

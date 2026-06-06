@@ -345,10 +345,10 @@ const conversionData = [
                 : 'تحليلات الحجوزات'}
             </h3>
 
-            <div dir="ltr">
+            <div dir="ltr" className="h-[12.5rem] sm:h-[17.5rem] w-full">
               <ResponsiveContainer
                 width="100%"
-                height={300}
+                height="100%"
               >
                 <BarChart data={conversionData}>
                   <CartesianGrid
@@ -421,10 +421,10 @@ const conversionData = [
                 : 'العقارات حسب النوع'}
             </h3>
 
-            <div dir="ltr">
+            <div dir="ltr" className="h-[12.5rem] sm:h-[17.5rem] w-full">
               <ResponsiveContainer
                 width="100%"
-                height={300}
+                height="100%"
               >
                 <BarChart data={propertyTypeData}>
                   <CartesianGrid

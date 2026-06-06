@@ -40,9 +40,9 @@ export const ContactPage: React.FC = () => {
         title={language === 'en' ? 'Contact Us' : 'اتصل بنا'} 
         description={language === 'en' ? 'Have a question? We\'d love to hear from you.' : 'لديك سؤال؟ يسعدنا سماع رأيك.'} 
       />
-      <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="mx-auto max-w-7xl px-4 py-8 w-full page-enter">
+      <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }} className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 w-full page-enter">
         <div className="text-center mb-12">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--foreground)] tracking-tight">{t('contact.title')}</h1>
+        <h1 className="text-[clamp(1.5rem,4vw,2.5rem)] font-bold text-[var(--foreground)] tracking-tight">{t('contact.title')}</h1>
         <p className="mt-3 text-[var(--text-secondary)] max-w-lg mx-auto">{language === 'en' ? 'Have a question? We\'d love to hear from you.' : 'لديك سؤال؟ يسعدنا سماع رأيك.'}</p>
       </div>
 
