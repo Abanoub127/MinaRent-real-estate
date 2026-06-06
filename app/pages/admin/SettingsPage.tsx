@@ -11,19 +11,7 @@ import { useApp } from '../../contexts/AppContext';
 import { Card } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
-
-const API = 'http://localhost:5000/api';
-
-const authHeaders = () => {
-  const token = localStorage.getItem('token');
-
-  return {
-    'Content-Type': 'application/json',
-    ...(token && {
-      Authorization: `Bearer ${token}`,
-    }),
-  };
-};
+import { updatePassword } from '../../../services/api';
 
 interface UserProfile {
   name: string;
@@ -47,12 +35,12 @@ export const SettingsPage: React.FC = () => {
     toggleLanguage,
   } = useApp();
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const [profileData, setProfileData] =
     useState<UserProfile>({
-      name: '',
-      email: '',
+      name: user?.name || '',
+      email: user?.email || '',
       phone: '',
     });
 
@@ -72,116 +60,19 @@ export const SettingsPage: React.FC = () => {
     });
 
   useEffect(() => {
-    fetchSettings();
+    setLoading(false);
   }, []);
 
-  const fetchSettings = async () => {
-    try {
-      setLoading(true);
+  const themeLabel =
+    theme === 'light'
+      ? language === 'en' ? 'Light mode' : 'الوضع الفاتح'
+      : language === 'en' ? 'Dark mode' : 'الوضع الداكن';
 
-      const response = await fetch(
-        `${API}/settings`,
-        {
-          method: 'GET',
-          headers: authHeaders(),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch settings');
-      }
-
-      const data = await response.json();
-
-      setProfileData({
-        name: data?.user?.name || user?.name || '',
-        email:
-          data?.user?.email ||
-          user?.email ||
-          '',
-        phone: data?.user?.phone || '',
-      });
-
-      setNotifications({
-        email:
-          data?.notifications?.email ??
-          true,
-        bookings:
-          data?.notifications?.bookings ??
-          true,
-        messages:
-          data?.notifications?.messages ??
-          true,
-        updates:
-          data?.notifications?.updates ??
-          false,
-      });
-    } catch (error) {
-      console.error(
-        'Error fetching settings:',
-        error
-      );
-
-      setProfileData({
-        name: user?.name || '',
-        email: user?.email || '',
-        phone: '',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-let themeLabel = '';
-
-if (theme === 'light') {
-  themeLabel =
-    language === 'en'
-      ? 'Light mode'
-      : 'الوضع الفاتح';
-} else {
-  themeLabel =
-    language === 'en'
-      ? 'Dark mode'
-      : 'الوضع الداكن';
-}
   const handleProfileSubmit = async (
     e: React.FormEvent<HTMLFormElement>
   ) => {
     e.preventDefault();
-
-    try {
-      const response = await fetch(
-        `${API}/settings/profile`,
-        {
-          method: 'PUT',
-          headers: authHeaders(),
-          body: JSON.stringify(profileData),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          'Failed to update profile'
-        );
-      }
-
-      alert(
-        language === 'en'
-          ? 'Profile updated successfully!'
-          : 'تم تحديث الملف الشخصي بنجاح!'
-      );
-    } catch (error) {
-      console.error(
-        'Profile update error:',
-        error
-      );
-
-      alert(
-        language === 'en'
-          ? 'Failed to update profile'
-          : 'فشل تحديث الملف الشخصي'
-      );
-    }
+    console.log('Profile update - UI only (no backend endpoint)');
   };
 
   const handlePasswordSubmit = async (
@@ -203,25 +94,7 @@ if (theme === 'light') {
     }
 
     try {
-      const response = await fetch(
-        `${API}/settings/password`,
-        {
-          method: 'PUT',
-          headers: authHeaders(),
-          body: JSON.stringify({
-            currentPassword:
-              passwordData.current,
-            newPassword: passwordData.new,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          'Failed to update password'
-        );
-      }
-
+      await updatePassword(passwordData.current, passwordData.new);
       alert(
         language === 'en'
           ? 'Password changed successfully!'
@@ -246,66 +119,37 @@ if (theme === 'light') {
       );
     }
   };
-const notificationLabels: Record<
-  string,
-  { en: string; ar: string }
-> = {
-  email: {
-    en: 'Email Notifications',
-    ar: 'إشعارات البريد الإلكتروني',
-  },
-  bookings: {
-    en: 'Booking Alerts',
-    ar: 'تنبيهات الحجز',
-  },
-  messages: {
-    en: 'Message Notifications',
-    ar: 'إشعارات الرسائل',
-  },
-  updates: {
-    en: 'Product Updates',
-    ar: 'تحديثات المنتج',
-  },
-};
+
+  const notificationLabels: Record<
+    string,
+    { en: string; ar: string }
+  > = {
+    email: {
+      en: 'Email Notifications',
+      ar: 'إشعارات البريد الإلكتروني',
+    },
+    bookings: {
+      en: 'Booking Alerts',
+      ar: 'تنبيهات الحجز',
+    },
+    messages: {
+      en: 'Message Notifications',
+      ar: 'إشعارات الرسائل',
+    },
+    updates: {
+      en: 'Product Updates',
+      ar: 'تحديثات المنتج',
+    },
+  };
+
   const handleNotificationToggle =
     async (
       key: keyof NotificationSettings
     ) => {
-      const updatedNotifications = {
-        ...notifications,
-        [key]: !notifications[key],
-      };
-
-      setNotifications(updatedNotifications);
-
-      try {
-        const response = await fetch(
-          `${API}/settings/notifications`,
-          {
-            method: 'PUT',
-            headers: authHeaders(),
-            body: JSON.stringify(
-              updatedNotifications
-            ),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            'Failed to update notifications'
-          );
-        }
-      } catch (error) {
-        console.error(
-          'Notification update error:',
-          error
-        );
-
-        setNotifications((prev) => ({
-  ...prev,
-  [key]: !prev[key as keyof NotificationSettings],
-}));
-      }
+      setNotifications((prev) => ({
+        ...prev,
+        [key]: !prev[key],
+      }));
     };
 
   if (loading) {
@@ -328,7 +172,6 @@ const notificationLabels: Record<
           : 'الإعدادات'}
       </h1>
 
-      {/* Profile Settings */}
       <Card>
         <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
@@ -419,7 +262,6 @@ const notificationLabels: Record<
         </div>
       </Card>
 
-      {/* Password Settings */}
       <Card>
         <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
@@ -511,7 +353,6 @@ const notificationLabels: Record<
         </div>
       </Card>
 
-      {/* Appearance */}
       <Card>
         <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
@@ -548,8 +389,8 @@ const notificationLabels: Record<
                 </p>
 
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-  {themeLabel}
-</p>
+                  {themeLabel}
+                </p>
               </div>
 
               <Button
@@ -592,7 +433,6 @@ const notificationLabels: Record<
         </div>
       </Card>
 
-      {/* Notifications */}
       <Card>
         <div className="p-6">
           <div className="flex items-center gap-3 mb-6">
@@ -625,12 +465,12 @@ const notificationLabels: Record<
               >
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">
-  {
-    notificationLabels[key]?.[
-      language === 'en' ? 'en' : 'ar'
-    ]
-  }
-</p>
+                    {
+                      notificationLabels[key]?.[
+                        language === 'en' ? 'en' : 'ar'
+                      ]
+                    }
+                  </p>
                 </div>
 
                 <button

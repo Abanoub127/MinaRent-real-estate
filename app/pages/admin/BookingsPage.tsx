@@ -12,19 +12,12 @@ import {
   SelectItem,
   SelectValue,
 } from '../../components/ui/Select';
-
-const API = 'http://localhost:5000/api';
-
-const authHeaders = () => ({
-  'Content-Type': 'application/json',
-  Authorization: `Bearer ${localStorage.getItem('token')}`,
-});
+import { getProperties, getBookings, updateBooking, deleteBooking, createBooking, type Property, type Booking } from '../../../services/api';
 
 type BookingStatus = 'pending' | 'confirmed' | 'cancelled';
 
-interface Booking {
+interface LocalBooking {
   _id: string;
-
   propertyId: {
     _id: string;
     title: string;
@@ -32,29 +25,24 @@ interface Booking {
     location: string;
     locationAr: string;
   };
-
   clientId: {
     _id: string;
     name: string;
     phone: string;
     email: string;
   };
-
   startDate: string;
   endDate: string;
-
   paidAmount?: number;
-
   status: BookingStatus;
-
   notes?: string;
 }
 export const BookingsPage: React.FC = () => {
   const { t, language } = useApp();
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [bookings, setLocalBookings] = useState<LocalBooking[]>([]);
   const [properties, setProperties] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
+  const [editingBooking, setEditingBooking] = useState<LocalBooking | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
@@ -70,15 +58,9 @@ export const BookingsPage: React.FC = () => {
 
   const fetchAll = async () => {
     try {
-      const [bRes, pRes] = await Promise.all([
-        fetch(`${API}/bookings`, { headers: authHeaders() }),
-        fetch(`${API}/properties`, { headers: authHeaders() }),
-      ]);
-      const [bData, pData] = await Promise.all([bRes.json(), pRes.json()]);
-      setBookings(Array.isArray(bData) ? bData : []);
-      setProperties(
-        Array.isArray(pData) ? pData : pData.properties || []
-      );
+      const [p, b] = await Promise.all([getProperties(1, 100), getBookings()]);
+      setProperties(p.properties || []);
+      setLocalBookings(b as any);
     } catch (err) {
       console.error(err);
     } finally {
@@ -90,7 +72,7 @@ export const BookingsPage: React.FC = () => {
     fetchAll();
   }, []);
 
-  const handleOpenModal = (booking?: Booking) => {
+  const handleOpenModal = (booking?: LocalBooking) => {
     if (booking) {
       setEditingBooking(booking);
       setFormData({
@@ -126,16 +108,12 @@ export const BookingsPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const body = JSON.stringify({ ...formData, paidAmount: Number(formData.paidAmount) || 0 });
+    const body: any = { ...formData, paidAmount: Number(formData.paidAmount) || 0 };
     try {
       if (editingBooking) {
-        await fetch(`${API}/bookings/${editingBooking._id}`, {
-          method: 'PUT',
-          headers: authHeaders(),
-          body,
-        });
+        await updateBooking(editingBooking._id, body);
       } else {
-        await fetch(`${API}/bookings`, { method: 'POST', headers: authHeaders(), body });
+        await createBooking(body);
       }
       await fetchAll();
       handleCloseModal();
@@ -147,7 +125,7 @@ export const BookingsPage: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (!confirm(language === 'en' ? 'Delete this booking?' : 'حذف هذا الحجز؟')) return;
     try {
-      await fetch(`${API}/bookings/${id}`, { method: 'DELETE', headers: authHeaders() });
+      await deleteBooking(id);
       await fetchAll();
     } catch (err) {
       console.error(err);
@@ -156,11 +134,7 @@ export const BookingsPage: React.FC = () => {
 
   const handleStatusChange = async (id: string, status: BookingStatus) => {
     try {
-      await fetch(`${API}/bookings/${id}`, {
-        method: 'PUT',
-        headers: authHeaders(),
-        body: JSON.stringify({ status }),
-      });
+      await updateBooking(id, { status });
       await fetchAll();
     } catch (err) {
       console.error(err);

@@ -30,30 +30,9 @@ import {
   Tooltip,
 } from 'recharts';
 
-const API = 'http://localhost:5000/api';
-
-const authHeaders = () => {
-  const token = localStorage.getItem('token');
-
-  return {
-    'Content-Type': 'application/json',
-
-    ...(token && {
-      Authorization: `Bearer ${token}`,
-    }),
-  };
-};
+import { getTransactions, createTransaction, type Transaction } from '../../../services/api';
 
 type TransactionType = 'revenue' | 'expense';
-
-interface Transaction {
-  _id: string;
-  type: TransactionType;
-  amount: number;
-  description: string;
-  category: string;
-  date: string;
-}
 
 interface FinancialStats {
   totalRevenue: number;
@@ -86,32 +65,10 @@ export const FinancialPage: React.FC = () => {
 
   const fetchTransactions = async () => {
     try {
-      const res = await fetch(`${API}/transactions`, {
-        headers: authHeaders(),
-      });
-
-      const data = await res.json();
-
-      const safeTransactions = Array.isArray(data)
-        ? data
-        : [];
-
-      setTransactions(safeTransactions);
-
-      const totalRevenue = safeTransactions
-        .filter((t: Transaction) => t.type === 'revenue')
-        .reduce(
-          (sum: number, t: Transaction) => sum + (t.amount || 0),
-          0,
-        );
-
-      const totalExpenses = safeTransactions
-        .filter((t: Transaction) => t.type === 'expense')
-        .reduce(
-          (sum: number, t: Transaction) => sum + (t.amount || 0),
-          0,
-        );
-
+      const t = await getTransactions();
+      setTransactions(Array.isArray(t) ? t : []);
+      const totalRevenue = t.filter((item) => item.type === 'revenue').reduce((sum, item) => sum + (item.amount || 0), 0);
+      const totalExpenses = t.filter((item) => item.type === 'expense').reduce((sum, item) => sum + (item.amount || 0), 0);
       setStats({
         totalRevenue,
         totalExpenses,
@@ -119,9 +76,7 @@ export const FinancialPage: React.FC = () => {
       });
     } catch (error) {
       console.error(error);
-
       setTransactions([]);
-
       setStats({
         totalRevenue: 0,
         totalExpenses: 0,
@@ -155,17 +110,13 @@ export const FinancialPage: React.FC = () => {
     e.preventDefault();
 
     try {
-      await fetch(`${API}/transactions`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({
-          type: formData.type,
-          amount: Number(formData.amount) || 0,
-          description: formData.description,
-          category: formData.category,
-          date: formData.date,
-          notes: formData.notes,
-        }),
+      await createTransaction({
+        type: formData.type,
+        amount: Number(formData.amount) || 0,
+        description: formData.description,
+        category: formData.category,
+        date: formData.date,
+        notes: formData.notes,
       });
 
       await fetchTransactions();
@@ -262,7 +213,6 @@ export const FinancialPage: React.FC = () => {
         </Button>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="p-6">
           <div className="flex items-start justify-between">
@@ -274,7 +224,7 @@ export const FinancialPage: React.FC = () => {
               </p>
 
               <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                EGP{' '}
+                EGP {' '}
                 {(
                   stats.totalRevenue / 1000000
                 ).toFixed(1)}
@@ -298,7 +248,7 @@ export const FinancialPage: React.FC = () => {
               </p>
 
               <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                EGP{' '}
+                EGP {' '}
                 {(
                   stats.totalExpenses / 1000
                 ).toFixed(0)}
@@ -322,7 +272,7 @@ export const FinancialPage: React.FC = () => {
               </p>
 
               <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                EGP{' '}
+                EGP {' '}
                 {(
                   stats.profit / 1000000
                 ).toFixed(1)}
@@ -337,7 +287,6 @@ export const FinancialPage: React.FC = () => {
         </Card>
       </div>
 
-      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <div className="p-6">
@@ -428,7 +377,6 @@ export const FinancialPage: React.FC = () => {
         </Card>
       </div>
 
-      {/* Transactions */}
       <Card>
         <div className="p-6">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -447,7 +395,7 @@ export const FinancialPage: React.FC = () => {
 
                 return (
                   <div
-                    key={transaction._id}
+                    key={transaction.id}
                     className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
                   >
                     <div className="flex items-center gap-3">
@@ -471,8 +419,8 @@ export const FinancialPage: React.FC = () => {
                         </p>
 
                         <p className="text-sm text-gray-500 dark:text-gray-400">
-                          {transaction.category}{' '}
-                          •{' '}
+                          {transaction.category} {' '}
+                          • {' '}
                           {transaction.date
                             ? new Date(
                                 transaction.date,
@@ -490,7 +438,7 @@ export const FinancialPage: React.FC = () => {
                       }`}
                     >
                       {isRevenue ? '+' : '-'}
-                      EGP{' '}
+                      EGP {' '}
                       {transaction.amount.toLocaleString()}
                     </div>
                   </div>
@@ -508,7 +456,6 @@ export const FinancialPage: React.FC = () => {
         </div>
       </Card>
 
-      {/* Modal */}
       <Modal
         isOpen={showModal}
         onClose={handleCloseModal}
@@ -646,17 +593,17 @@ export const FinancialPage: React.FC = () => {
           />
 
           <TextArea
-  name="notes"
-  label={language === 'en' ? 'Notes' : 'ملاحظات'}
-  value={formData.notes}
-  onChange={(e) =>
-    setFormData((prev) => ({
-      ...prev,
-      notes: e.target.value,
-    }))
-  }
-  rows={3}
-/>
+            name="notes"
+            label={language === 'en' ? 'Notes' : 'ملاحظات'}
+            value={formData.notes}
+            onChange={(e) =>
+              setFormData((prev) => ({
+                ...prev,
+                notes: e.target.value,
+              }))
+            }
+            rows={3}
+          />
         </form>
       </Modal>
     </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Eye,
   MousePointerClick,
@@ -21,19 +21,7 @@ import {
   Legend,
 } from 'recharts';
 
-const API = 'http://localhost:5000/api';
-
-const authHeaders = () => {
-  const token = localStorage.getItem('token');
-
-  return {
-    'Content-Type': 'application/json',
-
-    ...(token && {
-      Authorization: `Bearer ${token}`,
-    }),
-  };
-};
+import { getProperties, getStats } from '../../../services/api';
 
 type PropertyType =
   | 'villa'
@@ -42,46 +30,32 @@ type PropertyType =
   | 'land'
   | 'commercial';
 
-interface Property {
+interface LocalProperty {
   _id: string;
-
   title: string;
-
   titleAr: string;
-
   location: string;
-
   locationAr: string;
-
   type: PropertyType;
-
   views: number;
 }
 
 interface Stats {
   totalProperties: number;
-
   totalBookings: number;
-
   totalClients: number;
-
   totalRevenue: number;
-
   totalExpenses: number;
-
   profit: number;
-
   monthlyRevenue: number;
-
   pendingBookings: number;
-
   confirmedBookings: number;
 }
 
 export const AnalyticsPage: React.FC = () => {
   const { language } = useApp();
 
-  const [properties, setProperties] = useState<Property[]>([]);
+  const [properties, setProperties] = useState<LocalProperty[]>([]);
 
   const [stats, setStats] = useState<Stats | null>(null);
 
@@ -89,28 +63,9 @@ export const AnalyticsPage: React.FC = () => {
 
   const fetchAnalytics = async () => {
     try {
-      const [propertiesRes, statsRes] = await Promise.all([
-        fetch(`${API}/properties`, {
-          headers: authHeaders(),
-        }),
-
-        fetch(`${API}/stats`, {
-          headers: authHeaders(),
-        }),
-      ]);
-
-      const [propertiesData, statsData] = await Promise.all([
-        propertiesRes.json(),
-        statsRes.json(),
-      ]);
-
-      setProperties(
-        Array.isArray(propertiesData)
-          ? propertiesData
-          : []
-      );
-
-      setStats(statsData);
+      const [p, s] = await Promise.all([getProperties(1, 100), getStats()]);
+      setProperties((p.properties || []) as LocalProperty[]);
+      setStats(s);
     } catch (error) {
       console.error(error);
     } finally {
@@ -179,27 +134,28 @@ export const AnalyticsPage: React.FC = () => {
     },
   ].filter((item) => item.count > 0);
 
-const totalViews = properties.reduce(
-  (sum, property) => sum + property.views,
-  0
-);
+  const totalViews = properties.reduce(
+    (sum, property) => sum + property.views,
+    0
+  );
 
-const conversionData = [
-  {
-    month:
-      language === 'en'
-        ? 'Analytics'
-        : 'التحليلات',
+  const conversionData = [
+    {
+      month:
+        language === 'en'
+          ? 'Analytics'
+          : 'التحليلات',
 
-    views: totalViews,
+      views: totalViews,
 
-    bookings:
-      stats?.totalBookings || 0,
+      bookings:
+        stats?.totalBookings || 0,
 
-    sales:
-      stats?.confirmedBookings || 0,
-  },
-];
+      sales:
+        stats?.confirmedBookings || 0,
+    },
+  ];
+
   const topLocationsMap = properties.reduce(
     (
       acc: Record<
@@ -234,9 +190,8 @@ const conversionData = [
     {}
   );
 
-  const topLocations = Object.values(
-  topLocationsMap
-).sort((a, b) => b.views - a.views);
+  const topLocations = Object.values(topLocationsMap)
+    .sort((a, b) => b.views - a.views);
 
   if (loading) {
     return (

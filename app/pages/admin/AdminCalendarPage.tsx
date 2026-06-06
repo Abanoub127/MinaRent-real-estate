@@ -637,7 +637,7 @@ if (filterStatus !== 'all') {
   );
 
   return (
-    <div className="flex flex-col h-full w-full bg-[var(--background)] overflow-hidden">
+    <div className="flex flex-col h-full w-full bg-[var(--background)] overflow-hidden" style={{ height: '100%', minHeight: 0 }}>
 
       {/* ══════════════════════════ TOOLBAR ══════════════════════════ */}
       <div className="flex-shrink-0 bg-[var(--card)] border-b border-[var(--border)] px-4 md:px-6 lg:px-8 py-2.5 flex flex-col gap-2.5 z-10"
