@@ -154,11 +154,17 @@ export const AdminLayout: React.FC = () => {
 
 {/* Page Content */}
         <main className="flex-1 overflow-hidden flex flex-col" style={{ minHeight: 0 }}>
-          <div className="flex-1 overflow-auto">
-            <div className="w-full mx-auto px-4 sm:px-5 lg:px-6 xl:px-8 py-6 sm:py-8 max-w-7xl">
+          {location.pathname === '/admin/calendar' ? (
+            <div className="flex-1 overflow-hidden flex flex-col w-full h-full">
               <Outlet />
             </div>
-          </div>
+          ) : (
+            <div className="flex-1 overflow-auto">
+              <div className="w-full mx-auto px-4 sm:px-5 lg:px-6 xl:px-8 py-6 sm:py-8 max-w-7xl">
+                <Outlet />
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </div>

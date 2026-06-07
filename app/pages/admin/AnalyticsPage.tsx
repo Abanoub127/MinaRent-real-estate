@@ -20,6 +20,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  Cell,
 } from 'recharts';
 
 import { getProperties, getStats } from '../../../services/api';
@@ -328,9 +329,13 @@ export const AnalyticsPage: React.FC = () => {
 
                   <Bar
                     dataKey="count"
-                    fill="var(--primary)"
                     name={language === 'en' ? 'Count' : 'العدد'}
-                  />
+                  >
+                    {propertyTypeData.map((entry, index) => {
+                      const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
+                      return <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />;
+                    })}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>

@@ -52,8 +52,9 @@ const DesktopCell = memo(({
       <div
         className={`w-full h-full rounded-[0.25rem] border flex flex-col justify-center relative overflow-hidden select-none transition-opacity duration-150 ${hasBook ? 'cursor-pointer hover:brightness-95 active:scale-95' : ''}`}
         style={{
-          background: status === 'available' ? 'rgba(16, 185, 129, 0.25)' : hasBook ? colors.bg : 'transparent',
-          borderColor: status === 'available' ? '#34D399' : hasBook ? colors.border : 'transparent',
+          background: status === 'available' ? 'transparent' : colors.bg,
+          borderColor: status === 'available' ? 'transparent' : colors.border,
+          borderWidth: status === 'available' ? '0' : '1px',
           opacity: getOpacity,
         }}
       >
@@ -66,11 +67,6 @@ const DesktopCell = memo(({
               <Users size={9} />
               <span>{(cellBs[0] as any).guests ?? cellBs[0].totalDays}</span>
             </div>
-          </div>
-        )}
-        {!hasBook && filterStatus === 'available' && (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-[0.625rem] font-bold" style={{ color: '#10B981' }}>متاح</span>
           </div>
         )}
       </div>
@@ -226,13 +222,6 @@ export const AdminCalendarPage: React.FC = () => {
     }
   };
 
-  const filteredProps = useMemo(() =>
-    properties.filter(p =>
-      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p as any).titleAr?.includes(searchQuery) ||
-      p.location?.toLowerCase().includes(searchQuery.toLowerCase())
-    ), [properties, searchQuery]);
-
   const monthRange = useMemo(() => {
     const y = currentDate.getFullYear(), m = currentDate.getMonth();
     const last = new Date(y, m + 1, 0).getDate();
@@ -268,6 +257,41 @@ export const AdminCalendarPage: React.FC = () => {
     });
     return map;
   }, [bookings]);
+
+  const filteredProps = useMemo(() => {
+    let props = properties.filter(p =>
+      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p as any).titleAr?.includes(searchQuery) ||
+      p.location?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    if (filterStatus !== 'all') {
+      props = props.filter(p => {
+        let hasMatch = false;
+        for (const date of dateRange) {
+          const key = `${p._id}__${date.toISOString().slice(0, 10)}`;
+          const cellBs = bookingMap.get(key) || [];
+          const hasBook = cellBs.length > 0;
+          
+          let cellStatus = 'available';
+          if (hasBook) {
+            if (cellBs.some(b => b.status === 'cancelled')) cellStatus = 'cancelled';
+            else if (cellBs.some(b => b.status === 'pending')) cellStatus = 'pending';
+            else if (cellBs.some(b => b.status === 'expired')) cellStatus = 'expired';
+            else cellStatus = 'confirmed';
+          }
+          
+          if (cellStatus === filterStatus) {
+            hasMatch = true;
+            break;
+          }
+        }
+        return hasMatch;
+      });
+    }
+
+    return props;
+  }, [properties, searchQuery, filterStatus, dateRange, bookingMap]);
 
   const occupancyMap = useMemo(() => {
     const map = new Map<string, number>();

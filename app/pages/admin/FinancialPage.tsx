@@ -5,7 +5,7 @@ import {
   DollarSign,
   Plus,
 } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useApp } from '../../contexts/AppContext';
 import { PageContainer, PageHeader, PageSection } from '../../components/ui/PageContainer';
 import { StatCard } from '../../components/ui/StatCard';
@@ -221,6 +221,58 @@ export const FinancialPage: React.FC = () => {
             icon={<DollarSign className="w-full h-full" />}
             variant="primary"
           />
+        </div>
+      </PageSection>
+
+      <PageSection>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-[var(--foreground)] mb-4">
+                {language === 'en' ? 'Revenue by Category' : 'الإيرادات حسب الفئة'}
+              </h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={revenueChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.1} />
+                  <XAxis dataKey="name" stroke="var(--text-secondary)" />
+                  <YAxis stroke="var(--text-secondary)" />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px' }}
+                    formatter={(value: number) => formatCurrency(value)}
+                  />
+                  <Bar dataKey="value" name={language === 'en' ? 'Revenue' : 'الإيرادات'}>
+                    {revenueChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+
+          <Card>
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-[var(--foreground)] mb-4">
+                {language === 'en' ? 'Expenses by Category' : 'المصروفات حسب الفئة'}
+              </h3>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={expenseChartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" opacity={0.1} />
+                  <XAxis dataKey="name" stroke="var(--text-secondary)" />
+                  <YAxis stroke="var(--text-secondary)" />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px' }}
+                    formatter={(value: number) => formatCurrency(value)}
+                  />
+                  <Bar dataKey="value" name={language === 'en' ? 'Expenses' : 'المصروفات'}>
+                    {expenseChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={['#EF4444', '#F97316', '#F59E0B', '#EAB308', '#84CC16'][index % 5]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
         </div>
       </PageSection>
 
