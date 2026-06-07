@@ -7,7 +7,7 @@ import { Badge } from '../../components/ui/badge';
 import { Input,  TextArea } from '../../components/ui/input';
 import { Modal } from '../../components/ui/Modal';
 import { Select, SelectContent,SelectItem, SelectTrigger, SelectValue,} from "../../components/ui/Select";
-import { getProperties, createProperty, updateProperty, deleteProperty, Property, PropertyStatus, PropertyType, PropertiesResponse, formatEGPShort} from "../../../services/api";
+import { getProperties, createProperty, updateProperty, deleteProperty, Property, PropertyStatus, PropertyType, PropertiesResponse, formatCurrency} from "../../../services/api";
 export const AdminPropertiesPage: React.FC = () => {
   const { t, language } = useApp();
 const [properties, setProperties] =
@@ -500,7 +500,7 @@ const fetchProperties = async () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-semibold text-gray-900 dark:text-white">
-                        {formatEGPShort(property.price)}
+                        {formatCurrency(property.price)}
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -580,7 +580,7 @@ const fetchProperties = async () => {
                   {language === 'en' ? property.location : property.locationAr}
                 </p>
                 <p className="text-lg font-bold text-blue-600 dark:text-blue-400 mb-3">
-                  {formatEGPShort(property.price)}
+                  {formatCurrency(property.price)}
                 </p>
                 <div className="flex gap-2">
                   <Button variant="secondary" size="sm" onClick={() => handleOpenModal(property)} className="flex-1">

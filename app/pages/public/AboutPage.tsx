@@ -39,8 +39,8 @@ export const AboutPage: React.FC = () => {
               {language === 'en' ? 'About Us' : 'من نحن'}
             </h1>
             <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto leading-relaxed">
-              {language === 'en' 
-                ? 'Your trusted partner in finding the perfect property.' 
+              {language === 'en'
+                ? 'Your trusted partner in finding the perfect property.'
                 : 'شريكك الموثوق في العثور على العقار المثالي.'}
             </p>
           </motion.div>
@@ -79,9 +79,9 @@ export const AboutPage: React.FC = () => {
               variants={fadeInUp}
               className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/3] bg-[var(--secondary)]"
             >
-              <img 
-                src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=1000" 
-                alt="Luxury Property" 
+              <img
+                src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=1000"
+                alt="Luxury Property"
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#1B2B4B]/80 to-transparent" />
@@ -97,21 +97,21 @@ export const AboutPage: React.FC = () => {
       {/* ── Stats Section ── */}
       <section className="py-20 bg-[var(--card)] border-y border-[var(--border)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
-            variants={staggerContainer} 
-            initial="hidden" 
-            whileInView="visible" 
-            viewport={{ once: true, margin: '-50px' }} 
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-50px' }}
             className="grid md:grid-cols-3 gap-8"
           >
             {[
-              { num: '300+', labelEn: 'Premium Properties', labelAr: 'عقارات مميزة' },
+              { num: '30+', labelEn: 'Premium Properties', labelAr: 'عقارات مميزة' },
               { num: '100%', labelEn: 'Client Satisfaction', labelAr: 'معدل رضا العملاء' },
               { num: '24/7', labelEn: 'Customer Support', labelAr: 'خدمة على مدار الساعة' },
             ].map((stat, idx) => (
-              <motion.div 
-                key={idx} 
-                variants={fadeInUp} 
+              <motion.div
+                key={idx}
+                variants={fadeInUp}
                 className="p-8 text-center rounded-2xl bg-[var(--background)] border border-[var(--border)] shadow-sm hover:shadow-md transition-shadow"
               >
                 <div className="text-5xl font-black text-[var(--accent)] mb-4">{stat.num}</div>
@@ -134,11 +134,11 @@ export const AboutPage: React.FC = () => {
             <div className="w-20 h-1 bg-[var(--accent)] rounded-full mx-auto" />
           </div>
 
-          <motion.div 
-            variants={staggerContainer} 
-            initial="hidden" 
-            whileInView="visible" 
-            viewport={{ once: true, margin: '-50px' }} 
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-50px' }}
             className="grid md:grid-cols-3 gap-8"
           >
             {[
@@ -146,9 +146,9 @@ export const AboutPage: React.FC = () => {
               { icon: Star, titleEn: 'Quality & Excellence', titleAr: 'الجودة والتميز', descEn: 'We curate only the finest properties for our clients.', descAr: 'ننتقي فقط أفضل العقارات لعملائنا.' },
               { icon: HeadphonesIcon, titleEn: 'Customer Service', titleAr: 'خدمة العملاء', descEn: 'Your satisfaction is our top priority, always.', descAr: 'رضاك هو أولويتنا القصوى، دائماً.' }
             ].map((val, idx) => (
-              <motion.div 
-                key={idx} 
-                variants={fadeInUp} 
+              <motion.div
+                key={idx}
+                variants={fadeInUp}
                 className="premium-card flex flex-col items-center text-center p-10 rounded-2xl bg-[var(--card)] border border-[var(--border)] group"
               >
                 <div className="w-20 h-20 bg-[var(--primary)]/10 text-[var(--primary)] rounded-full flex items-center justify-center mb-6 group-hover:bg-[var(--primary)] group-hover:text-white transition-all duration-300">
@@ -178,17 +178,17 @@ export const AboutPage: React.FC = () => {
           >
             <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--accent)]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-[var(--primary)]/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-            
+
             <div className="relative z-10">
               <h2 className="text-3xl font-bold mb-6">
                 {language === 'en' ? 'Get In Touch' : 'تواصل معنا'}
               </h2>
               <p className="text-white/80 text-lg mb-10 max-w-xl mx-auto">
-                {language === 'en' 
+                {language === 'en'
                   ? 'We are here to help you find your next perfect home. Reach out to us for any inquiries.'
                   : 'نحن هنا لمساعدتك في العثور على منزلك المثالي التالي. تواصل معنا لأي استفسارات.'}
               </p>
-              
+
               <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-10 text-white/90">
                 <div className="flex items-center gap-3">
                   <Phone className="text-[var(--accent)] w-5 h-5" />
@@ -201,8 +201,8 @@ export const AboutPage: React.FC = () => {
                 </div>
               </div>
 
-              <Link 
-                to="/contact" 
+              <Link
+                to="/contact"
                 className="inline-flex items-center justify-center px-8 py-4 bg-[var(--accent)] text-[#1B2B4B] font-bold rounded-xl hover:brightness-110 active:scale-95 transition-all text-lg shadow-lg shadow-[var(--accent)]/20"
               >
                 {language === 'en' ? 'Contact Us Now' : 'تواصل معنا الآن'}

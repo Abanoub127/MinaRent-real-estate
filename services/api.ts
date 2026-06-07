@@ -7,6 +7,10 @@ export const formatEGP = (amount: number): string => {
   return `${amount.toLocaleString('en-EG')} EGP`;
 };
 
+export const formatCurrency = (amount: number): string => {
+  return `${amount.toLocaleString('en-EG')} ج.م`;
+};
+
 export const formatEGPShort = (amount: number): string => {
   if (amount >= 1_000_000) return `${(amount / 1_000_000).toFixed(1)}M EGP`;
   if (amount >= 1_000) return `${(amount / 1_000).toFixed(0)}K EGP`;
@@ -411,7 +415,7 @@ export const deleteTransaction = async (id: string) => {
 
 // ================== Bookings ==================
 
-export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
+export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'expired';
 
 export type Booking = {
   id: string;

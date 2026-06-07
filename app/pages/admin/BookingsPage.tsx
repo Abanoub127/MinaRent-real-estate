@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
+import { PageContainer, PageHeader, PageSection } from '../../components/ui/PageContainer';
+import { StatCard } from '../../components/ui/StatCard';
 import { Card } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input, TextArea } from '../../components/ui/input';
@@ -12,9 +14,9 @@ import {
   SelectItem,
   SelectValue,
 } from '../../components/ui/Select';
-import { getProperties, getBookings, updateBooking, deleteBooking, createBooking, type Property, type Booking } from '../../../services/api';
+import { getProperties, getBookings, updateBooking, deleteBooking, createBooking, type Property, type Booking, formatCurrency } from '../../../services/api';
 
-type BookingStatus = 'pending' | 'confirmed' | 'cancelled';
+type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'expired';
 
 interface LocalBooking {
   _id: string;
@@ -140,180 +142,149 @@ export const BookingsPage: React.FC = () => {
       console.error(err);
     }
   };
-let modalTitle = '';
 
-if (editingBooking) {
-  modalTitle =
-    language === 'en'
-      ? 'Edit Booking'
-      : 'تعديل الحجز';
-} else {
-  modalTitle =
-    language === 'en'
-      ? 'Add Booking'
-      : 'إضافة حجز';
-};
+  const modalTitle = editingBooking
+    ? language === 'en' ? 'Edit Booking' : 'تعديل الحجز'
+    : language === 'en' ? 'Add Booking' : 'إضافة حجز';
+
   const getStatusLabel = (status: BookingStatus) => {
     const map = {
       pending: language === 'en' ? 'Pending' : 'قيد الانتظار',
       confirmed: language === 'en' ? 'Confirmed' : 'مؤكد',
       cancelled: language === 'en' ? 'Cancelled' : 'ملغي',
+      expired: language === 'en' ? 'Expired' : 'منتهي',
     };
     return map[status] || status;
+  };
+
+  const getStatusClasses = (status: BookingStatus) => {
+    if (status === 'confirmed') return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
+    if (status === 'pending') return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
+    return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
   };
 
   if (loading) return <div className="text-center py-10">Loading...</div>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('admin.bookings')}</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            {language === 'en' ? 'Manage property viewings and appointments' : 'إدارة معاينات وحجوزات العقارات'}
-          </p>
+    <PageContainer>
+      <PageSection>
+        <PageHeader
+          title={t('admin.bookings')}
+          description={language === 'en' ? 'Manage property viewings and appointments' : 'إدارة معاينات وحجوزات العقارات'}
+          action={
+            <Button onClick={() => handleOpenModal()} className="flex items-center gap-2">
+              <Plus className="w-5 h-5" />
+              {language === 'en' ? 'Add Booking' : 'إضافة حجز'}
+            </Button>
+          }
+        />
+      </PageSection>
+
+      <PageSection>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {(['pending', 'confirmed', 'cancelled', 'expired'] as BookingStatus[]).map((s) => {
+            const variants: Record<BookingStatus, any> = { pending: 'warning', confirmed: 'success', cancelled: 'danger', expired: 'default' };
+            const icons: Record<BookingStatus, any> = { pending: Clock, confirmed: CalendarIcon, cancelled: Trash2, expired: Clock };
+            const Icon = icons[s];
+            return (
+              <StatCard
+                key={s}
+                title={getStatusLabel(s)}
+                value={bookings.filter((b) => b.status === s).length}
+                icon={<Icon className="w-full h-full" />}
+                variant={variants[s]}
+              />
+            );
+          })}
         </div>
-        <Button onClick={() => handleOpenModal()} className="flex items-center gap-2">
-          <Plus className="w-5 h-5" />
-          {language === 'en' ? 'Add Booking' : 'إضافة حجز'}
-        </Button>
-      </div>
+      </PageSection>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {(['pending', 'confirmed', 'cancelled'] as BookingStatus[]).map((s) => {
-          const colors = {
-            pending: 'yellow',
-            confirmed: 'green',
-            cancelled: 'red',
-          };
-          const icons = { pending: Clock, confirmed: CalendarIcon, cancelled: Trash2 };
-          const Icon = icons[s];
-          const color = colors[s];
-          return (
-            <Card key={s} className="p-6">
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 bg-${color}-100 dark:bg-${color}-900 rounded-lg flex items-center justify-center`}>
-                  <Icon className={`w-6 h-6 text-${color}-600 dark:text-${color}-400`} />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{getStatusLabel(s)}</p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {bookings.filter((b) => b.status === s).length}
-                  </p>
-                </div>
-              </div>
-            </Card>
-          );
-        })}
-      </div>
+      <PageSection>
+        <Card>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-[var(--secondary)]">
+                <tr>
+                  {[
+                    language === 'en' ? 'Property' : 'العقار',
+                    language === 'en' ? 'Client' : 'العميل',
+                    language === 'en' ? 'Start Date' : 'تاريخ البداية',
+                    language === 'en' ? 'End Date' : 'تاريخ النهاية',
+                    language === 'en' ? 'Paid' : 'المدفوع',
+                    language === 'en' ? 'Status' : 'الحالة',
+                    language === 'en' ? 'Actions' : 'الإجراءات',
+                  ].map((h) => (
+                    <th key={h} className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase">
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="bg-[var(--card)] divide-y divide-[var(--border)]">
+                {bookings.map((booking) => {
+                  const id = booking._id;
 
-      {/* Table */}
-      <Card>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50 dark:bg-gray-700">
-              <tr>
-                {[
-                  language === 'en' ? 'Property' : 'العقار',
-                  language === 'en' ? 'Client' : 'العميل',
-                  language === 'en' ? 'Start Date' : 'تاريخ البداية',
-                  language === 'en' ? 'End Date' : 'تاريخ النهاية',
-                  language === 'en' ? 'Paid' : 'المدفوع',
-                  language === 'en' ? 'Status' : 'الحالة',
-                  language === 'en' ? 'Actions' : 'الإجراءات',
-                ].map((h) => (
-                  <th key={h} className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-           <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-  {bookings.map((booking) => {
-    const id = booking._id;
+                  return (
+                    <tr key={id} className="hover:bg-[var(--secondary)] transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="text-sm font-medium text-[var(--foreground)]">
+                          {language === 'en' ? booking.propertyId?.title || '—' : booking.propertyId?.titleAr || '—'}
+                        </div>
+                        <div className="text-xs text-[var(--text-secondary)]">
+                          {language === 'en' ? booking.propertyId?.location || '' : booking.propertyId?.locationAr || ''}
+                        </div>
+                      </td>
 
-    return (
-      <tr key={id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-        <td className="px-6 py-4">
-          <div className="text-sm font-medium text-gray-900 dark:text-white">
-            {language === 'en'
-              ? booking.propertyId?.title || '—'
-              : booking.propertyId?.titleAr || '—'}
-          </div>
-
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            {language === 'en'
-              ? booking.propertyId?.location || ''
-              : booking.propertyId?.locationAr || ''}
-          </div>
-        </td>
-
-        <td className="px-6 py-4">
-          <div className="text-sm text-gray-900 dark:text-white">
-            {booking.clientId?.name || '—'}
-          </div>
-
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            {booking.clientId?.phone || ''}
-          </div>
-        </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {booking.startDate ? new Date(booking.startDate).toLocaleDateString() : '—'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {booking.endDate ? new Date(booking.endDate).toLocaleDateString() : '—'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                      {booking.paidAmount ? `AED ${booking.paidAmount.toLocaleString()}` : '—'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <Select
-                        value={booking.status}
-                        onValueChange={(val) => handleStatusChange(id, val as BookingStatus)}
-                      >
-                        <SelectTrigger className="w-36">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="pending">{language === 'en' ? 'Pending' : 'قيد الانتظار'}</SelectItem>
-                          <SelectItem value="confirmed">{language === 'en' ? 'Confirmed' : 'مؤكد'}</SelectItem>
-                          <SelectItem value="cancelled">{language === 'en' ? 'Cancelled' : 'ملغي'}</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleOpenModal(booking)}
-                          className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(id)}
-                          className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-[var(--foreground)]">{booking.clientId?.name || '—'}</div>
+                        <div className="text-xs text-[var(--text-secondary)]">{booking.clientId?.phone || ''}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--foreground)]">
+                        {booking.startDate ? new Date(booking.startDate).toLocaleDateString() : '—'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-[var(--foreground)]">
+                        {booking.endDate ? new Date(booking.endDate).toLocaleDateString() : '—'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[var(--foreground)] pr-4">
+                        {booking.paidAmount ? formatCurrency(booking.paidAmount) : '—'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${getStatusClasses(booking.status)}`}>
+                          {getStatusLabel(booking.status)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleOpenModal(booking)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(id)}
+                            className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {bookings.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className="text-center py-8 text-[var(--text-secondary)]">
+                      {language === 'en' ? 'No bookings yet' : 'لا توجد حجوزات بعد'}
                     </td>
                   </tr>
-                );
-              })}
-              {bookings.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    {language === 'en' ? 'No bookings yet' : 'لا توجد حجوزات بعد'}
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </PageSection>
 
-      {/* Modal */}
       <Modal
         isOpen={showModal}
         onClose={handleCloseModal}
@@ -395,25 +366,16 @@ if (editingBooking) {
             </Select>
           </div>
 
-         <TextArea
-  name="notes"
-  label={language === 'en' ? 'Notes' : 'ملاحظات'}
-  value={formData.notes}
-  onChange={(e) =>
-    setFormData({
-      ...formData,
-      notes: e.target.value,
-    })
-  }
-  rows={3}
-  placeholder={
-    language === 'en'
-      ? 'Additional notes...'
-      : 'ملاحظات إضافية...'
-  }
-/>
+          <TextArea
+            name="notes"
+            label={language === 'en' ? 'Notes' : 'ملاحظات'}
+            value={formData.notes}
+            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            rows={3}
+            placeholder={language === 'en' ? 'Additional notes...' : 'ملاحظات إضافية...'}
+          />
         </form>
       </Modal>
-    </div>
+    </PageContainer>
   );
 };
