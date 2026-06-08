@@ -12,15 +12,12 @@ import { PageContainer, PageHeader, PageSection } from '../../components/ui/Page
 import { Card } from '../../components/ui/card';
 
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
   Tooltip,
   ResponsiveContainer,
   Legend,
-  Cell,
 } from 'recharts';
 
 import { getProperties, getStats } from '../../../services/api';
@@ -107,13 +104,10 @@ export const AnalyticsPage: React.FC = () => {
     0
   );
 
-  const conversionData = [
-    {
-      month: language === 'en' ? 'Analytics' : 'التحليلات',
-      views: totalViews,
-      bookings: stats?.totalBookings || 0,
-      sales: stats?.confirmedBookings || 0,
-    },
+  const conversionPieData = [
+    { name: language === 'en' ? 'Views' : 'المشاهدات', value: totalViews },
+    { name: language === 'en' ? 'Bookings' : 'الحجوزات', value: stats?.totalBookings || 0 },
+    { name: language === 'en' ? 'Confirmed' : 'المؤكد', value: stats?.confirmedBookings || 0 }
   ];
 
   const topLocationsMap = properties.reduce(
@@ -245,52 +239,27 @@ export const AnalyticsPage: React.FC = () => {
                 {language === 'en' ? 'Bookings Analytics' : 'تحليلات الحجوزات'}
               </h3>
 
-              <ResponsiveContainer
-                width="100%"
-                height={300}
-              >
-                <BarChart data={conversionData}>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="var(--border)"
-                    opacity={0.1}
-                  />
-
-                  <XAxis
-                    dataKey="month"
-                    stroke="var(--text-secondary)"
-                  />
-
-                  <YAxis stroke="var(--text-secondary)" />
-
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={conversionPieData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={100}
+                    dataKey="value"
+                    label
+                  >
+                    {conversionPieData.map((entry, index) => {
+                      const COLORS = ['#3B82F6', '#10B981', '#F59E0B'];
+                      return <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />;
+                    })}
+                  </Pie>
                   <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'var(--card)',
-                      border: '1px solid var(--border)',
-                      borderRadius: '12px',
-                    }}
+                    contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px' }}
                   />
-
                   <Legend />
-
-                  <Bar
-                    dataKey="views"
-                    fill="var(--primary)"
-                    name={language === 'en' ? 'Views' : 'المشاهدات'}
-                  />
-
-                  <Bar
-                    dataKey="bookings"
-                    fill="var(--accent)"
-                    name={language === 'en' ? 'Bookings' : 'الحجوزات'}
-                  />
-
-                  <Bar
-                    dataKey="sales"
-                    fill="#F59E0B"
-                    name={language === 'en' ? 'Confirmed' : 'المؤكد'}
-                  />
-                </BarChart>
+                </PieChart>
               </ResponsiveContainer>
             </div>
           </Card>
@@ -301,42 +270,28 @@ export const AnalyticsPage: React.FC = () => {
                 {language === 'en' ? 'Properties by Type' : 'العقارات حسب النوع'}
               </h3>
 
-              <ResponsiveContainer
-                width="100%"
-                height={300}
-              >
-                <BarChart data={propertyTypeData}>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke="var(--border)"
-                    opacity={0.1}
-                  />
-
-                  <XAxis
-                    dataKey="type"
-                    stroke="var(--text-secondary)"
-                  />
-
-                  <YAxis stroke="var(--text-secondary)" />
-
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'var(--card)',
-                      border: '1px solid var(--border)',
-                      borderRadius: '12px',
-                    }}
-                  />
-
-                  <Bar
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={propertyTypeData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={100}
                     dataKey="count"
-                    name={language === 'en' ? 'Count' : 'العدد'}
+                    nameKey="type"
+                    label
                   >
                     {propertyTypeData.map((entry, index) => {
                       const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
                       return <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />;
                     })}
-                  </Bar>
-                </BarChart>
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px' }}
+                  />
+                  <Legend />
+                </PieChart>
               </ResponsiveContainer>
             </div>
           </Card>

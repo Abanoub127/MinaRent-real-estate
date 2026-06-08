@@ -110,7 +110,7 @@ export const HomePage: React.FC = () => {
                 {language === 'en' ? 'Premium Properties in Egypt' : 'عقارات فاخرة في مصر'}
               </div>
 
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-[1.1] tracking-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.2] tracking-tight">
                 {language === 'en' ? (
                   <>Find Your Perfect <span className="text-shimmer-gold">Space</span> With Us</>
                 ) : (
@@ -118,7 +118,7 @@ export const HomePage: React.FC = () => {
                 )}
               </h1>
 
-              <p className="text-lg text-white/70 leading-relaxed max-w-lg">
+              <p className="text-base sm:text-lg text-white/70 leading-relaxed max-w-lg">
                 {language === 'en'
                   ? 'Discover curated properties that match your lifestyle. From modern apartments to luxury villas, your next chapter starts here.'
                   : 'اكتشف عقارات منتقاة بعناية تناسب أسلوب حياتك. من الشقق الحديثة إلى الفيلات الفاخرة، فصلك القادم يبدأ هنا.'}
@@ -151,11 +151,16 @@ export const HomePage: React.FC = () => {
               variants={slideInLeft}
               initial="hidden"
               animate="visible"
-              className="relative flex items-center justify-center"
+              className="relative flex items-center justify-center mt-8 md:mt-0"
             >
-              <div className="absolute w-80 h-80 bg-[var(--accent)]/10 rounded-full blur-3xl" />
-              <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-10 sm:p-14 pulse-glow">
-                <MRLogo size="xl" showText={true} animated={true} dark={true} />
+              <div className="absolute w-64 h-64 md:w-80 md:h-80 bg-[var(--accent)]/10 rounded-full blur-3xl" />
+              <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-6 sm:p-14 pulse-glow">
+                <div className="block md:hidden">
+                  <MRLogo size="lg" showText={true} animated={true} dark={true} />
+                </div>
+                <div className="hidden md:block">
+                  <MRLogo size="xl" showText={true} animated={true} dark={true} />
+                </div>
               </div>
             </motion.div>
           </div>
