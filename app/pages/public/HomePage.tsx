@@ -110,7 +110,7 @@ export const HomePage: React.FC = () => {
                 {language === 'en' ? 'Premium Properties in Egypt' : 'عقارات فاخرة في مصر'}
               </div>
 
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.2] tracking-tight">
+              <h1 className="hero-title font-bold text-white leading-[1.2] tracking-tight">
                 {language === 'en' ? (
                   <>Find Your Perfect <span className="text-shimmer-gold">Space</span> With Us</>
                 ) : (
@@ -154,11 +154,11 @@ export const HomePage: React.FC = () => {
               className="relative flex items-center justify-center mt-8 md:mt-0"
             >
               <div className="absolute w-64 h-64 md:w-80 md:h-80 bg-[var(--accent)]/10 rounded-full blur-3xl" />
-              <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-6 sm:p-14 pulse-glow">
-                <div className="block md:hidden">
+              <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-6 sm:p-14 pulse-glow max-w-full overflow-x-auto scrollbar-none" style={{ WebkitOverflowScrolling: 'touch' }}>
+                <div className="block md:hidden min-w-max">
                   <MRLogo size="lg" showText={true} animated={true} dark={true} />
                 </div>
-                <div className="hidden md:block">
+                <div className="hidden md:block min-w-max">
                   <MRLogo size="xl" showText={true} animated={true} dark={true} />
                 </div>
               </div>
@@ -168,8 +168,8 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* ── Features ── */}
-      <section className="bg-[var(--card)] py-20 border-y border-[var(--border)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="bg-[var(--card)] py-20 border-y border-[var(--border)] overflow-x-hidden w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <motion.div variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }} className="grid md:grid-cols-3 gap-8">
             {[
               { icon: Home, titleEn: 'Vast Selection', titleAr: 'تشكيلة واسعة', descEn: 'Browse thousands of verified properties in prime locations.', descAr: 'تصفح آلاف العقارات الموثقة في مواقع متميزة.' },
@@ -189,7 +189,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* ── Featured Properties ── */}
-      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full overflow-x-hidden">
         <div className="flex items-end justify-between mb-10">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-[var(--foreground)] mb-2">
@@ -249,8 +249,8 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* ── Testimonials & Comment Form ── */}
-      <section className="bg-[var(--secondary)] py-20 border-t border-[var(--border)] overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="bg-[var(--secondary)] py-20 border-t border-[var(--border)] overflow-x-hidden w-full">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <div className="grid lg:grid-cols-3 gap-10 items-start">
             {/* Comment Form */}
             <motion.div initial={{ opacity: 0, x: isRtl ? 40 : -40 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="bg-[var(--card)] p-7 rounded-2xl shadow-lg border border-[var(--border)]">

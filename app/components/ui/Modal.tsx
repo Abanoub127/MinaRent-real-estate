@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
-import { Button } from './button';
 
 interface ModalProps {
   isOpen: boolean;
@@ -19,16 +18,8 @@ export const Modal: React.FC<ModalProps> = ({
   footer,
   size = 'md',
 }) => {
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isOpen]);
+  // Removed body.style.overflow = 'hidden' to fix mobile scrolling issues.
+  // Using overscroll-contain on the scrollable container instead.
 
   if (!isOpen) return null;
 
@@ -40,26 +31,41 @@ export const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-    <div
-          className="absolute inset-0 bg-black/20 backdrop-blur-sm"
-          onClick={onClose}
-        />
-              <div className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full ${sizeClasses[size]} max-h-[90vh] flex flex-col`}>
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        onClick={onClose}
+        style={{ touchAction: 'none' }}
+      />
+      
+      {/* Modal Container */}
+      <div 
+        className={`relative bg-[var(--card)] sm:rounded-2xl rounded-t-2xl shadow-2xl w-full ${sizeClasses[size]} flex flex-col border border-[var(--border)]`}
+        style={{ maxHeight: '90dvh' }}
+      >
         {title && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+          <div className="flex-shrink-0 flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
+            <h3 className="text-lg font-bold text-[var(--foreground)]">{title}</h3>
             <button
               onClick={onClose}
-              className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              className="p-1.5 hover:bg-[var(--secondary)] rounded-full transition-colors text-[var(--text-secondary)] hover:text-[var(--foreground)]"
             >
-              <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+              <X className="w-5 h-5" />
             </button>
           </div>
         )}
-        <div className="px-6 py-4 overflow-y-auto flex-1">{children}</div>
+        
+        {/* Scrollable Content */}
+        <div 
+          className="px-5 py-4 overflow-y-auto flex-1 overscroll-contain"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
+          {children}
+        </div>
+        
         {footer && (
-          <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+          <div className="flex-shrink-0 px-5 py-4 border-t border-[var(--border)] flex justify-end gap-3 bg-[var(--card)] sm:rounded-b-2xl">
             {footer}
           </div>
         )}

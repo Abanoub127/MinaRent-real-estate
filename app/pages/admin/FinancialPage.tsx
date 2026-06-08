@@ -237,10 +237,10 @@ export const FinancialPage: React.FC = () => {
                     data={revenueChartData}
                     cx="50%"
                     cy="50%"
-                    labelLine={false}
-                    outerRadius={100}
+                    labelLine={true}
+                    outerRadius={80}
                     dataKey="value"
-                    label
+                    label={({ name, value }) => `${value}`}
                   >
                     {revenueChartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -267,10 +267,10 @@ export const FinancialPage: React.FC = () => {
                     data={expenseChartData}
                     cx="50%"
                     cy="50%"
-                    labelLine={false}
-                    outerRadius={100}
+                    labelLine={true}
+                    outerRadius={80}
                     dataKey="value"
-                    label
+                    label={({ name, value }) => `${value}`}
                   >
                     {expenseChartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

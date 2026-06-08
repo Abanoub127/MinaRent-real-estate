@@ -12,12 +12,16 @@ import { PageContainer, PageHeader, PageSection } from '../../components/ui/Page
 import { Card } from '../../components/ui/card';
 
 import {
-  PieChart,
-  Pie,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
   Cell,
   Tooltip,
   ResponsiveContainer,
   Legend,
+  LabelList
 } from 'recharts';
 
 import { getProperties, getStats } from '../../../services/api';
@@ -97,17 +101,20 @@ export const AnalyticsPage: React.FC = () => {
       type: language === 'en' ? 'Commercial' : 'تجاري',
       count: properties.filter((p) => p.type === 'commercial').length,
     },
-  ].filter((item) => item.count > 0);
+  ].filter((item) => item.count > 0).map((item, index) => ({
+    ...item,
+    fill: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'][index % 5]
+  }));
 
   const totalViews = properties.reduce(
     (sum, property) => sum + property.views,
     0
   );
 
-  const conversionPieData = [
-    { name: language === 'en' ? 'Views' : 'المشاهدات', value: totalViews },
-    { name: language === 'en' ? 'Bookings' : 'الحجوزات', value: stats?.totalBookings || 0 },
-    { name: language === 'en' ? 'Confirmed' : 'المؤكد', value: stats?.confirmedBookings || 0 }
+  const conversionData = [
+    { name: language === 'en' ? 'Views' : 'المشاهدات', value: totalViews, fill: '#3B82F6' },
+    { name: language === 'en' ? 'Bookings' : 'الحجوزات', value: stats?.totalBookings || 0, fill: '#10B981' },
+    { name: language === 'en' ? 'Confirmed' : 'المؤكد', value: stats?.confirmedBookings || 0, fill: '#F59E0B' }
   ];
 
   const topLocationsMap = properties.reduce(
@@ -240,26 +247,31 @@ export const AnalyticsPage: React.FC = () => {
               </h3>
 
               <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={conversionPieData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={100}
-                    dataKey="value"
-                    label
-                  >
-                    {conversionPieData.map((entry, index) => {
-                      const COLORS = ['#3B82F6', '#10B981', '#F59E0B'];
-                      return <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />;
-                    })}
-                  </Pie>
+                <BarChart data={conversionData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                  <XAxis dataKey="name" stroke="var(--text-secondary)" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="var(--text-secondary)" fontSize={12} tickLine={false} axisLine={false} label={{ value: language === 'en' ? 'Count' : 'العدد', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)' }} />
                   <Tooltip
+                    cursor={{ fill: 'var(--secondary)' }}
                     contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px' }}
                   />
-                  <Legend />
-                </PieChart>
+                  <Legend content={() => (
+                    <div className="flex justify-center flex-wrap gap-4 mt-2">
+                      {conversionData.map((entry, index) => (
+                        <div key={`item-${index}`} className="flex items-center gap-1.5">
+                          <div className="w-4 h-3 rounded-sm" style={{ backgroundColor: entry.fill }} />
+                          <span className="text-sm font-semibold text-[var(--text-secondary)]">{entry.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )} />
+                  <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={60}>
+                    <LabelList dataKey="value" position="top" fill="var(--text-secondary)" fontSize={13} fontWeight="bold" />
+                    {conversionData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </Card>
@@ -271,27 +283,31 @@ export const AnalyticsPage: React.FC = () => {
               </h3>
 
               <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={propertyTypeData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={100}
-                    dataKey="count"
-                    nameKey="type"
-                    label
-                  >
-                    {propertyTypeData.map((entry, index) => {
-                      const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
-                      return <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />;
-                    })}
-                  </Pie>
+                <BarChart data={propertyTypeData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+                  <XAxis dataKey="type" stroke="var(--text-secondary)" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="var(--text-secondary)" fontSize={12} tickLine={false} axisLine={false} label={{ value: language === 'en' ? 'Properties' : 'عدد العقارات', angle: -90, position: 'insideLeft', fill: 'var(--text-secondary)' }} />
                   <Tooltip
+                    cursor={{ fill: 'var(--secondary)' }}
                     contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px' }}
                   />
-                  <Legend />
-                </PieChart>
+                  <Legend content={() => (
+                    <div className="flex justify-center flex-wrap gap-4 mt-2">
+                      {propertyTypeData.map((entry, index) => (
+                        <div key={`item-${index}`} className="flex items-center gap-1.5">
+                          <div className="w-4 h-3 rounded-sm" style={{ backgroundColor: entry.fill }} />
+                          <span className="text-sm font-semibold text-[var(--text-secondary)]">{entry.type}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )} />
+                  <Bar dataKey="count" radius={[4, 4, 0, 0]} maxBarSize={60}>
+                    <LabelList dataKey="count" position="top" fill="var(--text-secondary)" fontSize={13} fontWeight="bold" />
+                    {propertyTypeData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </Card>

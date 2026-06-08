@@ -201,10 +201,10 @@ export const PublicLayout: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div className="md:col-span-2">
-              <Link to="/" className="inline-block mb-4">
+              <Link to="/" className="inline-block mb-4 max-w-full overflow-x-auto scrollbar-none pr-4">
                 <MRLogo size="md" showText={true} animated={false} />
               </Link>
-              <p className="text-[var(--text-secondary)] text-sm max-w-sm leading-relaxed mb-6">
+              <p className="text-[var(--text-secondary)] text-sm max-w-sm leading-relaxed mb-6 pr-4">
                 {isRtl
                   ? 'شريكك الموثوق في العثور على العقار المثالي. نقدم مجموعة منسقة من أفضل العقارات بأسلوب احترافي وعصري.'
                   : 'Your trusted partner in finding the perfect property. We offer a curated selection of premium real estate with a professional and modern approach.'}

@@ -31,7 +31,7 @@ export const MRLogo: React.FC<MRLogoProps> = ({
   const iconSize = s.icon;
 
   return (
-    <div className={`flex items-center ${s.gap} ${className}`}>
+    <div className={`flex items-center ${s.gap} ${className}`} dir="ltr">
       {/* Logo Image */}
       <div
         className={`relative shrink-0 ${animated ? 'logo-float' : ''}`}

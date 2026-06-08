@@ -662,4 +662,14 @@ html, body {
     -webkit-transform: translateZ(0);
     transform: translateZ(0);
   }
+}/* Global Mobile Fixes */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: clamp(24px, 7vw, 42px) !important;
+  }
 }

@@ -87,7 +87,7 @@ const DesktopCell = memo(({
             <span className="truncate font-bold w-full text-center leading-tight" style={{ fontSize: '0.5625rem', color: colors.text }}>
               {typeof cellBs[0].clientId === 'object' ? abbr(cellBs[0].clientId?.name || '—', 9) : '—'}
             </span>
-            <div className="flex items-center justify-center gap-[0.125rem] mt-[0.0625rem]" style={{ fontSize: '0.5rem', color: colors.text, opacity: 0.8 }}>
+            <div className="flex items-center justify-center gap-[0.125rem] mt-[0.0625rem]" style={{ fontSize: '0.5rem', color: colors.text, opacity: 0.8, fontFamily: 'Inter, system-ui, sans-serif' }}>
               <Users size={8} />
               <span>{(cellBs[0] as any).guests ?? cellBs[0].totalDays}</span>
             </div>
@@ -154,7 +154,7 @@ const MobileCell = memo(({
           <div className="w-full h-full px-[0.1875rem] py-[0.125rem] flex flex-col justify-center relative">
             <div className="flex items-center justify-between">
               <span className="font-bold truncate" style={{ fontSize: '0.5rem', color: colors.text }}>{propCode}</span>
-              <div className="flex items-center gap-[0.0625rem]" style={{ fontSize: '0.5rem', color: colors.text, opacity: 0.85 }}>
+              <div className="flex items-center gap-[0.0625rem]" style={{ fontSize: '0.5rem', color: colors.text, opacity: 0.85, fontFamily: 'Inter, system-ui, sans-serif' }}>
                 {(cellBs[0] as any).guests || cellBs[0].totalDays}
                 <Users size={8} />
               </div>
@@ -204,17 +204,17 @@ const DesktopRow = memo(({
         )}
       </div>
       {/* Property details */}
-      <div className="flex flex-col flex-1 min-w-0 justify-center">
-        <p className="font-bold text-[var(--foreground)] truncate" style={{ fontSize: '0.75rem' }}>
+      <div className="flex flex-col flex-1 min-w-0 justify-center" dir={isAr ? "rtl" : "ltr"}>
+        <p className="font-bold text-[var(--foreground)] truncate" style={{ fontSize: '0.75rem', textAlign: isAr ? 'right' : 'left' }}>
           {isAr && (prop as any).titleAr ? (prop as any).titleAr : prop.title}
         </p>
-        <p className="text-[var(--text-secondary)] truncate" style={{ fontSize: '0.5625rem' }}>{propCodeFn(prop)}</p>
-        <div className="flex items-center gap-1.5 mt-1">
+        <p className="text-[var(--text-secondary)] truncate" style={{ fontSize: '0.5625rem', fontFamily: 'Inter, system-ui, sans-serif', textAlign: isAr ? 'right' : 'left' }}>{propCodeFn(prop)}</p>
+        <div className="flex items-center gap-1.5 mt-1" dir="ltr">
           {/* Thinner occupancy bar */}
           <div className="flex-1 bg-[var(--border)] rounded-full overflow-hidden" style={{ height: '0.1875rem' }}>
             <div className="bg-[var(--primary)] h-full transition-all duration-500" style={{ width: `${occupancy}%` }} />
           </div>
-          <span className="text-[var(--primary)] font-bold leading-none" style={{ fontSize: '0.5625rem' }}>{occupancy}%</span>
+          <span className="text-[var(--primary)] font-bold leading-none" style={{ fontSize: '0.5625rem', fontFamily: 'Inter, system-ui, sans-serif' }}>{occupancy}%</span>
         </div>
       </div>
     </div>
@@ -417,6 +417,7 @@ export const AdminCalendarPage: React.FC = () => {
     all: { ar: 'الكل', en: 'All' },
     confirmed: { ar: 'مؤكد', en: 'Confirmed' },
     pending: { ar: 'في الانتظار', en: 'Pending' },
+    completed: { ar: 'مكتمل', en: 'Completed' },
     cancelled: { ar: 'ملغى', en: 'Cancelled' },
     available: { ar: 'متاح', en: 'Available' },
     checkout: { ar: 'انتهى', en: 'Checked Out' },
@@ -425,6 +426,7 @@ export const AdminCalendarPage: React.FC = () => {
     all: '#6b7280',
     confirmed: STATUS_COLORS.confirmed.dot,
     pending: STATUS_COLORS.pending.dot,
+    completed: STATUS_COLORS.completed.dot,
     cancelled: STATUS_COLORS.cancelled.dot,
     available: STATUS_COLORS.available.dot,
     checkout: STATUS_COLORS.checkout.dot,
@@ -432,7 +434,7 @@ export const AdminCalendarPage: React.FC = () => {
 
   // ── Mobile Grid ───────────────────────────────────────────────────────────
   const renderMobileGrid = () => (
-    <div ref={scrollContainerRef} className="flex-1 overflow-auto bg-[var(--background)]" style={{ scrollbarWidth: 'none' }}>
+    <div ref={scrollContainerRef} className="flex-1 overflow-auto bg-[var(--background)]" style={{ scrollbarWidth: 'none' }} dir="ltr">
       <div className="inline-flex flex-col min-w-max w-full">
 
         {/* Sticky header: property columns */}
@@ -455,7 +457,7 @@ export const AdminCalendarPage: React.FC = () => {
                   <Building2 size={13} className="text-[var(--text-secondary)] m-auto h-full" />
                 )}
               </div>
-              <p className="font-bold text-[var(--foreground)] mt-[0.1875rem] truncate w-full text-center" style={{ fontSize: '0.5625rem' }}>
+              <p className="font-bold text-[var(--foreground)] mt-[0.1875rem] truncate w-full text-center" style={{ fontSize: '0.5625rem', fontFamily: 'Inter, system-ui, sans-serif' }}>
                 {propCodeFn(prop)}
               </p>
             </div>
@@ -472,7 +474,7 @@ export const AdminCalendarPage: React.FC = () => {
               <div className={`sticky left-0 z-10 flex-shrink-0 border-r border-b border-[var(--border)] flex flex-col items-center justify-center select-none ${isT ? 'bg-[var(--primary)]/5' : 'bg-[var(--card)]'}`}
                 style={{ width: DATE_COL_W, height: CELL_H }}>
                 <div className={`flex items-center justify-center font-bold leading-none ${isT ? 'bg-[var(--primary)] text-white rounded-full' : 'text-[var(--foreground)]'
-                  }`} style={{ fontSize: '0.6875rem', width: isT ? '1.25rem' : 'auto', height: isT ? '1.25rem' : 'auto' }}>
+                  }`} style={{ fontSize: '0.6875rem', width: isT ? '1.25rem' : 'auto', height: isT ? '1.25rem' : 'auto', fontFamily: 'Inter, system-ui, sans-serif' }}>
                   {date.getDate()}
                 </div>
                 <span className="text-[var(--text-secondary)] mt-[0.0625rem]" style={{ fontSize: '0.5rem' }}>{getDayShort(date)}</span>
@@ -563,7 +565,7 @@ export const AdminCalendarPage: React.FC = () => {
 
   // ── Desktop Grid ──────────────────────────────────────────────────────────
   const renderDesktopGrid = () => (
-    <div ref={scrollContainerRef} className="flex-1 overflow-auto bg-[var(--background)]" style={{ scrollbarWidth: 'thin' }}>
+    <div ref={scrollContainerRef} className="flex-1 overflow-auto bg-[var(--background)]" style={{ scrollbarWidth: 'thin' }} dir="ltr">
       <div className="inline-flex flex-col min-w-max bg-[var(--card)]">
 
         {/* Sticky top header */}
@@ -586,7 +588,7 @@ export const AdminCalendarPage: React.FC = () => {
                 style={{ width: DAY_COL_W, height: HEADER_H }}
               >
                 <div className={`flex items-center justify-center font-bold leading-none ${isT ? 'bg-[var(--primary)] text-white rounded-full' : 'text-[var(--foreground)]'
-                  }`} style={{ fontSize: '0.75rem', width: isT ? '1.5rem' : 'auto', height: isT ? '1.5rem' : 'auto' }}>
+                  }`} style={{ fontSize: '0.75rem', width: isT ? '1.5rem' : 'auto', height: isT ? '1.5rem' : 'auto', fontFamily: 'Inter, system-ui, sans-serif' }}>
                   {date.getDate()}
                 </div>
                 <span className="text-[var(--text-secondary)] mt-[0.125rem]" style={{ fontSize: '0.5625rem' }}>{getDayShort(date)}</span>
@@ -630,11 +632,11 @@ export const AdminCalendarPage: React.FC = () => {
             <h1 className="text-sm font-bold text-[var(--foreground)] whitespace-nowrap">
               {isAr ? 'التقويم' : 'Calendar'}
             </h1>
-            <div className="flex items-center gap-1 bg-[var(--secondary)] rounded-lg p-[0.1875rem] border border-[var(--border)]">
+            <div className="flex items-center gap-1 bg-[var(--secondary)] rounded-lg p-[0.1875rem] border border-[var(--border)]" dir="ltr">
               <button onClick={goToPrev} className="p-1 rounded hover:bg-[var(--border)] text-[var(--text-secondary)] transition" title="Previous">
                 <ChevronLeft size={14} />
               </button>
-              <span className="text-xs font-semibold text-[var(--foreground)] min-w-[6.25rem] text-center select-none">
+              <span className="text-xs font-semibold text-[var(--foreground)] min-w-[6.25rem] text-center select-none" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
                 {getMonthName(currentDate)}
               </span>
               <button onClick={goToNext} className="p-1 rounded hover:bg-[var(--border)] text-[var(--text-secondary)] transition" title="Next">
@@ -650,18 +652,13 @@ export const AdminCalendarPage: React.FC = () => {
                 <button onClick={() => setMobileViewMode('grid')} className={`p-1.5 rounded-md transition ${mobileViewMode === 'grid' ? 'bg-[var(--card)] text-[var(--primary)] shadow-sm' : 'text-[var(--text-secondary)] hover:text-[var(--foreground)]'}`}><LayoutGrid size={14} /></button>
               </div>
             )}
-            <div className="flex items-center bg-[var(--secondary)] rounded-lg p-[0.1875rem] gap-[0.125rem]">
-              {(['month', 'week'] as ViewMode[]).map(v => (
-                <button key={v} onClick={() => setViewMode(v)}
-                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-semibold transition ${viewMode === v
-                      ? 'bg-[var(--card)] text-[var(--primary)] shadow-sm'
-                      : 'text-[var(--text-secondary)] hover:text-[var(--foreground)]'
-                    }`}>
-                  {v === 'month' ? <LayoutGrid size={12} /> : <Rows size={12} />}
-                  {v === 'month' ? (isAr ? 'شهر' : 'Month') : (isAr ? 'أسبوع' : 'Week')}
-                </button>
-              ))}
-            </div>
+            <button
+              onClick={() => setViewMode(v => v === 'month' ? 'week' : 'month')}
+              className="flex items-center gap-1 px-2.5 py-1.5 bg-[var(--card)] border border-[var(--border)] rounded-lg text-xs font-semibold text-[var(--primary)] shadow-sm hover:brightness-95 active:scale-95 transition-all"
+            >
+              {viewMode === 'month' ? <LayoutGrid size={12} /> : <Rows size={12} />}
+              {viewMode === 'month' ? (isAr ? 'شهر' : 'Month') : (isAr ? 'أسبوع' : 'Week')}
+            </button>
             <button onClick={scrollToToday}
               className="flex items-center gap-1 px-3 py-1.5 bg-[var(--primary)] hover:brightness-110 active:scale-95 text-[var(--primary-foreground)] rounded-lg text-xs font-semibold transition-all shadow-sm whitespace-nowrap">
               <Calendar size={13} />
