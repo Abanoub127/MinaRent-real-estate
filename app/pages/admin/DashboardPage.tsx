@@ -30,7 +30,7 @@ export const DashboardPage: React.FC = () => {
             start.setHours(0, 0, 0, 0);
             const end = new Date(booking.endDate);
             end.setHours(23, 59, 59, 999);
-            if (now >= start && now <= end) {
+            if (now <= end) {
               const cId = typeof booking.clientId === 'object' && booking.clientId !== null 
                 ? (booking.clientId as any)._id || (booking.clientId as any).id 
                 : booking.clientId;
