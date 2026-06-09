@@ -231,28 +231,48 @@ export const FinancialPage: React.FC = () => {
               <h3 className="text-lg font-semibold text-[var(--foreground)] mb-4">
                 {language === 'en' ? 'Revenue by Category' : 'الإيرادات حسب الفئة'}
               </h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart margin={{ top: 20, right: 40, left: 40, bottom: 20 }}>
-                  <Pie
-                    data={revenueChartData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={true}
-                    outerRadius={90}
-                    dataKey="value"
-                    label={({ name, value }) => `${name}: ${formatCurrency(value)}`}
-                  >
-                    {revenueChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px' }}
-                    formatter={(value: number) => formatCurrency(value)}
-                  />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+              <div className="flex flex-col xl:flex-row items-center gap-6">
+                <div className="w-full xl:w-1/2 h-[250px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={revenueChartData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={90}
+                        paddingAngle={5}
+                        dataKey="value"
+                        stroke="none"
+                      >
+                        {revenueChartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px' }}
+                        formatter={(value: number) => formatCurrency(value)}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="w-full xl:w-1/2 flex flex-col gap-3">
+                  {revenueChartData.map((entry, index) => (
+                    <div key={entry.name} className="flex items-center justify-between p-3 bg-[var(--secondary)] rounded-xl hover:scale-[1.02] transition-transform">
+                      <div className="flex items-center gap-3">
+                        <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                        <span className="text-sm font-semibold text-[var(--foreground)]">{entry.name}</span>
+                      </div>
+                      <span className="text-sm font-bold text-[var(--foreground)]" dir="ltr">{formatCurrency(entry.value)}</span>
+                    </div>
+                  ))}
+                  {revenueChartData.length === 0 && (
+                    <div className="text-center py-4 text-sm text-[var(--text-secondary)]">
+                      {language === 'en' ? 'No data available' : 'لا توجد بيانات'}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </Card>
 
@@ -261,28 +281,48 @@ export const FinancialPage: React.FC = () => {
               <h3 className="text-lg font-semibold text-[var(--foreground)] mb-4">
                 {language === 'en' ? 'Expenses by Category' : 'المصروفات حسب الفئة'}
               </h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart margin={{ top: 20, right: 40, left: 40, bottom: 20 }}>
-                 <Pie
-                    data={expenseChartData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={true}
-                    outerRadius={90}
-                    dataKey="value"
-                    label={({ name, value }) => `${name}: ${formatCurrency(value)}`}
-                  >
-                    {expenseChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px' }}
-                    formatter={(value: number) => formatCurrency(value)}
-                  />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
+              <div className="flex flex-col xl:flex-row items-center gap-6">
+                <div className="w-full xl:w-1/2 h-[250px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                     <Pie
+                        data={expenseChartData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={90}
+                        paddingAngle={5}
+                        dataKey="value"
+                        stroke="none"
+                      >
+                        {expenseChartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '12px' }}
+                        formatter={(value: number) => formatCurrency(value)}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="w-full xl:w-1/2 flex flex-col gap-3">
+                  {expenseChartData.map((entry, index) => (
+                    <div key={entry.name} className="flex items-center justify-between p-3 bg-[var(--secondary)] rounded-xl hover:scale-[1.02] transition-transform">
+                      <div className="flex items-center gap-3">
+                        <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                        <span className="text-sm font-semibold text-[var(--foreground)]">{entry.name}</span>
+                      </div>
+                      <span className="text-sm font-bold text-[var(--foreground)]" dir="ltr">{formatCurrency(entry.value)}</span>
+                    </div>
+                  ))}
+                  {expenseChartData.length === 0 && (
+                    <div className="text-center py-4 text-sm text-[var(--text-secondary)]">
+                      {language === 'en' ? 'No data available' : 'لا توجد بيانات'}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </Card>
         </div>

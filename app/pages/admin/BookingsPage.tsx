@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { Plus, Edit, Trash2, Calendar as CalendarIcon, Clock, CheckCircle } from 'lucide-react';
 import { useApp } from '../../contexts/AppContext';
 import { PageContainer, PageHeader, PageSection } from '../../components/ui/PageContainer';
 import { StatCard } from '../../components/ui/StatCard';
@@ -16,7 +16,7 @@ import {
 } from '../../components/ui/Select';
 import { getProperties, getBookings, updateBooking, deleteBooking, createBooking, type Property, type Booking, formatCurrency } from '../../../services/api';
 
-type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'expired';
+type BookingStatus = 'pending' | 'confirmed' | 'cancelled' | 'expired' | 'completed';
 
 interface LocalBooking {
   _id: string;
@@ -151,7 +151,8 @@ export const BookingsPage: React.FC = () => {
     const map = {
       pending: language === 'en' ? 'Pending' : 'قيد الانتظار',
       confirmed: language === 'en' ? 'Confirmed' : 'مؤكد',
-      cancelled: language === 'en' ? 'Cancelled' : 'ملغي',
+      cancelled: language === 'en' ? 'Cancelled' : 'ملغى',
+      completed: language === 'en' ? 'Completed' : 'مكتمل',
       expired: language === 'en' ? 'Completed' : 'مكتمل',
     };
     return map[status] || status;
@@ -160,7 +161,8 @@ export const BookingsPage: React.FC = () => {
   const getStatusClasses = (status: BookingStatus) => {
     if (status === 'confirmed') return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400';
     if (status === 'pending') return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400';
-    return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+    if (status === 'cancelled') return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+    return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300';
   };
 
   if (loading) return <div className="text-center py-10">Loading...</div>;
@@ -181,16 +183,16 @@ export const BookingsPage: React.FC = () => {
       </PageSection>
 
       <PageSection>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {(['pending', 'confirmed', 'cancelled', 'expired'] as BookingStatus[]).map((s) => {
-            const variants: Record<BookingStatus, any> = { pending: 'warning', confirmed: 'success', cancelled: 'danger', expired: 'default' };
-            const icons: Record<BookingStatus, any> = { pending: Clock, confirmed: CalendarIcon, cancelled: Trash2, expired: Clock };
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {(['pending', 'confirmed', 'cancelled', 'completed'] as BookingStatus[]).map((s) => {
+            const variants: Record<string, any> = { pending: 'warning', confirmed: 'success', cancelled: 'danger', completed: 'default' };
+            const icons: Record<string, any> = { pending: Clock, confirmed: CalendarIcon, cancelled: Trash2, completed: CheckCircle };
             const Icon = icons[s];
             return (
               <StatCard
                 key={s}
                 title={getStatusLabel(s)}
-                value={bookings.filter((b) => b.status === s).length}
+                value={bookings.filter((b) => s === 'completed' ? (b.status === 'completed' || b.status === 'expired') : b.status === s).length}
                 icon={<Icon className="w-full h-full" />}
                 variant={variants[s]}
               />
