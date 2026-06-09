@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { Heart, Bed, Bath, Maximize, MapPin, Search as SearchIcon, SlidersHorizontal, Eye, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useApp } from "../../contexts/AppContext";
@@ -26,10 +26,11 @@ export const PropertiesPage: React.FC = () => {
 
   const [minPriceInput, setMinPriceInput] = useState<string>("");
   const [maxPriceInput, setMaxPriceInput] = useState<string>("");
-  const [type, setType] = useState<string>("any");
+  const [searchParams] = useSearchParams();
+  const [type, setType] = useState<string>(searchParams.get("type") || "any");
   const [rooms, setRooms] = useState<number | "any">("any");
   const [location, setLocation] = useState("");
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(searchParams.get("q") || "");
   const [savedProperties, setSavedProperties] = useState<string[]>([]);
 
   useEffect(() => {

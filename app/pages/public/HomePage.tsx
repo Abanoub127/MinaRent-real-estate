@@ -13,6 +13,7 @@ export const HomePage: React.FC = () => {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchType, setSearchType] = useState('');
 
   // Comment Form
   const [commentName, setCommentName] = useState('');
@@ -100,32 +101,32 @@ export const HomePage: React.FC = () => {
               variants={slideInRight}
               initial="hidden"
               animate="visible"
-              className="flex flex-col gap-6"
+              className="flex flex-col items-center text-center lg:items-start lg:text-start gap-4"
             >
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm text-white/90 font-medium text-sm w-fit border border-white/10">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--accent)] opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[var(--accent)]" />
-                </span>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 backdrop-blur-sm text-white/80 font-medium text-xs w-fit border border-white/10 self-end lg:self-start">
                 {language === 'en' ? 'Premium Properties in Egypt' : 'عقارات فاخرة في مصر'}
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#E3B04A] opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#E3B04A]" />
+                </span>
               </div>
 
-              <h1 className="hero-title font-bold text-white leading-[1.2] tracking-tight">
+              <h1 className="hero-title font-bold text-white leading-[1.3] tracking-tight text-4xl lg:text-5xl mt-2">
                 {language === 'en' ? (
-                  <>Find Your Perfect <span className="text-shimmer-gold">Space</span> With Us</>
+                  <>Find Your Perfect <br className="lg:hidden" /><span className="text-[#E3B04A]">Space</span><br className="lg:hidden" /> With Us</>
                 ) : (
-                  <>اعثر على <span className="text-shimmer-gold">مساحتك</span> المثالية معنا</>
+                  <>اعثر على <br/><span className="text-[#E3B04A] text-5xl inline-block my-1">مساحتك</span><br/> المثالية معنا</>
                 )}
               </h1>
 
-              <p className="text-base sm:text-lg text-white/70 leading-relaxed max-w-lg">
+              <p className="text-sm sm:text-base text-white/70 leading-relaxed max-w-lg mx-auto lg:mx-0">
                 {language === 'en'
                   ? 'Discover curated properties that match your lifestyle. From modern apartments to luxury villas, your next chapter starts here.'
-                  : 'اكتشف عقارات منتقاة بعناية تناسب أسلوب حياتك. من الشقق الحديثة إلى الفيلات الفاخرة، فصلك القادم يبدأ هنا.'}
+                  : <>اكتشف عقارات منتقاة بعناية تناسب أسلوب حياتك.<br/>من الشقق الحديثة إلى الفيلات الفاخرة.<br/>فصلك القادم يبدأ هنا.</>}
               </p>
 
               {/* Search Bar */}
-              <div className="mt-2 flex items-center p-1.5 bg-[#1C2C3E]/80 backdrop-blur-md border border-white/10 rounded-full max-w-2xl w-full mx-auto md:mx-0 overflow-x-auto scrollbar-none">
+              <div className="mt-4 flex items-center p-1 bg-[#202E42]/80 backdrop-blur-md border border-white/10 rounded-full w-[98%] sm:max-w-2xl mx-auto lg:mx-0 overflow-x-auto scrollbar-none shadow-lg">
                 <div className="flex-1 flex items-center min-w-[140px] px-2 sm:px-4 border-l border-white/10">
                   <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-white/50 shrink-0" />
                   <input
@@ -133,23 +134,48 @@ export const HomePage: React.FC = () => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={language === 'en' ? 'Search location...' : 'ابحث بالموقع...'}
-                    className="w-full bg-transparent border-none outline-none text-xs sm:text-sm text-white placeholder:text-white/50 py-2 px-2"
+                    className="w-full bg-transparent border-none outline-none text-xs sm:text-sm text-white placeholder:text-white/50 py-2 px-2 font-medium"
                   />
                 </div>
                 
-                <div className="flex items-center min-w-[90px] px-2 sm:px-4 cursor-pointer hover:bg-white/5 rounded-lg transition-colors border-l border-white/10">
-                  <span className="text-xs sm:text-sm text-white/80 select-none">
-                    {language === 'en' ? 'Type' : 'النوع'}
-                  </span>
-                  <svg className="w-4 h-4 text-white/50 mx-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                <div className="relative flex items-center min-w-[85px] border-l border-white/10 hover:bg-white/5 transition-colors">
+                  <select
+                    value={searchType}
+                    onChange={(e) => setSearchType(e.target.value)}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  >
+                    <option value="">{language === 'en' ? 'Any' : 'النوع'}</option>
+                    <option value="apartment">{language === 'en' ? 'Apartment' : 'شقة'}</option>
+                    <option value="villa">{language === 'en' ? 'Villa' : 'فيلا'}</option>
+                    <option value="house">{language === 'en' ? 'House' : 'منزل'}</option>
+                    <option value="commercial">{language === 'en' ? 'Commercial' : 'تجاري'}</option>
+                  </select>
+                  <div className="flex items-center px-2 sm:px-3 w-full justify-between pointer-events-none">
+                    <span className="text-xs sm:text-sm text-white/90 select-none font-medium">
+                      {searchType ? (
+                         searchType === 'apartment' ? (language === 'en' ? 'Apartment' : 'شقة') :
+                         searchType === 'villa' ? (language === 'en' ? 'Villa' : 'فيلا') :
+                         searchType === 'house' ? (language === 'en' ? 'House' : 'منزل') :
+                         searchType === 'commercial' ? (language === 'en' ? 'Commercial' : 'تجاري') :
+                         (language === 'en' ? 'Type' : 'النوع')
+                      ) : (language === 'en' ? 'Type' : 'النوع')}
+                    </span>
+                    <svg className="w-3.5 h-3.5 text-white/50 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </div>
                 </div>
 
                 <Link
-                  to={searchQuery ? `/properties?q=${encodeURIComponent(searchQuery)}` : '/properties'}
-                  className="bg-[#C9A84C] text-[#1a2332] px-4 sm:px-6 py-2.5 sm:py-3 rounded-full font-bold text-xs sm:text-sm hover:brightness-110 transition-all flex items-center gap-1.5 shrink-0"
+                  to={(() => {
+                    const params = new URLSearchParams();
+                    if (searchQuery) params.append('q', searchQuery);
+                    if (searchType) params.append('type', searchType);
+                    const str = params.toString();
+                    return str ? `/properties?${str}` : '/properties';
+                  })()}
+                  className="bg-[#D4A353] text-[#121A26] px-5 sm:px-6 py-2.5 rounded-full font-bold text-xs sm:text-sm hover:brightness-110 transition-all flex items-center gap-1.5 shrink-0 ml-1"
                 >
-                  <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   {language === 'en' ? 'Search' : 'بحث'}
+                  <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </Link>
               </div>
             </motion.div>
