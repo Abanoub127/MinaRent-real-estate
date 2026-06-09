@@ -38,22 +38,25 @@ export const PublicLayout: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-[var(--background)] transition-colors duration-300">
       {/* Floating Navbar */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled ? 'py-2 px-3' : 'py-3 px-3 md:px-6'
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 py-3 px-4 md:px-6`}
       >
         <div
-          className={`max-w-6xl mx-auto rounded-2xl border transition-all duration-500 ${
-            scrolled
-              ? 'bg-[var(--card)]/85 backdrop-blur-xl shadow-lg border-[var(--border)]'
-              : 'bg-[var(--card)]/95 backdrop-blur-md border-[var(--border)] shadow-md'
-          }`}
+          className={`max-w-6xl mx-auto rounded-2xl border transition-all duration-500 bg-white dark:bg-[var(--card)] shadow-lg border-[var(--border)]`}
         >
-          <div className="px-5 h-16 flex items-center justify-between">
+          <div className="px-5 h-16 flex items-center justify-between relative">
             {/* Logo */}
-            <Link to="/" className="flex items-center group">
+            <Link to="/" className="flex items-center group md:static absolute left-1/2 -translate-x-1/2 md:translate-x-0">
               <MRLogo size="sm" showText={true} animated={false} />
             </Link>
+
+            {/* Mobile Menu Button - Left Side */}
+            <button
+              className="md:hidden absolute left-5 p-2 text-[var(--foreground)] rounded-xl hover:bg-[var(--secondary)] z-10"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-1">
@@ -106,14 +109,6 @@ export const PublicLayout: React.FC = () => {
               </Link>
             </div>
 
-            {/* Mobile Menu Button */}
-            <button
-              className="md:hidden p-2 text-[var(--foreground)] rounded-xl hover:bg-[var(--secondary)]"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label="Toggle menu"
-            >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
           </div>
         </div>
 

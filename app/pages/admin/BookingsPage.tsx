@@ -35,6 +35,7 @@ interface LocalBooking {
   };
   startDate: string;
   endDate: string;
+  nightPrice?: number;
   paidAmount?: number;
   status: BookingStatus;
   notes?: string;
@@ -53,6 +54,7 @@ export const BookingsPage: React.FC = () => {
     clientPhone: '',
     startDate: '',
     endDate: '',
+    nightPrice: '',
     paidAmount: '',
     status: 'confirmed' as BookingStatus,
     notes: '',
@@ -83,6 +85,7 @@ export const BookingsPage: React.FC = () => {
         clientPhone: booking.clientId?.phone || '',
         startDate: booking.startDate?.split('T')[0] || '',
         endDate: booking.endDate?.split('T')[0] || '',
+        nightPrice: booking.nightPrice !== undefined ? String(booking.nightPrice) : '',
         paidAmount: String(booking.paidAmount || ''),
         status: booking.status || 'confirmed',
         notes: booking.notes || '',
@@ -95,6 +98,7 @@ export const BookingsPage: React.FC = () => {
         clientPhone: '',
         startDate: '',
         endDate: '',
+        nightPrice: '',
         paidAmount: '',
         status: 'confirmed',
         notes: '',
@@ -110,7 +114,11 @@ export const BookingsPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const body: any = { ...formData, paidAmount: Number(formData.paidAmount) || 0 };
+    const body: any = { 
+      ...formData, 
+      paidAmount: Number(formData.paidAmount) || 0,
+      ...(formData.nightPrice !== '' ? { nightPrice: Number(formData.nightPrice) } : {})
+    };
     try {
       if (editingBooking) {
         await updateBooking(editingBooking._id, body);
@@ -347,12 +355,21 @@ export const BookingsPage: React.FC = () => {
             />
           </div>
 
-          <Input
-            label={language === 'en' ? 'Paid Amount (EGP)' : 'المبلغ المدفوع (جنيه)'}
-            type="number"
-            value={formData.paidAmount}
-            onChange={(e) => setFormData({ ...formData, paidAmount: e.target.value })}
-          />
+          <div className="grid grid-cols-2 gap-4">
+            <Input
+              label={language === 'en' ? 'Night Price (EGP) - Optional' : 'سعر الليلة (جنيه) - اختياري'}
+              type="number"
+              value={formData.nightPrice}
+              onChange={(e) => setFormData({ ...formData, nightPrice: e.target.value })}
+              placeholder={language === 'en' ? 'Default property price' : 'سعر العقار الافتراضي'}
+            />
+            <Input
+              label={language === 'en' ? 'Paid Amount (EGP)' : 'المبلغ المدفوع (جنيه)'}
+              type="number"
+              value={formData.paidAmount}
+              onChange={(e) => setFormData({ ...formData, paidAmount: e.target.value })}
+            />
+          </div>
 
           <div>
             <label className="text-sm mb-1 block">{language === 'en' ? 'Status' : 'الحالة'}</label>

@@ -438,6 +438,7 @@ export type Booking = {
   startDate: string;
   endDate: string;
   totalDays: number;
+  nightPrice?: number;
   totalPrice: number;
   paidAmount: number;
   remainingAmount: number;

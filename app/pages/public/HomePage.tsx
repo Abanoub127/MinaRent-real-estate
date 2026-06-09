@@ -125,22 +125,30 @@ export const HomePage: React.FC = () => {
               </p>
 
               {/* Search Bar */}
-              <div className="mt-2 flex items-center p-1.5 bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl max-w-lg w-full">
-                <div className="flex-1 flex items-center gap-2 px-4">
-                  <MapPin className="w-5 h-5 text-white/50" />
+              <div className="mt-2 flex items-center p-1.5 bg-[#1C2C3E]/80 backdrop-blur-md border border-white/10 rounded-full max-w-2xl w-full mx-auto md:mx-0 overflow-x-auto scrollbar-none">
+                <div className="flex-1 flex items-center min-w-[140px] px-2 sm:px-4 border-l border-white/10">
+                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-white/50 shrink-0" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={language === 'en' ? 'Search by location...' : 'ابحث بالموقع...'}
-                    className="w-full bg-transparent border-none outline-none text-sm text-white placeholder:text-white/40 py-2"
+                    placeholder={language === 'en' ? 'Search location...' : 'ابحث بالموقع...'}
+                    className="w-full bg-transparent border-none outline-none text-xs sm:text-sm text-white placeholder:text-white/50 py-2 px-2"
                   />
                 </div>
+                
+                <div className="flex items-center min-w-[90px] px-2 sm:px-4 cursor-pointer hover:bg-white/5 rounded-lg transition-colors border-l border-white/10">
+                  <span className="text-xs sm:text-sm text-white/80 select-none">
+                    {language === 'en' ? 'Type' : 'النوع'}
+                  </span>
+                  <svg className="w-4 h-4 text-white/50 mx-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+
                 <Link
                   to={searchQuery ? `/properties?q=${encodeURIComponent(searchQuery)}` : '/properties'}
-                  className="bg-[var(--accent)] text-[var(--accent-foreground)] px-6 py-3 rounded-xl font-semibold text-sm hover:brightness-110 transition-all flex items-center gap-2 shrink-0 btn-premium"
+                  className="bg-[#C9A84C] text-[#1a2332] px-4 sm:px-6 py-2.5 sm:py-3 rounded-full font-bold text-xs sm:text-sm hover:brightness-110 transition-all flex items-center gap-1.5 shrink-0"
                 >
-                  <Search className="w-4 h-4" />
+                  <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   {language === 'en' ? 'Search' : 'بحث'}
                 </Link>
               </div>

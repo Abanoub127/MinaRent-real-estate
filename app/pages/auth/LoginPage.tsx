@@ -72,14 +72,31 @@ export const LoginPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="text-xs font-semibold text-[var(--text-secondary)] mb-1.5 block">{language === 'en' ? 'Email Address' : 'البريد الإلكتروني'}</label>
-              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full px-4 py-3.5 bg-[var(--card)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-sm text-[var(--foreground)]" placeholder="adminrentmina24@gmail.com" dir="ltr" />
+              <input 
+                type="email" 
+                required 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                className="w-full px-4 py-3.5 bg-[var(--card)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-sm text-[var(--foreground)]" 
+                placeholder={language === 'en' ? 'Your email' : 'البريد الإلكتروني'} 
+                dir="ltr" 
+              />
             </div>
             <div>
-              <label className="text-xs font-semibold text-[var(--text-secondary)] mb-1.5 block">{language === 'en' ? 'Password' : 'كلمة المرور'}</label>
-              <div className="relative">
-                <input type={showPassword ? 'text' : 'password'} required value={password} onChange={(e) => setPassword(e.target.value)} className="w-full px-4 py-3.5 bg-[var(--card)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-sm text-[var(--foreground)] pe-12" placeholder="••••••••" dir="ltr" />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute end-3 top-1/2 -translate-y-1/2 p-1.5 text-[var(--text-secondary)] hover:text-[var(--foreground)] transition-colors">
+              <div className="relative" dir="ltr">
+                <input 
+                  type={showPassword ? 'text' : 'password'} 
+                  required 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} 
+                  className="w-full px-4 py-3.5 bg-[var(--card)] border border-[var(--border)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] text-sm text-[var(--foreground)] pr-12" 
+                  placeholder={language === 'en' ? 'Password' : 'كلمة المرور'} 
+                />
+                <button 
+                  type="button" 
+                  onClick={() => setShowPassword(!showPassword)} 
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[var(--text-secondary)] hover:text-[var(--foreground)] transition-colors"
+                >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
