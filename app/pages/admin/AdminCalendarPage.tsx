@@ -9,7 +9,7 @@ import { getProperties, getBookings, updateBooking, Property, Booking, formatEGP
 import { motion, AnimatePresence } from 'framer-motion';
 import { ProtectedImage } from '../../components/ProtectedImage';
 
-type FilterStatus = 'all' | 'confirmed' | 'pending' | 'completed' | 'cancelled' | 'available' | 'checkout';
+type FilterStatus = 'all' | 'confirmed' | 'pending' | 'completed' | 'cancelled' | 'available';
 type ViewMode = 'month' | 'week';
 
 // ── Status colors ─────────────────────────────────────────────────────────────
@@ -19,7 +19,6 @@ const STATUS_COLORS = {
   pending: { bg: 'rgba(245, 158, 11, 0.15)', border: '#f59e0b', text: 'var(--foreground)', dot: '#f59e0b' },
   completed: { bg: 'rgba(107, 114, 128, 0.15)', border: '#6b7280', text: 'var(--foreground)', dot: '#6b7280' },
   cancelled: { bg: 'rgba(239, 68, 68, 0.15)', border: '#ef4444', text: 'var(--foreground)', dot: '#ef4444' },
-  checkout: { bg: 'rgba(168, 85, 247, 0.15)', border: '#a855f7', text: 'var(--foreground)', dot: '#a855f7' },
 } as const;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -55,12 +54,6 @@ const DesktopCell = memo(({
     if (cellBs.some(b => b.status === 'cancelled')) return 'cancelled';
     if (cellBs.some(b => b.status === 'completed')) return 'completed';
     if (cellBs.some(b => b.status === 'pending')) return 'pending';
-    // Checkout: booking ends today (endDate === this cell's date)
-    const cellDateStr = date.toISOString().slice(0, 10);
-    if (cellBs.some(b => {
-      const end = new Date(b.endDate); end.setHours(0, 0, 0, 0);
-      return end.toISOString().slice(0, 10) === cellDateStr;
-    })) return 'checkout';
     return 'confirmed';
   }, [cellBs, hasBook, date]);
 
@@ -123,12 +116,6 @@ const MobileCell = memo(({
     if (cellBs.some(b => b.status === 'cancelled')) return 'cancelled';
     if (cellBs.some(b => b.status === 'completed')) return 'completed';
     if (cellBs.some(b => b.status === 'pending')) return 'pending';
-    // Checkout: booking ends today (endDate === this cell's date)
-    const cellDateStr = date.toISOString().slice(0, 10);
-    if (cellBs.some(b => {
-      const end = new Date(b.endDate); end.setHours(0, 0, 0, 0);
-      return end.toISOString().slice(0, 10) === cellDateStr;
-    })) return 'checkout';
     return 'confirmed';
   }, [cellBs, hasBook, date]);
 
@@ -293,11 +280,13 @@ export const AdminCalendarPage: React.FC = () => {
         const [pr, br] = await Promise.all([getProperties(1, 100), getBookings()]);
         setProperties(pr.properties || []);
         let books = (br && (br as any).bookings ? (br as any).bookings : Array.isArray(br) ? br : []) as Booking[];
-        
+
         const todayStr = new Date().toISOString().slice(0, 10);
         const expired = books.filter(b => {
           if (b.status !== 'confirmed' && b.status !== 'pending') return false;
-          const end = new Date(b.endDate); end.setHours(0, 0, 0, 0);
+          const end = new Date(b.endDate);
+          if (isNaN(end.getTime())) return false;
+          end.setHours(0, 0, 0, 0);
           return end.toISOString().slice(0, 10) < todayStr;
         });
 
@@ -345,10 +334,16 @@ export const AdminCalendarPage: React.FC = () => {
     bookings.forEach(b => {
       const pId = typeof b.propertyId === 'object' && b.propertyId ? b.propertyId._id : b.propertyId;
       if (!pId) return;
-      const s = new Date(b.startDate); s.setHours(0, 0, 0, 0);
-      const e = new Date(b.endDate); e.setHours(0, 0, 0, 0);
+      const s = new Date(b.startDate);
+      if (isNaN(s.getTime())) return;
+      s.setHours(0, 0, 0, 0);
+
+      const e = new Date(b.endDate);
+      if (isNaN(e.getTime())) return;
+      e.setHours(0, 0, 0, 0);
+
       const cur = new Date(s);
-      while (cur < e) {
+      while (cur <= e) {
         const key = `${pId}__${cur.toISOString().slice(0, 10)}`;
         if (!map.has(key)) map.set(key, []);
         map.get(key)!.push(b);
@@ -420,7 +415,6 @@ export const AdminCalendarPage: React.FC = () => {
     completed: { ar: 'مكتمل', en: 'Completed' },
     cancelled: { ar: 'ملغى', en: 'Cancelled' },
     available: { ar: 'متاح', en: 'Available' },
-    checkout: { ar: 'انتهى', en: 'Checked Out' },
   };
   const filterDotColor: Record<FilterStatus, string> = {
     all: '#6b7280',
@@ -429,7 +423,6 @@ export const AdminCalendarPage: React.FC = () => {
     completed: STATUS_COLORS.completed.dot,
     cancelled: STATUS_COLORS.cancelled.dot,
     available: STATUS_COLORS.available.dot,
-    checkout: STATUS_COLORS.checkout.dot,
   };
 
   // ── Mobile Grid ───────────────────────────────────────────────────────────
@@ -490,7 +483,7 @@ export const AdminCalendarPage: React.FC = () => {
                   filterStatus={filterStatus}
                   cellH={CELL_H}
                   colMinW={COL_MIN_W}
-                  onClickBooking={(b) => handleClickBooking(b)}
+                  onClickBooking={(b) => handleClickBooking(b, prop)}
                   propCode={propCodeFn(prop)}
                 />
               ))}
@@ -504,25 +497,24 @@ export const AdminCalendarPage: React.FC = () => {
   // ── Mobile List ───────────────────────────────────────────────────────────
   const renderMobileList = () => {
     const rangeStart = dateRange[0];
-    const rs = new Date(rangeStart); rs.setHours(0,0,0,0);
+    const rs = new Date(rangeStart); rs.setHours(0, 0, 0, 0);
     const rangeEnd = dateRange[dateRange.length - 1];
-    const re = new Date(rangeEnd); re.setHours(23,59,59,999);
-    
+    const re = new Date(rangeEnd); re.setHours(23, 59, 59, 999);
+
     const relevantBookings = bookings.filter(b => {
       const pId = typeof b.propertyId === 'object' && b.propertyId ? b.propertyId._id : b.propertyId;
       if (!filteredProps.some(p => p._id === pId)) return false;
-      const s = new Date(b.startDate); s.setHours(0,0,0,0);
-      const e = new Date(b.endDate); e.setHours(0,0,0,0);
+      const s = new Date(b.startDate);
+      const e = new Date(b.endDate);
+      if (isNaN(s.getTime()) || isNaN(e.getTime())) return false;
+      s.setHours(0, 0, 0, 0);
+      e.setHours(0, 0, 0, 0);
       if (e < rs || s > re) return false;
       if (filterStatus !== 'all') {
-         if (filterStatus === 'available') return false;
-         if (filterStatus === 'checkout') {
-            const endStr = e.toISOString().slice(0, 10);
-            const inRange = dateRange.some(d => d.toISOString().slice(0,10) === endStr);
-            if (!inRange) return false;
-         } else if (b.status !== filterStatus) {
-            return false;
-         }
+        if (filterStatus === 'available') return false;
+        if (b.status !== filterStatus) {
+          return false;
+        }
       }
       return true;
     });
@@ -534,30 +526,30 @@ export const AdminCalendarPage: React.FC = () => {
     return (
       <div className="flex-1 overflow-auto bg-[var(--background)] p-4 space-y-3">
         {relevantBookings.map(b => {
-           const pId = typeof b.propertyId === 'object' && b.propertyId ? b.propertyId._id : b.propertyId;
-           const prop = properties.find(p => p._id === pId);
-           const pName = prop ? (isAr && (prop as any).titleAr ? (prop as any).titleAr : prop.title) : '—';
-           const statusLabels: Record<string, { ar: string; en: string }> = {
-                  confirmed: { ar: 'مؤكد', en: 'Confirmed' },
-                  pending: { ar: 'في الانتظار', en: 'Pending' },
-                  cancelled: { ar: 'ملغى', en: 'Cancelled' },
-           };
-           const sColor = STATUS_COLORS[b.status as keyof typeof STATUS_COLORS] || STATUS_COLORS.confirmed;
-           const sLabel = isAr ? (statusLabels[b.status]?.ar || b.status) : (statusLabels[b.status]?.en || b.status);
-           return (
-             <div key={(b as any)._id || b.id} onClick={() => handleClickBooking(b, prop)} className="bg-[var(--card)] p-4 rounded-xl border border-[var(--border)] shadow-sm flex flex-col gap-2 active:scale-[0.98] transition-transform">
-               <div className="flex justify-between items-start">
-                 <h3 className="font-bold text-[var(--foreground)] text-sm truncate pr-2">{pName}</h3>
-                 <span className="px-2 py-0.5 rounded-full text-[0.625rem] font-bold whitespace-nowrap" style={{ backgroundColor: sColor.bg, color: sColor.text, border: `1px solid ${sColor.border}` }}>
-                   {sLabel}
-                 </span>
-               </div>
-               <div className="flex items-center text-[var(--text-secondary)] text-xs gap-3 mt-1">
-                 <div className="flex items-center gap-1.5"><Calendar size={12} /> {formatDate(b.startDate, language)} - {formatDate(b.endDate, language)}</div>
-                 <div className="flex items-center gap-1.5"><Users size={12} /> {typeof b.clientId === 'object' ? b.clientId?.name : (isAr ? 'ضيف' : 'Guest')}</div>
-               </div>
-             </div>
-           );
+          const pId = typeof b.propertyId === 'object' && b.propertyId ? b.propertyId._id : b.propertyId;
+          const prop = properties.find(p => p._id === pId);
+          const pName = prop ? (isAr && (prop as any).titleAr ? (prop as any).titleAr : prop.title) : '—';
+          const statusLabels: Record<string, { ar: string; en: string }> = {
+            confirmed: { ar: 'مؤكد', en: 'Confirmed' },
+            pending: { ar: 'في الانتظار', en: 'Pending' },
+            cancelled: { ar: 'ملغى', en: 'Cancelled' },
+          };
+          const sColor = STATUS_COLORS[b.status as keyof typeof STATUS_COLORS] || STATUS_COLORS.confirmed;
+          const sLabel = isAr ? (statusLabels[b.status]?.ar || b.status) : (statusLabels[b.status]?.en || b.status);
+          return (
+            <div key={(b as any)._id || b.id} onClick={() => handleClickBooking(b, prop)} className="bg-[var(--card)] p-4 rounded-xl border border-[var(--border)] shadow-sm flex flex-col gap-2 active:scale-[0.98] transition-transform">
+              <div className="flex justify-between items-start">
+                <h3 className="font-bold text-[var(--foreground)] text-sm truncate pr-2">{pName}</h3>
+                <span className="px-2 py-0.5 rounded-full text-[0.625rem] font-bold whitespace-nowrap" style={{ backgroundColor: sColor.bg, color: sColor.text, border: `1px solid ${sColor.border}` }}>
+                  {sLabel}
+                </span>
+              </div>
+              <div className="flex items-center text-[var(--text-secondary)] text-xs gap-3 mt-1">
+                <div className="flex items-center gap-1.5"><Calendar size={12} /> {formatDate(b.startDate, language)} - {formatDate(b.endDate, language)}</div>
+                <div className="flex items-center gap-1.5"><Users size={12} /> {typeof b.clientId === 'object' ? b.clientId?.name : (isAr ? 'ضيف' : 'Guest')}</div>
+              </div>
+            </div>
+          );
         })}
       </div>
     );
@@ -565,11 +557,11 @@ export const AdminCalendarPage: React.FC = () => {
 
   // ── Desktop Grid ──────────────────────────────────────────────────────────
   const renderDesktopGrid = () => (
-    <div ref={scrollContainerRef} className="flex-1 overflow-auto bg-[var(--background)]" style={{ scrollbarWidth: 'thin' }} dir="ltr">
-      <div className="inline-flex flex-col min-w-max bg-[var(--card)]">
+    <div ref={scrollContainerRef} className="flex-1 overflow-auto bg-[var(--background)] w-full" style={{ scrollbarWidth: 'thin' }} dir="ltr">
+      <div className="inline-flex flex-col min-w-max bg-[var(--card)] w-full">
 
         {/* Sticky top header */}
-        <div className="sticky top-0 z-10 flex bg-[var(--card)] border-b border-[var(--border)]" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+        <div className="sticky top-0 z-10 flex bg-[var(--card)] border-b border-[var(--border)] w-full" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
           {/* Corner */}
           <div className="sticky left-0 z-20 bg-[var(--card)] border-r border-[var(--border)] flex-shrink-0 flex items-center px-3"
             style={{ width: PROP_COL_W, height: HEADER_H }}>
@@ -595,6 +587,8 @@ export const AdminCalendarPage: React.FC = () => {
               </div>
             );
           })}
+          {/* فاضي يملا الباقي */}
+          <div className="flex-1 bg-[var(--card)]" style={{ height: HEADER_H }} />
         </div>
 
         {/* Property rows — memoised */}
@@ -676,8 +670,8 @@ export const AdminCalendarPage: React.FC = () => {
               return (
                 <button key={s} onClick={() => setFilterStatus(s)}
                   className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[0.6875rem] font-semibold whitespace-nowrap border transition-all ${active
-                      ? 'text-[var(--foreground)] border-[var(--border)] shadow-sm'
-                      : 'bg-[var(--card)] text-[var(--text-secondary)] border-[var(--border)] hover:bg-[var(--secondary)]'
+                    ? 'text-[var(--foreground)] border-[var(--border)] shadow-sm'
+                    : 'bg-[var(--card)] text-[var(--text-secondary)] border-[var(--border)] hover:bg-[var(--secondary)]'
                     }`}
                   style={active ? { background: col } : {}}>
                   <span className="w-1.5 h-1.5 rounded-full" style={{ background: active ? 'var(--foreground)' : col }} />
@@ -739,7 +733,7 @@ export const AdminCalendarPage: React.FC = () => {
                 const statusLabels: Record<string, { ar: string; en: string }> = {
                   confirmed: { ar: 'مؤكد', en: 'Confirmed' },
                   pending: { ar: 'في الانتظار', en: 'Pending' },
-                  completed: { ar: 'منتهي', en: 'Completed' },
+                  completed: { ar: 'Complete', en: 'Completed' },
                   cancelled: { ar: 'ملغى', en: 'Cancelled' },
                 };
                 return (

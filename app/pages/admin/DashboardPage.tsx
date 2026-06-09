@@ -53,9 +53,6 @@ export const DashboardPage: React.FC = () => {
                 <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-white/20">
                   <DollarSign className="w-5 h-5 text-white"/>
                 </div>
-                <div className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full bg-white/20 text-white`}>
-                  {(stats.revenueGrowth||0)>=0?<TrendingUp className="w-3 h-3"/>:<TrendingDown className="w-3 h-3"/>}<span>{Math.abs(stats.revenueGrowth||0)}%</span>
-                </div>
               </div>
               <div className="relative z-10">
                 <h3 className="text-xs font-medium mb-1 text-white/80">{language==='en'?'Total Revenue':'إجمالي الإيرادات'}</h3>
@@ -68,9 +65,6 @@ export const DashboardPage: React.FC = () => {
                 <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-[var(--secondary)]">
                   <Building2 className="w-5 h-5 text-[var(--primary)]"/>
                 </div>
-                <div className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full ${(stats.propertyGrowth||0)>=0?'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400':'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'}`}>
-                  {(stats.propertyGrowth||0)>=0?<TrendingUp className="w-3 h-3"/>:<TrendingDown className="w-3 h-3"/>}<span>{Math.abs(stats.propertyGrowth||0)}%</span>
-                </div>
               </div>
               <h3 className="text-xs font-medium mb-1 text-[var(--text-secondary)]">{t('dashboard.totalProperties')}</h3>
               <p className="text-2xl font-bold tracking-tight text-[var(--foreground)]">{stats.totalProperties}</p>
@@ -81,9 +75,6 @@ export const DashboardPage: React.FC = () => {
                 <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-[var(--secondary)]">
                   <CalendarCheck className="w-5 h-5 text-[var(--accent)]"/>
                 </div>
-                <div className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full ${(stats.bookingsGrowth||0)>=0?'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400':'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'}`}>
-                  {(stats.bookingsGrowth||0)>=0?<TrendingUp className="w-3 h-3"/>:<TrendingDown className="w-3 h-3"/>}<span>{Math.abs(stats.bookingsGrowth||0)}%</span>
-                </div>
               </div>
               <h3 className="text-xs font-medium mb-1 text-[var(--text-secondary)]">{t('dashboard.totalBookings')}</h3>
               <p className="text-2xl font-bold tracking-tight text-[var(--foreground)]">{stats.totalBookings}</p>
@@ -93,9 +84,6 @@ export const DashboardPage: React.FC = () => {
               <div className="flex justify-between items-start mb-3">
                 <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-[var(--secondary)]">
                   <Users className="w-5 h-5 text-blue-500"/>
-                </div>
-                <div className={`flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full ${(stats.clientsGrowth||0)>=0?'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400':'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'}`}>
-                  {(stats.clientsGrowth||0)>=0?<TrendingUp className="w-3 h-3"/>:<TrendingDown className="w-3 h-3"/>}<span>{Math.abs(stats.clientsGrowth||0)}%</span>
                 </div>
               </div>
               <h3 className="text-xs font-medium mb-1 text-[var(--text-secondary)]">{t('dashboard.activeClients')}</h3>
@@ -196,8 +184,16 @@ export const DashboardPage: React.FC = () => {
                         {typeof b.propertyId==='object'&&b.propertyId!==null?(language==='en'?b.propertyId.title:b.propertyId.titleAr):'Property'}
                       </p>
                     </div>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${b.status==='confirmed'?'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':b.status==='pending'?'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400':'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'}`}>
-                      {language==='en'?b.status:(b.status==='confirmed'?'مؤكد':b.status==='pending'?'قيد الانتظار':'ملغى')}
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                      b.status === 'confirmed' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                      b.status === 'pending' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' :
+                      b.status === 'cancelled' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                      'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                    }`}>
+                      {language === 'en' ? (b.status === 'expired' || b.status === 'completed' ? 'Completed' : b.status) : 
+                        (b.status === 'confirmed' ? 'مؤكد' : 
+                         b.status === 'pending' ? 'قيد الانتظار' : 
+                         b.status === 'cancelled' ? 'ملغى' : 'مكتمل')}
                     </span>
                   </div>
                 ))}

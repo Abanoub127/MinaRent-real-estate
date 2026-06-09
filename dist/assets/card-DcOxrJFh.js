@@ -1,0 +1,1 @@
+import{j as t}from"./vendor-BXVJ_nOw.js";import{c as e}from"./utils-DCN8dDX3.js";function n({className:r,hover:a,...o}){return t.jsx("div",{"data-slot":"card",className:e("bg-card text-card-foreground flex flex-col gap-6 rounded-xl border",a&&"transition-all duration-300 hover:shadow-lg hover:-translate-y-1",r),...o})}export{n as C};

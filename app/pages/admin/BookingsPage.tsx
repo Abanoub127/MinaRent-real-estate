@@ -152,7 +152,7 @@ export const BookingsPage: React.FC = () => {
       pending: language === 'en' ? 'Pending' : 'قيد الانتظار',
       confirmed: language === 'en' ? 'Confirmed' : 'مؤكد',
       cancelled: language === 'en' ? 'Cancelled' : 'ملغي',
-      expired: language === 'en' ? 'Expired' : 'منتهي',
+      expired: language === 'en' ? 'Completed' : 'مكتمل',
     };
     return map[status] || status;
   };

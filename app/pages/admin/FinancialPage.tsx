@@ -205,19 +205,19 @@ export const FinancialPage: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <StatCard
             title={language === 'en' ? 'Total Revenue' : 'إجمالي الإيرادات'}
-            value={`${formatCurrency(stats.totalRevenue).replace('ج.م', 'M ج.م')}`}
+            value={formatCurrency(stats.totalRevenue)}
             icon={<TrendingUp className="w-full h-full" />}
             variant="success"
           />
           <StatCard
             title={language === 'en' ? 'Total Expenses' : 'إجمالي المصروفات'}
-            value={`${formatCurrency(stats.totalExpenses).replace('ج.م', 'K ج.م')}`}
+            value={formatCurrency(stats.totalExpenses)}
             icon={<TrendingDown className="w-full h-full" />}
             variant="danger"
           />
           <StatCard
             title={language === 'en' ? 'Net Profit' : 'صافي الربح'}
-            value={`${formatCurrency(stats.profit)}`}
+            value={formatCurrency(stats.profit)}
             icon={<DollarSign className="w-full h-full" />}
             variant="primary"
           />
@@ -232,15 +232,15 @@ export const FinancialPage: React.FC = () => {
                 {language === 'en' ? 'Revenue by Category' : 'الإيرادات حسب الفئة'}
               </h3>
               <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
+                <PieChart margin={{ top: 20, right: 40, left: 40, bottom: 20 }}>
                   <Pie
                     data={revenueChartData}
                     cx="50%"
                     cy="50%"
                     labelLine={true}
-                    outerRadius={80}
+                    outerRadius={90}
                     dataKey="value"
-                    label={({ name, value }) => `${value}`}
+                    label={({ name, value }) => `${name}: ${formatCurrency(value)}`}
                   >
                     {revenueChartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -262,15 +262,15 @@ export const FinancialPage: React.FC = () => {
                 {language === 'en' ? 'Expenses by Category' : 'المصروفات حسب الفئة'}
               </h3>
               <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
+                <PieChart margin={{ top: 20, right: 40, left: 40, bottom: 20 }}>
+                 <Pie
                     data={expenseChartData}
                     cx="50%"
                     cy="50%"
                     labelLine={true}
-                    outerRadius={80}
+                    outerRadius={90}
                     dataKey="value"
-                    label={({ name, value }) => `${value}`}
+                    label={({ name, value }) => `${name}: ${formatCurrency(value)}`}
                   >
                     {expenseChartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />

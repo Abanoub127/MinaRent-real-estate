@@ -24,7 +24,7 @@ import {
   LabelList
 } from 'recharts';
 
-import { getProperties, getStats } from '../../../services/api';
+import { getProperties, getStats, getBookings } from '../../../services/api';
 
 type PropertyType =
   | 'villa'
@@ -61,14 +61,16 @@ export const AnalyticsPage: React.FC = () => {
   const [properties, setProperties] = useState<LocalProperty[]>([]);
 
   const [stats, setStats] = useState<Stats | null>(null);
+  const [bookings, setBookings] = useState<any[]>([]);
 
   const [loading, setLoading] = useState(true);
 
   const fetchAnalytics = async () => {
     try {
-      const [p, s] = await Promise.all([getProperties(1, 100), getStats()]);
+      const [p, s, b] = await Promise.all([getProperties(1, 100), getStats(), getBookings()]);
       setProperties((p.properties || []) as LocalProperty[]);
       setStats(s);
+      setBookings(b);
     } catch (error) {
       console.error(error);
     } finally {
@@ -110,6 +112,16 @@ export const AnalyticsPage: React.FC = () => {
     (sum, property) => sum + property.views,
     0
   );
+
+  const realClientCount = useMemo(() => {
+    const validBookings = bookings.filter(b => b.status === 'confirmed' || b.status === 'completed' || b.status === 'expired');
+    const uniqueClientIds = new Set();
+    validBookings.forEach(b => {
+      const cId = typeof b.clientId === 'object' && b.clientId ? b.clientId._id || b.clientId.id : b.clientId;
+      if (cId) uniqueClientIds.add(cId);
+    });
+    return uniqueClientIds.size;
+  }, [bookings]);
 
   const conversionData = [
     { name: language === 'en' ? 'Views' : 'المشاهدات', value: totalViews, fill: '#3B82F6' },
@@ -227,7 +239,7 @@ export const AnalyticsPage: React.FC = () => {
                   {language === 'en' ? 'Clients' : 'العملاء'}
                 </p>
                 <p className="text-2xl font-bold text-[var(--foreground)]">
-                  {stats?.totalClients || 0}
+                  {realClientCount}
                 </p>
               </div>
               <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-xl flex items-center justify-center flex-shrink-0">

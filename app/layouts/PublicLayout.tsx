@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router';
-import { Menu, X, Sun, Moon, Languages, MapPin, Building, Phone, Mail, ArrowUp, Clock } from 'lucide-react';
+import { Menu, X, Sun, Moon, Languages, MapPin, Building, Building2, Phone, Mail, ArrowUp, Clock, Home, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../contexts/AppContext';
 import { MRLogo } from '../components/ui/MRLogo';
@@ -28,10 +28,10 @@ export const PublicLayout: React.FC = () => {
   }, [location.pathname]);
 
   const navLinks = [
-    { name: t('nav.home'), path: '/' },
-    { name: t('nav.properties'), path: '/properties' },
-    { name: t('nav.about'), path: '/about' },
-    { name: t('nav.contact'), path: '/contact' },
+    { name: t('nav.home'), path: '/', icon: Home },
+    { name: t('nav.properties'), path: '/properties', icon: Building2 },
+    { name: t('nav.about'), path: '/about', icon: Users },
+    { name: t('nav.contact'), path: '/contact', icon: Phone },
   ];
 
   return (
@@ -173,7 +173,7 @@ export const PublicLayout: React.FC = () => {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 pt-24 pb-12">
+      <main className="flex-1 pt-24 pb-24 md:pb-12">
         <Outlet />
       </main>
 
@@ -185,7 +185,7 @@ export const PublicLayout: React.FC = () => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="fixed bottom-8 right-8 z-40 p-3 bg-[var(--primary)] text-white rounded-xl shadow-lg shadow-[var(--primary)]/25 hover:shadow-xl hover:-translate-y-1 transition-all"
+            className="fixed bottom-24 md:bottom-8 right-8 z-40 p-3 bg-[var(--primary)] text-white rounded-xl shadow-lg shadow-[var(--primary)]/25 hover:shadow-xl hover:-translate-y-1 transition-all"
             aria-label="Scroll to top"
           >
             <ArrowUp className="w-5 h-5" />
@@ -195,6 +195,30 @@ export const PublicLayout: React.FC = () => {
 
       {/* WhatsApp Floating Button */}
       <WhatsAppButton />
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--card)] border-t border-[var(--border)] shadow-[0_-4px_20px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom)]">
+        <div className="flex items-center justify-around h-16 px-2">
+          {navLinks.map((link) => {
+            const isActive = location.pathname === link.path;
+            const Icon = link.icon;
+            return (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors ${
+                  isActive ? 'text-[var(--primary)]' : 'text-[var(--text-secondary)] hover:text-[var(--foreground)]'
+                }`}
+              >
+                <Icon className={`w-5 h-5 ${isActive ? 'stroke-2' : 'stroke-[1.5]'}`} />
+                <span className={`text-[10px] ${isActive ? 'font-bold' : 'font-medium'}`}>
+                  {link.name}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
 
       {/* Footer */}
       <footer className="bg-[var(--card)] border-t border-[var(--border)] mt-auto">

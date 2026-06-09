@@ -133,13 +133,14 @@ export const AdminLayout: React.FC = () => {
           <div className="flex items-center gap-1 sm:gap-2">
             <button
               onClick={() => navigate('/')}
-              className="hidden md:flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--text-secondary)] hover:bg-[var(--primary)] hover:border-[var(--primary)] hover:text-white transition-all text-sm font-semibold group"
+              className="flex items-center gap-2 px-2.5 py-2 md:px-3.5 rounded-xl border border-[var(--border)] bg-[var(--card)] text-[var(--text-secondary)] hover:bg-[var(--primary)] hover:border-[var(--primary)] hover:text-white transition-all text-sm font-semibold group"
+              title={language === 'en' ? 'View Site' : 'الموقع'}
             >
               <Globe className="w-4 h-4 text-[var(--primary)] group-hover:text-white" />
-              {language === 'en' ? 'View Site' : 'الموقع'}
+              <span className="hidden sm:block">{language === 'en' ? 'View Site' : 'الموقع'}</span>
             </button>
 
-            <div className="hidden md:block h-5 w-px bg-[var(--border)] mx-1" />
+            <div className="h-5 w-px bg-[var(--border)] mx-1" />
 
             <button onClick={toggleTheme} className="p-2.5 rounded-xl text-[var(--text-secondary)] hover:bg-[var(--secondary)] transition-all">
               {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}

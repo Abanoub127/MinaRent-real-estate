@@ -12,7 +12,7 @@ export const WhatsAppButton: React.FC = () => {
         damping: 20,
         delay: 0.5,
       }}
-      className="fixed bottom-8 left-8 z-50 flex items-center group"
+      className="fixed bottom-24 md:bottom-8 left-8 z-50 !flex items-center group"
     >
       <a
         href="https://wa.me/201279229000"
