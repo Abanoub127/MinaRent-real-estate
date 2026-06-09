@@ -275,8 +275,8 @@ const fetchProperties = async () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('admin.properties')}</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <h1 className="text-2xl font-bold text-[var(--foreground)]">{t('admin.properties')}</h1>
+          <p className="text-[var(--text-secondary)] mt-1 text-sm">
             {language === 'en' ? 'Manage your property listings' : 'إدارة قوائم العقارات'}
           </p>
         </div>
@@ -460,31 +460,31 @@ const fetchProperties = async () => {
         <Card>
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 dark:bg-gray-700">
+              <thead className="bg-[var(--secondary)]">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                     {language === 'en' ? 'Image' : 'الصورة'}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                     {t('propertiesMgmt.title')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                     {t('propertiesMgmt.price')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                     {language === 'en' ? 'Location' : 'الموقع'}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                     {t('propertiesMgmt.status')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider">
                     {t('propertiesMgmt.actions')}
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              <tbody className="bg-[var(--card)] divide-y divide-[var(--border)]">
                 {filteredProperties.map((property) => (
-                  <tr key={property.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <tr key={property.id} className="hover:bg-[var(--secondary)] transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <img
                         src={property.images[0]}
@@ -493,18 +493,18 @@ const fetchProperties = async () => {
                       />
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">
+                      <div className="text-sm font-medium text-[var(--foreground)]">
                         {language === 'en' ? property.title : property.titleAr}
                       </div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400 capitalize">{property.type}</div>
+                      <div className="text-sm text-[var(--text-secondary)] capitalize">{property.type}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                      <div className="text-sm font-semibold text-[var(--foreground)]">
                         {formatCurrency(property.price)}
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm text-gray-900 dark:text-white">
+                      <div className="text-sm text-[var(--foreground)]">
                         {language === 'en' ? property.location : property.locationAr}
                       </div>
                     </td>

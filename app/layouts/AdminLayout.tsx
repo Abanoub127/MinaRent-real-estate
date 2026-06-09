@@ -50,9 +50,8 @@ export const AdminLayout: React.FC = () => {
 
       {/* Sidebar — Navy Dark */}
       <aside
-        className={`fixed lg:static inset-y-0 ${isRtl ? 'right-0' : 'left-0'} z-50 w-72 transition-all duration-300 ease-in-out lg:transform-none ${
-          isMobileOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full lg:translate-x-0' : '-translate-x-full lg:translate-x-0')
-        } ${!isSidebarOpen && 'lg:w-20'}`}
+        className={`fixed lg:static inset-y-0 ${isRtl ? 'right-0' : 'left-0'} z-50 w-72 transition-all duration-300 ease-in-out lg:transform-none ${isMobileOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full lg:translate-x-0' : '-translate-x-full lg:translate-x-0')
+          } ${!isSidebarOpen && 'lg:w-20'}`}
         style={{ background: 'var(--sidebar)' }}
       >
         <div className="h-full flex flex-col border-r border-[var(--sidebar-border)]" style={isRtl ? { borderRight: 'none', borderLeft: '1px solid var(--sidebar-border)' } : {}}>
@@ -73,11 +72,10 @@ export const AdminLayout: React.FC = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${
-                    isActive
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${isActive
                       ? 'text-[var(--sidebar-primary-foreground)]'
                       : 'hover:bg-[var(--sidebar-accent)]'
-                  }`}
+                    }`}
                   style={isActive ? { background: 'var(--sidebar-primary)', color: 'var(--sidebar-primary-foreground)' } : { color: 'var(--sidebar-foreground)' }}
                   title={!isSidebarOpen ? link.name : undefined}
                 >
@@ -153,7 +151,7 @@ export const AdminLayout: React.FC = () => {
           </div>
         </header>
 
-{/* Page Content */}
+        {/* Page Content */}
         <main className="flex-1 overflow-hidden flex flex-col" style={{ minHeight: 0 }}>
           {location.pathname === '/admin/calendar' ? (
             <div className="flex-1 overflow-hidden flex flex-col w-full h-full">

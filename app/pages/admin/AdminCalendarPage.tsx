@@ -169,12 +169,12 @@ interface DesktopRowProps {
   rowH: number;
   onClickBooking: (b: Booking, p: Property) => void;
   isAr: boolean;
-  propCodeFn: (p: Property) => string;
+  propName: string;
 }
 
 const DesktopRow = memo(({
   prop, dateRange, bookingMap, filterStatus, occupancy,
-  isTodayFn, propColW, dayColW, rowH, onClickBooking, isAr, propCodeFn,
+  isTodayFn, propColW, dayColW, rowH, onClickBooking, isAr, propName,
 }: DesktopRowProps) => (
   <div className="flex group hover:bg-[var(--secondary)] transition-colors border-b border-[var(--border)]">
     {/* Sticky property info */}
@@ -191,11 +191,13 @@ const DesktopRow = memo(({
         )}
       </div>
       {/* Property details */}
-      <div className="flex flex-col flex-1 min-w-0 justify-center" dir={isAr ? "rtl" : "ltr"}>
-        <p className="font-bold text-[var(--foreground)] truncate" style={{ fontSize: '0.75rem', textAlign: isAr ? 'right' : 'left' }}>
-          {isAr && (prop as any).titleAr ? (prop as any).titleAr : prop.title}
+      <div className="flex flex-col flex-1 min-w-0 justify-center group/tooltip relative" dir={isAr ? "rtl" : "ltr"}>
+        <p className="font-bold text-[var(--foreground)] text-[0.7rem] leading-tight line-clamp-2" style={{ textAlign: isAr ? 'right' : 'left' }}>
+          {propName}
         </p>
-        <p className="text-[var(--text-secondary)] truncate" style={{ fontSize: '0.5625rem', fontFamily: 'Inter, system-ui, sans-serif', textAlign: isAr ? 'right' : 'left' }}>{propCodeFn(prop)}</p>
+        <div className="absolute top-full left-0 mt-1 hidden group-hover/tooltip:block bg-black text-white text-xs px-2 py-1 rounded z-50 whitespace-normal w-max max-w-[200px]">
+          {propName}
+        </div>
         <div className="flex items-center gap-1.5 mt-1" dir="ltr">
           {/* Thinner occupancy bar */}
           <div className="flex-1 bg-[var(--border)] rounded-full overflow-hidden" style={{ height: '0.1875rem' }}>
@@ -242,6 +244,10 @@ export const AdminCalendarPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('month');
   const [mobileViewMode, setMobileViewMode] = useState<'grid' | 'list'>('list');
   const [isMobile, setIsMobile] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const todayColRef = useRef<HTMLDivElement>(null);
@@ -251,15 +257,15 @@ export const AdminCalendarPage: React.FC = () => {
 
   // ── Sizes ─────────────────────────────────────────────────────────────────
   // Desktop
-  const PROP_COL_W = 210;
+  const PROP_COL_W = 240;
   const DAY_COL_W = 46;
-  const ROW_H = 52;
+  const ROW_H = 56;
   const HEADER_H = 48;
   // Mobile
-  const DATE_COL_W = 42;  // was 52
-  const CELL_H = 34;  // was 48
-  const MOB_HEADER_H = 56;  // was 72
-  const COL_MIN_W = 65;  // was 80
+  const DATE_COL_W = 42; 
+  const CELL_H = 36;
+  const MOB_HEADER_H = 64; 
+  const COL_MIN_W = 90;
 
   // ── Responsive ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -301,13 +307,52 @@ export const AdminCalendarPage: React.FC = () => {
     })();
   }, []);
 
-  // ── Filtered props ────────────────────────────────────────────────────────
-  const filteredProps = useMemo(() =>
-    properties.filter(p =>
+  // ── Filtered and Sorted props ─────────────────────────────────────────────
+  const getTypePriority = (type?: string) => {
+    const t = (type || '').toLowerCase();
+    if (t.includes('villa')) return 1;
+    if (t.includes('house') && !t.includes('town') && !t.includes('twin')) return 2;
+    if (t.includes('town')) return 3;
+    if (t.includes('twin')) return 4;
+    if (t.includes('duplex')) return 5;
+    if (t.includes('penthouse')) return 6;
+    if (t.includes('apartment')) return 7;
+    if (t.includes('studio')) return 8;
+    return 9;
+  };
+
+  const filteredProps = useMemo(() => {
+    let result = properties.filter(p =>
       p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (p as any).titleAr?.includes(searchQuery) ||
       p.location?.toLowerCase().includes(searchQuery.toLowerCase())
-    ), [properties, searchQuery]);
+    );
+
+    result.sort((a, b) => {
+      const pA = getTypePriority(a.type);
+      const pB = getTypePriority(b.type);
+      if (pA !== pB) return pA - pB;
+      const sA = a.size || 0;
+      const sB = b.size || 0;
+      if (sA !== sB) return sB - sA;
+      const cA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const cB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return cA - cB;
+    });
+
+    return result;
+  }, [properties, searchQuery]);
+
+  // Pagination
+  const itemsPerPage = 5;
+  const totalPages = Math.max(1, Math.ceil(filteredProps.length / itemsPerPage));
+  
+  useEffect(() => { setCurrentPage(1); }, [searchQuery, filterStatus]);
+
+  const paginatedProps = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredProps.slice(start, start + itemsPerPage);
+  }, [filteredProps, currentPage]);
 
   // ── Date ranges ───────────────────────────────────────────────────────────
   const monthRange = useMemo(() => {
@@ -384,13 +429,59 @@ export const AdminCalendarPage: React.FC = () => {
     }, 60);
   }, [isMobile, CELL_H, DAY_COL_W]);
 
+  // ── Swipe Handlers ────────────────────────────────────────────────────────
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+  const onTouchEndEvent = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const minDistance = 50;
+    if (distance > minDistance && currentPage < totalPages) {
+      setSwipeDirection('left');
+      setCurrentPage(p => p + 1);
+    } else if (distance < -minDistance && currentPage > 1) {
+      setSwipeDirection('right');
+      setCurrentPage(p => p - 1);
+    }
+  };
+
+  const getFullPropName = useCallback((p: Property) => {
+    const titleStr = isAr && (p as any).titleAr ? (p as any).titleAr : p.title;
+    const sizeStr = p.size ? (isAr ? `${p.size} م²` : `${p.size}m²`) : '';
+    let typeStr: string = p.type || '';
+    if (isAr) {
+      const typeMap: Record<string, string> = {
+        villa: 'فيلا', house: 'بيت', townhouse: 'تاون هاوس',
+        twinhouse: 'توين هاوس', duplex: 'دوبلكس', penthouse: 'بنتهاوس',
+        apartment: 'شقة', studio: 'استوديو'
+      };
+      typeStr = typeMap[typeStr.toLowerCase()] || typeStr;
+    } else {
+      typeStr = typeStr.charAt(0).toUpperCase() + typeStr.slice(1);
+    }
+    
+    // Check if the title already includes the type, to avoid duplication
+    if (titleStr.toLowerCase().includes(p.type?.toLowerCase() || '')) {
+      return `${titleStr}${sizeStr ? ' - ' + sizeStr : ''}`;
+    }
+    return `${typeStr ? typeStr + ' - ' : ''}${titleStr}${sizeStr ? ' - ' + sizeStr : ''}`;
+  }, [isAr]);
+
+  const propCodeFn = useCallback((p: Property) => {
+    const t = getFullPropName(p);
+    return t.length > 12 ? t.slice(0, 11) + '…' : t;
+  }, [getFullPropName]);
+
   // ── Labels ────────────────────────────────────────────────────────────────
   const getMonthName = (d: Date) =>
     d.toLocaleDateString(isAr ? 'ar-EG' : 'en-US', { month: 'long', year: 'numeric' });
   const getDayShort = (d: Date) =>
     d.toLocaleDateString(isAr ? 'ar-EG' : 'en-US', { weekday: 'short' });
-
-  const propCodeFn = useCallback((p: Property) => (p as any).code || p.title.slice(0, 6), []);
 
   const handleClickBooking = useCallback((b: Booking, p?: Property) => {
     setSelectedBooking(b);
@@ -425,21 +516,72 @@ export const AdminCalendarPage: React.FC = () => {
     available: STATUS_COLORS.available.dot,
   };
 
+  // ── Pagination UI ─────────────────────────────────────────────────────────
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+    return (
+      <div className="flex items-center justify-center gap-2 p-3 bg-[var(--card)] border-t border-[var(--border)] w-full sticky bottom-0 z-10" dir="ltr">
+        <button 
+          onClick={() => { setSwipeDirection('right'); setCurrentPage(p => Math.max(1, p - 1)); }}
+          disabled={currentPage === 1}
+          className="px-3 py-1 text-xs font-semibold disabled:opacity-50 text-[var(--foreground)] hover:bg-[var(--secondary)] rounded-md transition-colors"
+        >
+          {isAr ? 'السابق' : 'Previous'}
+        </button>
+        <div className="flex items-center gap-1 overflow-x-auto scrollbar-none px-2 max-w-[50vw]">
+          {Array.from({ length: totalPages }).map((_, i) => (
+            <button
+              key={i}
+              onClick={() => { setSwipeDirection(i + 1 > currentPage ? 'left' : 'right'); setCurrentPage(i + 1); }}
+              className={`flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold transition-all ${currentPage === i + 1 ? 'bg-[var(--primary)] text-white shadow-sm' : 'text-[var(--text-secondary)] hover:bg-[var(--secondary)] hover:text-[var(--foreground)]'}`}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
+        <button 
+          onClick={() => { setSwipeDirection('left'); setCurrentPage(p => Math.min(totalPages, p + 1)); }}
+          disabled={currentPage === totalPages}
+          className="px-3 py-1 text-xs font-semibold disabled:opacity-50 text-[var(--foreground)] hover:bg-[var(--secondary)] rounded-md transition-colors"
+        >
+          {isAr ? 'التالي' : 'Next'}
+        </button>
+      </div>
+    );
+  };
+
   // ── Mobile Grid ───────────────────────────────────────────────────────────
   const renderMobileGrid = () => (
-    <div ref={scrollContainerRef} className="flex-1 overflow-auto bg-[var(--background)]" style={{ scrollbarWidth: 'none' }} dir="ltr">
-      <div className="inline-flex flex-col min-w-max w-full">
-
-        {/* Sticky header: property columns */}
-        <div className="sticky top-0 z-10 flex w-full bg-[var(--card)] border-b border-[var(--border)]" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+    <div 
+      className="flex-1 overflow-hidden flex flex-col w-full bg-[var(--background)]"
+      onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEndEvent}
+    >
+      <div ref={scrollContainerRef} className="flex-1 overflow-auto bg-[var(--background)] relative" style={{ scrollbarWidth: 'none' }} dir="ltr">
+        <AnimatePresence initial={false} custom={swipeDirection}>
+          <motion.div
+            key={currentPage}
+            custom={swipeDirection}
+            variants={{
+              enter: (d: string) => ({ x: d === 'left' ? '100%' : d === 'right' ? '-100%' : '0%' }),
+              center: { x: 0 },
+              exit: (d: string) => ({ x: d === 'left' ? '-100%' : d === 'right' ? '100%' : '0%', position: 'absolute' as const, top: 0, left: 0, right: 0 })
+            }}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ type: 'tween', duration: 0.3 }}
+            className="inline-flex flex-col min-w-max w-full"
+          >
+            {/* Sticky header: property columns */}
+            <div className="sticky top-0 z-10 flex w-full bg-[var(--card)] border-b border-[var(--border)]" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
           {/* Corner */}
           <div className="sticky left-0 z-20 bg-[var(--card)] border-r border-[var(--border)] flex-shrink-0 flex items-center justify-center"
             style={{ width: DATE_COL_W, height: MOB_HEADER_H }}>
             <span className="text-[0.5625rem] font-bold text-[var(--text-secondary)] uppercase tracking-wide">{isAr ? 'يوم' : 'Day'}</span>
           </div>
 
-          {filteredProps.map(prop => (
-            <div key={prop._id} className="flex flex-col border-r border-[var(--border)] bg-[var(--card)] items-center justify-center p-1"
+          {paginatedProps.map(prop => (
+            <div key={prop._id} className="flex flex-col border-r border-[var(--border)] bg-[var(--card)] items-center justify-center p-1 group/tooltip relative"
               style={{ minWidth: COL_MIN_W, flex: 1, height: MOB_HEADER_H }}>
               {/* Property image */}
               <div className="w-full overflow-hidden rounded-[0.3125rem] bg-[var(--secondary)] border border-[var(--border)] relative flex-shrink-0"
@@ -450,9 +592,12 @@ export const AdminCalendarPage: React.FC = () => {
                   <Building2 size={13} className="text-[var(--text-secondary)] m-auto h-full" />
                 )}
               </div>
-              <p className="font-bold text-[var(--foreground)] mt-[0.1875rem] truncate w-full text-center" style={{ fontSize: '0.5625rem', fontFamily: 'Inter, system-ui, sans-serif' }}>
-                {propCodeFn(prop)}
+              <p className="font-bold text-[var(--foreground)] mt-[0.1875rem] w-full text-center line-clamp-2 leading-tight" style={{ fontSize: '0.6rem', wordBreak: 'break-word' }}>
+                {getFullPropName(prop)}
               </p>
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 hidden group-hover/tooltip:block bg-black text-white text-xs px-2 py-1 rounded z-50 whitespace-nowrap">
+                {getFullPropName(prop)}
+              </div>
             </div>
           ))}
         </div>
@@ -474,7 +619,7 @@ export const AdminCalendarPage: React.FC = () => {
               </div>
 
               {/* Cells */}
-              {filteredProps.map(prop => (
+              {paginatedProps.map(prop => (
                 <MobileCell
                   key={`${date.toISOString()}-${prop._id}`}
                   date={date}
@@ -490,7 +635,10 @@ export const AdminCalendarPage: React.FC = () => {
             </div>
           );
         })}
+          </motion.div>
+        </AnimatePresence>
       </div>
+      {renderPagination()}
     </div>
   );
 
@@ -592,7 +740,7 @@ export const AdminCalendarPage: React.FC = () => {
         </div>
 
         {/* Property rows — memoised */}
-        {filteredProps.map(prop => (
+        {paginatedProps.map(prop => (
           <DesktopRow
             key={prop._id as string}
             prop={prop}
@@ -606,10 +754,11 @@ export const AdminCalendarPage: React.FC = () => {
             rowH={ROW_H}
             onClickBooking={handleClickBooking}
             isAr={isAr}
-            propCodeFn={propCodeFn}
+            propName={getFullPropName(prop)}
           />
         ))}
       </div>
+      {renderPagination()}
     </div>
   );
 

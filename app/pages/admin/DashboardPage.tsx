@@ -12,11 +12,34 @@ export const DashboardPage: React.FC = () => {
   const [stats, setStats] = useState<Stats | null>(null);
   const [recentProperties, setRecentProperties] = useState<Property[]>([]);
   const [recentBookings, setRecentBookings] = useState<Booking[]>([]);
+  const [activeClientsCount, setActiveClientsCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([getStats(), getProperties(1, 4), getBookings()])
-      .then(([s, p, b]) => { setStats(s); setRecentProperties(p.properties); setRecentBookings(b.slice(0, 5)); })
+      .then(([s, p, b]) => { 
+        setStats(s); 
+        setRecentProperties(p.properties); 
+        setRecentBookings(b.slice(0, 5)); 
+
+        const now = new Date();
+        const activeClientIds = new Set();
+        b.forEach(booking => {
+          if (booking.status === 'confirmed') {
+            const start = new Date(booking.startDate);
+            start.setHours(0, 0, 0, 0);
+            const end = new Date(booking.endDate);
+            end.setHours(23, 59, 59, 999);
+            if (now >= start && now <= end) {
+              const cId = typeof booking.clientId === 'object' && booking.clientId !== null 
+                ? (booking.clientId as any)._id || (booking.clientId as any).id 
+                : booking.clientId;
+              if (cId) activeClientIds.add(cId);
+            }
+          }
+        });
+        setActiveClientsCount(activeClientIds.size);
+      })
       .catch(console.error).finally(() => setLoading(false));
   }, []);
 
@@ -87,7 +110,7 @@ export const DashboardPage: React.FC = () => {
                 </div>
               </div>
               <h3 className="text-xs font-medium mb-1 text-[var(--text-secondary)]">{t('dashboard.activeClients')}</h3>
-              <p className="text-2xl font-bold tracking-tight text-[var(--foreground)]">{stats.totalClients}</p>
+              <p className="text-2xl font-bold tracking-tight text-[var(--foreground)]">{activeClientsCount}</p>
             </motion.div>
           </div>
         </PageSection>
